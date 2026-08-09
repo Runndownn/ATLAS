@@ -53,7 +53,15 @@ In Greek mythology, Atlas held up the celestial spheres — he bore the weight o
 | 2 | Safety Layer (filesystem discovery + archive safety) | Poolside | ✅ COMPLETE |
 | 3 | Storage & Identity (content hashing + dedup) | Poolside | ✅ COMPLETE |
 | 4 | Phase Implementations (all 6 phases) | Poolside | ✅ COMPLETE |
-| 5 | CLI polish + example pipelines + PyPI publish | Poolside | 🔲 IN PROGRESS |
+| 5 | CLI polish + example pipelines + PyPI publish | Poolside | ✅ COMPLETE |
+
+### Planning Documentation
+
+Full planning documents are maintained under `docs/08-planning/Plans_/Plan_atlas-pipeline-engine/`:
+
+- **`IMPLEMENTATION-BACKLOG.md`** — Detailed implementation backlog with work item table, architecture boundaries, testing strategy, and risk register
+- **`conceptual-plan.md`** — Conceptual architecture, extraction rationale, technology stack, quality attributes, and sprint plan
+- **`TODO_atlas-PART1/atlas-PART1-1.md`** — Living BinReaper Production TODO with per-slice acceptance criteria and testing plans
 
 ---
 
