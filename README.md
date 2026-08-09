@@ -300,9 +300,7 @@ This project is developed using the **BinReaper Production TODO** methodology. T
 
 ATLAS is hosted and sponsored by **REDC2 Portal**, providing the infrastructure backbone for pipeline orchestration workloads, built using the **Geezer Mekanix Agentic Engineering Platform**. The platform transforms human intent into **Bounded. Observable. Evidence-Aware. Governed.** execution.
 
-## AI Model
-
-Framework development and planning decisions are powered by the **Poolside Laguna S 2.1 (free)** — a 262,112-token model used through the Kilo Gateway for code generation, architectural reasoning, and sprint planning.
+The AI model powering framework development and planning decisions is the **Poolside Laguna S 2.1 (free)** — a 262,112-token model used through the Kilo Gateway for code generation, architectural reasoning, and sprint planning.
 
 ## License
 
