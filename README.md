@@ -8,6 +8,8 @@
 
 ![ATLAS Logo](static/ATLAS-LOGO.png)
 
+> **Project start date:** August 9, 2026
+
 ## Overview
 
 ATLAS is a standalone orchestration engine for multi-phase batch processing workflows. It sequences pipeline phases (discovery → fingerprinting → extraction → analysis → review), tracks async job state, emits events for observability, and enforces safety checks on filesystem artifacts.
