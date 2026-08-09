@@ -65,8 +65,12 @@ class FingerprintingPhase(Phase):
             if file_info.is_dir or file_info.is_symlink:
                 continue
 
-            # Check if already hashed (dedup)
+            # Check if already hashed (dedup) using raw sha256 hex from file_info
             try:
+                if file_info.sha256 and self._hash_store.has_content(file_info.sha256):
+                    duplicates += 1
+                    continue
+
                 result_hash = self._hash_store.hash_file(file_info.path)
                 content_id = self._hash_store.get_content_id(result_hash.sha256)
 
@@ -74,8 +78,7 @@ class FingerprintingPhase(Phase):
                     duplicates += 1
                 else:
                     hashes[result_hash.sha256] = content_id
-
-                file_info.sha256 = result_hash.sha256
+                    file_info.sha256 = result_hash.sha256
                 processed += 1
 
                 if processed % 100 == 0:

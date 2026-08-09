@@ -191,6 +191,7 @@ class ArchiveSafetyService:
             and total_compressed <= self.max_compressed_bytes
             and member_count <= self.max_members
             and max_ratio <= self.max_compression_ratio
+            and not suspicious  # Suspicious patterns => unsafe
         )
 
         return ArchiveSafetyReport(
@@ -249,6 +250,7 @@ class ArchiveSafetyService:
         safe = (
             total_uncompressed <= self.max_uncompressed_bytes
             and member_count <= self.max_members
+            and not suspicious  # Suspicious patterns => unsafe
         )
 
         return ArchiveSafetyReport(

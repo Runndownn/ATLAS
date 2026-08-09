@@ -27,9 +27,18 @@ class ExtractionPhase(Phase):
     name = "controlled_extraction"
     retryable = True
 
+    # Compound archive extensions (checked with endswith, not suffix)
+    _ARCHIVE_SUFFIXES = (".zip", ".tar.gz", ".tgz", ".tar", ".tar.bz2",
+                         ".tar.xz", ".tar.lz", ".tar.lzma", ".gz", ".bz2", ".xz")
+
     def __init__(self, archive_safety: ArchiveSafetyService | None = None):
         super().__init__()
         self._archive_safety = archive_safety or ArchiveSafetyService()
+
+    def _is_archive(self, path: str) -> bool:
+        """Check if a path is an archive, handling compound extensions."""
+        name_lower = Path(path).name.lower()
+        return name_lower.endswith(self._ARCHIVE_SUFFIXES)
 
     async def execute(
         self,
@@ -41,10 +50,10 @@ class ExtractionPhase(Phase):
         discovery = job.metadata.get("discovery", {})
         risky_files = discovery.get("risky_files", [])
 
-        # Get archives from discovery metadata
+        # Get archives from discovery metadata — use proper extension matching
         archive_paths = [
             p for p in risky_files
-            if Path(p).suffix.lower() in {".zip", ".tar", ".tar.gz", ".tgz"}
+            if self._is_archive(p)
         ]
 
         if not archive_paths:
@@ -120,20 +129,19 @@ class ExtractionPhase(Phase):
         import tarfile
         import zipfile
 
-        ext = Path(archive_path).suffix.lower()
+        ext = Path(archive_path).name.lower()
         extracted = 0
 
-        if ext == ".zip":
+        if ext.endswith(".zip"):
             with zipfile.ZipFile(archive_path, "r") as zf:
                 for member in zf.namelist():
-                    # Prevent path traversal
                     member_path = Path(dest_dir / member)
                     if not member_path.resolve().is_relative_to(dest_dir.resolve()):
                         logger.warning("Skipping path traversal attempt: %s", member)
                         continue
                     zf.extract(member, dest_dir)
                     extracted += 1
-        elif ext in {".tar", ".tar.gz", ".tgz", ".tar.bz2", ".tar.xz"}:
+        elif ext.endswith((".tar.gz", ".tgz", ".tar.bz2", ".tar.xz")) or ext.endswith(".tar"):
             with tarfile.open(archive_path, "r:*") as tf:
                 for member in tf.getmembers():
                     # Prevent path traversal
@@ -141,7 +149,15 @@ class ExtractionPhase(Phase):
                     if not member_path.resolve().is_relative_to(dest_dir.resolve()):
                         logger.warning("Skipping path traversal attempt: %s", member.name)
                         continue
-                    tf.extract(member, dest_dir)
+
+                    # Harden extraction: use data filter to prevent link/symlink
+                    # and other TAR-based filesystem exploits on Python 3.13+.
+                    # filter="data" is the safe default recommended by Python docs.
+                    try:
+                        tf.extract(member, dest_dir, filter="data")
+                    except TypeError:
+                        # Python < 3.12: filter parameter not supported
+                        tf.extract(member, dest_dir)
                     extracted += 1
 
         return extracted

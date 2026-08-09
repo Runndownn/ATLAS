@@ -121,6 +121,13 @@ class JobRecord:
                 return {k: _json_safe(v) for k, v in obj.items()}
             if isinstance(obj, (list, tuple)):
                 return [_json_safe(v) for v in obj]
+            # Handle dataclass instances (e.g., EvidenceRecord, PromotionRecord)
+            if hasattr(obj, "__dataclass_fields__"):
+                return _json_safe(asdict(obj))
+            # Handle enums
+            if hasattr(obj, "value") and not isinstance(obj, (str, int, float, bool, dict, list, tuple)):
+                return str(obj)
+            return obj
             return obj
 
         d["metadata"] = json.dumps(_json_safe(d["metadata"]))
@@ -297,6 +304,67 @@ class JobStore:
             (job_id,),
         ).fetchall()
         return [self._row_to_phase(row) for row in rows]
+
+    async def store_event(
+        self,
+        job_id: str,
+        routing_key: str,
+        payload: dict[str, Any],
+        queue: str = "atlas.events",
+    ) -> str:
+        """Persist a lifecycle event to the events table."""
+        event_id = str(uuid4())
+        now = datetime.now(UTC)
+        conn = self._get_conn()
+        def _json_safe(obj: Any) -> Any:
+            if isinstance(obj, datetime):
+                return obj.isoformat()
+            if isinstance(obj, Path):
+                return str(obj)
+            if isinstance(obj, dict):
+                return {k: _json_safe(v) for k, v in obj.items()}
+            if isinstance(obj, (list, tuple)):
+                return [_json_safe(v) for v in obj]
+            if hasattr(obj, "__dataclass_fields__"):
+                return _json_safe(asdict(obj))
+            return obj
+
+        conn.execute(
+            """
+            INSERT INTO atlas_events
+                (event_id, job_id, routing_key, payload, created_at)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (event_id, job_id, routing_key, json.dumps(_json_safe(payload)), now.isoformat()),
+        )
+        conn.commit()
+        return event_id
+
+    async def list_events(self, job_id: str | None = None, limit: int = 1000) -> list[dict[str, Any]]:
+        """List persisted events, optionally filtered by job_id."""
+        conn = self._get_conn()
+        if job_id:
+            rows = conn.execute(
+                "SELECT event_id, job_id, routing_key, payload, created_at "
+                "FROM atlas_events WHERE job_id = ? ORDER BY created_at DESC LIMIT ?",
+                (job_id, limit),
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                "SELECT event_id, job_id, routing_key, payload, created_at "
+                "FROM atlas_events ORDER BY created_at DESC LIMIT ?",
+                (limit,),
+            ).fetchall()
+        return [
+            {
+                "event_id": row["event_id"],
+                "job_id": row["job_id"],
+                "routing_key": row["routing_key"],
+                "payload": json.loads(row["payload"]),
+                "created_at": row["created_at"],
+            }
+            for row in rows
+        ]
 
     def _row_to_job(self, row: sqlite3.Row) -> JobRecord:
         """Convert a database row to a JobRecord."""

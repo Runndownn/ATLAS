@@ -111,10 +111,13 @@ class HashStore:
             duration_seconds=round(duration, 6),
         )
 
-        # Cache in manifest for dedup
+        # Cache in manifest for dedup — store under both raw digest and
+        # content_id format so has_content() works regardless of caller
         self._manifest[sha256_hex] = result
+        self._manifest[f"sha256:{sha256_hex}"] = result
         if blake3_hex:
             self._manifest[blake3_hex] = result
+            self._manifest[f"blake3:{blake3_hex}"] = result
 
         logger.debug(
             "hashed_file path=%s sha256=%s size=%d chunks=%d duration=%.3fs",

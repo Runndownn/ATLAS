@@ -9,18 +9,21 @@
 ![ATLAS Logo](static/ATLAS-LOGO.png)
 
 > **Project start date:** August 24, 2026
+> **Maturity:** Pre-Alpha (v0.1.0) — framework skeleton with validated core lifecycle, safety, and storage layers
 
 ## Overview
 
-ATLAS is a standalone orchestration engine for multi-phase batch processing workflows. It sequences pipeline phases (discovery → fingerprinting → extraction → analysis → review), tracks async job state, emits events for observability, and enforces safety checks on filesystem artifacts.
+ATLAS is a pre-alpha, single-process Python orchestration kernel for staged artifact-processing workflows. It sequences pipeline phases (reconnaissance → fingerprinting → structural discovery → extraction → analysis → review), tracks async job state in SQLite, emits lifecycle events to an event bus, and enforces safety checks on filesystem and archive artifacts.
 
-Built for reliability, observability, and extensibility — whether you're processing CTF challenges, document archives, or code repositories.
+Built for reliability, observability, and extensibility — whether you're processing CTF challenges, document archives, or code repositories. See [`docs/08-planning/Plans_/Plan_atlas-pipeline-engine/assessment.md`](docs/08-planning/Plans_/Plan_atlas-pipeline-engine/assessment.md) for a detailed architectural assessment.
 
 ## Key Features
 
 - **Phase-based orchestration** — Sequential phase execution with pause/resume/cancel
-- **Event-driven** — Dual backend: in-memory (default) or RabbitMQ
-- **SQLite persistence** — Job state, phase records, and events stored durably
+- **Canonical runtime** — `AtlasRuntime` composition root wires all handlers automatically
+- **Fail-closed safety** — Missing phase handlers raise errors instead of silently completing
+- **Event-driven** — Dual backend: in-memory (default) or RabbitMQ, with SQLite event persistence
+- **SQLite persistence** — Job state, phase records, and lifecycle events stored durably
 - **Safety-first** — Archive bomb detection, symlink loop prevention, path traversal checks
 - **Content-addressable** — SHA-256 + BLAKE3 hashing with automatic deduplication
 - **Plugin phases** — Register custom phase handlers via Python Protocol
@@ -219,7 +222,8 @@ atlas job <job-id> status
 ### Creating Custom Phases
 
 ```python
-from atlas.core.orchestrator import PipelinePhase, PipelineOrchestrator
+from atlas.core.runtime import AtlasRuntime
+from atlas.core.orchestrator import PipelinePhase
 from atlas.core.job_store import JobRecord, PhaseRecord
 from atlas.phases.base import Phase
 
@@ -231,11 +235,10 @@ class MyCustomPhase(Phase):
         # ... your logic here ...
         self.update_progress(percent=100.0, message="Done")
 
-# Register with orchestrator
-orchestrator.register_phase_handler(
-    PipelinePhase.REVIEW_PROMOTION,  # or a custom phase
-    MyCustomPhase()
-)
+# Override a built-in phase
+runtime = AtlasRuntime(db_path=":memory:")
+await runtime.connect()
+runtime.register_phase_handler(PipelinePhase.REVIEW_PROMOTION, MyCustomPhase())
 ```
 
 ## Testing
@@ -261,6 +264,8 @@ python -m pytest tests/test_orchestrator.py -v
 | `test_filesystem_discovery.py` | 8 | Risk flags, symlink detection, depth limits |
 | `test_archive_safety.py` | 6 | ZIP assessment, traversal detection, limits |
 | `test_phases_integration.py` | 3 | Full pipeline end-to-end |
+| `test_runtime.py` | 5 | AtlasRuntime handler wiring + fail-closed tests |
+| **Total** | **48** | |
 
 ## Project Origin & Philosophy
 
@@ -284,11 +289,12 @@ This project is developed using the **BinReaper Production TODO** methodology. T
 
 | Slice | Status | Description |
 |-------|--------|-------------|
-| **Slice 1** | ✅ Complete | Core Orchestrator + Event Bus + Job Store + CLI + Tests |
-| **Slice 2** | ✅ Complete | Safety Layer (filesystem discovery + archive safety) |
-| **Slice 3** | ✅ Complete | Storage & Identity (content hashing + dedup) |
+| **Slice 1** | ✅ Complete | Core Orchestrator + Event Bus + Job Store + CLI + AtlasRuntime |
+| **Slice 2** | ✅ Complete | Safety Layer (filesystem discovery + archive safety + path safety) |
+| **Slice 3** | ✅ Complete | Storage & Identity (content hashing + dedup + event persistence) |
 | **Slice 4** | ✅ Complete | Phase Implementations (recon → fingerprint → extract → analyze → review) |
-| **Slice 5** | ✅ Complete | CLI polish + example pipelines + PyPI publish |
+| **Slice 5** | ✅ Complete | CLI polish + example pipelines + CI + PyPI + docs |
+| **Slice 6** | 🔲 Planned | Assessment-driven hardening (fail-closed, TAR filter, progress wiring, config schema) |
 
 ### Development Log
 
@@ -338,7 +344,15 @@ ATLAS is hosted and sponsored by **REDC2 Portal**, providing the infrastructure 
 
 The AI model powering framework development and planning decisions is the **Poolside Laguna S 2.1 (free)** — a 262,112-token model used through the Kilo Gateway for code generation, architectural reasoning, and sprint planning.
 
-## License
+## Known Limitations
+
+As documented in the [architectural assessment](docs/08-planning/Plans_/Plan_atlas-pipeline-engine/assessment.md):
+
+- **Pause/resume/cancel are process-local** — control commands from a separate CLI process cannot control a running pipeline in another process
+- **Structural Discovery reuses Extraction** — phases C and D currently share `ExtractionPhase`; a dedicated `StructuralDiscoveryPhase` is planned
+- **Content store is in-memory** — `HashStore` maintains an in-memory manifest; not persisted across restarts
+- **Phase progress is coarse** — intermediate progress within a phase is tracked but only persisted at phase completion
+- **No RabbitMQ consumer** — `RabbitMQEventBus` publishes but does not consume; event bus is primarily observability side-channel
 
 MIT — See [LICENSE](LICENSE) for details.
 

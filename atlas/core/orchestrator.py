@@ -159,9 +159,19 @@ class PipelineOrchestrator:
                         source_path=job.source_path,
                         metadata=job.metadata,
                     )
+                    # Bind phase record to handler so update_progress propagates
+                    if hasattr(handler, "_bind"):
+                        handler._bind(job, phase_record)
                     await handler.execute(job, config, phase_record)
+                    # Persist progress after handler returns
+                    await self._job_store.update_phase_record(phase_record)
+                    await self._job_store.update_job(job)
                 else:
-                    logger.warning("No handler registered for phase %s", phase.value)
+                    # Fail-closed: missing handler is an error, not a silent skip
+                    raise RuntimeError(
+                        f"No handler registered for phase '{phase.value}'. "
+                        f"Use AtlasRuntime to ensure all handlers are wired."
+                    )
 
                 phase_record.status = PipelineStatus.COMPLETED.value
                 phase_record.completed_at = datetime.now(UTC)
@@ -284,11 +294,21 @@ class PipelineOrchestrator:
             payload=payload,
         )
         await self._event_bus.publish(envelope)
+        # Also persist to SQLite for durable event log
+        try:
+            await self._job_store.store_event(
+                job.job_id, envelope.routing_key, envelope.payload, envelope.queue
+            )
+        except Exception:
+            logger.debug("Failed to persist event %s", envelope.routing_key, exc_info=True)
 
-    def set_progress(self, job_id: str, percent: float) -> None:
-        """Update progress for a job (callable from phase handlers)."""
-        # This is not async-safe for direct mutation; use update_progress instead
-        # Kept for interface compatibility
+    def set_progress(self, job: JobRecord, phase_record: PhaseRecord, percent: float) -> None:
+        """Update progress for a phase and propagate to the job record.
+
+        Call from within phase handlers via Phase.update_progress().
+        """
+        phase_record.progress_percent = percent
+        job.progress_percent = percent
         job = self._jobs.get(job_id)
         if job:
             job.progress_percent = percent
