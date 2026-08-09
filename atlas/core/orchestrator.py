@@ -74,6 +74,7 @@ class PhaseHandler(Protocol):
         self,
         job: JobRecord,
         config: PipelineConfig,
+        phase_record: PhaseRecord,
     ) -> None:
         """Execute a phase for the given job."""
         ...
@@ -159,7 +160,7 @@ class PipelineOrchestrator:
                         source_path=job.source_path,
                         metadata=job.metadata,
                     )
-                    await handler.execute(job, config)
+                    await handler.execute(job, config, phase_record)
                 else:
                     logger.warning("No handler registered for phase %s", phase.value)
 

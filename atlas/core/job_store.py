@@ -12,6 +12,7 @@ import logging
 import sqlite3
 from dataclasses import dataclass, asdict, field
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
@@ -109,8 +110,20 @@ class JobRecord:
         for key in ("started_at", "paused_at", "completed_at", "cancelled_at", "resumed_at", "created_at", "updated_at"):
             if d[key] is not None:
                 d[key] = d[key].isoformat()
-        # Always serialize metadata as JSON for SQLite storage
-        d["metadata"] = json.dumps(d["metadata"])
+        # Serialize metadata as JSON, handling non-serializable values
+        def _json_safe(obj: Any) -> Any:
+            """Convert non-JSON-serializable objects to safe equivalents."""
+            if isinstance(obj, (datetime, )):
+                return obj.isoformat()
+            if isinstance(obj, Path):
+                return str(obj)
+            if isinstance(obj, dict):
+                return {k: _json_safe(v) for k, v in obj.items()}
+            if isinstance(obj, (list, tuple)):
+                return [_json_safe(v) for v in obj]
+            return obj
+
+        d["metadata"] = json.dumps(_json_safe(d["metadata"]))
         return d
 
 
@@ -135,6 +148,9 @@ class PhaseRecord:
         for key in ("started_at", "completed_at", "created_at", "updated_at"):
             if d[key] is not None:
                 d[key] = d[key].isoformat()
+        # Ensure status is a plain string (may be PipelineStatus enum)
+        if d.get("status") is not None:
+            d["status"] = str(d["status"])
         return d
 
 

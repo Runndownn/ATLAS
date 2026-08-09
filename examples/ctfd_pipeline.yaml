@@ -1,0 +1,37 @@
+# ATLAS Pipeline Definition
+# Example: CTF Challenge Processing Pipeline
+# Maps to BinReaper challenge-solving methodology
+
+name: "ctf-challenge-pipeline"
+pipeline_id: "auto"  # Generates UUID at runtime
+source_path: "./challenge_artifacts"
+
+# Phases to execute (defaults to all if omitted)
+phases:
+  - reconnaissance
+  - fingerprinting
+  - structural_discovery
+  - controlled_extraction
+  - deep_understanding
+  - review_promotion
+
+# Phase-specific configuration
+phase_config:
+  reconnaissance:
+    max_depth: 16
+    follow_symlinks: false
+  fingerprinting:
+    algorithms: ["sha256", "blake3"]
+    chunk_size: 1048576
+  extraction:
+    max_uncompressed_mb: 1024
+    max_members: 50000
+
+# Pipeline-level settings
+abort_on_error: true  # Stop pipeline if any phase errors
+continue_on_phase_error: false  # Whether to continue to next phase after error
+
+metadata:
+  pipeline_name: "ctf-challenge-pipeline"
+  author: "BinReaperMekanix"
+  challenge_type: "auto-detect"  # Will be set by recon phase

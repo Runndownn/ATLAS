@@ -1,0 +1,17 @@
+# ATLAS Pipeline Definition
+# Example: Document Processing Pipeline
+
+name: "document-processing-pipeline"
+pipeline_id: "auto"
+source_path: "./documents"
+
+phases:
+  - reconnaissance
+  - fingerprinting
+  - controlled_extraction
+
+abort_on_error: true
+
+metadata:
+  pipeline_name: "document-processing-pipeline"
+  description: "Process PDFs, DOCX, and archives for content indexing"
