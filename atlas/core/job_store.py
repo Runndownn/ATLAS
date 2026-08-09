@@ -22,6 +22,10 @@ CREATE TABLE IF NOT EXISTS atlas_jobs (
     job_id          TEXT PRIMARY KEY,
     root_id         TEXT NOT NULL,
     source_path     TEXT,
+<<<<<<< HEAD
+=======
+    pipeline_name   TEXT,
+>>>>>>> 01d72eca5ab5cd53e317f1b3fc8eee172667d126
     phase           TEXT,
     status          TEXT NOT NULL,
     progress_percent REAL DEFAULT 0.0,
@@ -33,7 +37,11 @@ CREATE TABLE IF NOT EXISTS atlas_jobs (
     cancelled_at    TIMESTAMP,
     resumed_at      TIMESTAMP,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+<<<<<<< HEAD
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+=======
+    updated_at      TRIGGER_DEFAULT,
+>>>>>>> 01d72eca5ab5cd53e317f1b3fc8eee172667d126
     metadata        TEXT
 );
 
@@ -89,6 +97,10 @@ class JobRecord:
     def create(
         cls,
         source_path: str,
+<<<<<<< HEAD
+=======
+        pipeline_name: str = "default",
+>>>>>>> 01d72eca5ab5cd53e317f1b3fc8eee172667d126
         metadata: dict[str, Any] | None = None,
     ) -> "JobRecord":
         """Create a new job record with generated IDs."""
@@ -97,6 +109,10 @@ class JobRecord:
             job_id=str(uuid4()),
             root_id=str(uuid4()),
             source_path=source_path,
+<<<<<<< HEAD
+=======
+            pipeline_name=pipeline_name,
+>>>>>>> 01d72eca5ab5cd53e317f1b3fc8eee172667d126
             metadata=metadata or {},
             created_at=now,
             updated_at=now,
@@ -177,12 +193,24 @@ class JobStore:
                     lambda: conn.execute(
                         """
                         INSERT INTO atlas_jobs
+<<<<<<< HEAD
                             (job_id, root_id, source_path,
                              phase, status, progress_percent, metadata, created_at, updated_at)
                         VALUES (:job_id, :root_id, :source_path,
                                 :phase, :status, :progress_percent, :metadata, :created_at, :updated_at)
                         """,
                         job.to_dict(),
+=======
+                            (job_id, root_id, source_path, pipeline_name,
+                             phase, status, progress_percent, metadata, created_at, updated_at)
+                        VALUES (:job_id, :root_id, :source_path, :pipeline_name,
+                                :phase, :status, :progress_percent, :metadata, :created_at, :updated_at)
+                        """,
+                        {
+                            **job.to_dict(),
+                            "pipeline_name": job.metadata.get("pipeline_name", "default"),
+                        },
+>>>>>>> 01d72eca5ab5cd53e317f1b3fc8eee172667d126
                     )
                 )
                 await asyncio.to_thread(conn.commit)

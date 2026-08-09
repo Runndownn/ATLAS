@@ -33,7 +33,7 @@ async def orchestrator(job_store, event_bus):
 
 class TestJobRecord:
     def test_create_generates_ids(self):
-        job = JobRecord.create(source_path="/tmp/test")
+        job = JobRecord.create(source_path="/tmp/test", pipeline_name="test")
         assert job.job_id
         assert job.root_id
         assert job.status == "pending"

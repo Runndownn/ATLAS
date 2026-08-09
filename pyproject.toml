@@ -16,8 +16,12 @@ classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3.13",
+<<<<<<< HEAD
     "Topic :: System",
     "Topic :: Software Development :: Libraries",
+=======
+    "Topic :: System :: Pipeline",
+>>>>>>> 01d72eca5ab5cd53e317f1b3fc8eee172667d126
 ]
 
 dependencies = [
