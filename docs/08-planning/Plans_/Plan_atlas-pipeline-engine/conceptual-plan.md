@@ -2,7 +2,7 @@
 
 **Project:** ATLAS (Adaptive Task Lifecycle Engine)  
 **Repository:** `github.com/Runndownn/ATLAS`  
-**Host/Sponsor:** REDC2 portals  
+**Host/Sponsor:** REDC2 Portal (built on the Geezer Mekanix Agentic Engineering Platform)  
 **Framework Model:** poolside/laguna-s-2.1:free (262,112 tokens)  
 **Development Methodology:** BinReaper Production TODO  
 **Status:** ACTIVE — All 5 slices complete  
@@ -108,7 +108,7 @@ Event: (event_id, job_id, routing_key, payload, created_at)
 
 ## 6. Extraction Rationale
 
-ATLAS was extracted from the **BinReaperMekanix** challenge-solving ecosystem in the [geezer-mekanix](https://github.com/Runndownn/geezer-mekanix) workspace. The extraction removed:
+The Geezer Mekanix Agentic Engineering Platform transforms human intent into **Bounded. Observable. Evidence-Aware. Governed.** execution, providing the infrastructure backbone for ATLAS pipeline orchestration workloads.
 
 - **Security infrastructure** — RBAC, authentication, TLS, audit logging to SIEM
 - **Cognitive operations** — Knowledge fabric ingestion, source registry, retrieval synchronization
