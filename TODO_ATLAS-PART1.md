@@ -54,6 +54,7 @@ In Greek mythology, Atlas held up the celestial spheres — he bore the weight o
 | 3 | Storage & Identity (content hashing + dedup) | Poolside | ✅ COMPLETE |
 | 4 | Phase Implementations (all 6 phases) | Poolside | ✅ COMPLETE |
 | 5 | CLI polish + example pipelines + PyPI publish | Poolside | ✅ COMPLETE |
+| 6 | Assessment-driven hardening | Poolside | ✅ COMPLETE |
 
 ### Timeline Overview
 
@@ -65,7 +66,7 @@ In Greek mythology, Atlas held up the celestial spheres — he bore the weight o
 | **Sprint 1c** | Slice 3 Storage | Sep 3–5, 2026 | Hash store, schema |
 | **Sprint 1d** | Slice 4 Phases | Sep 6–10, 2026 | All 6 phases + integration tests |
 | **Sprint 2** | Slice 5 Polish | Sep 11–20, 2026 | CLI refinement, examples, CI, PyPI, docs |
-| **Sprint 3** | Review/Release | Sep 21–22, 2026 | Final review, PyPI publish, handoff |
+| **Sprint 3** | Slice 6 Hardening | Sep 21–22, 2026 | Assessment-driven fixes (48 tests passing) |
 
 **Key dates:**
 - **Aug 9, 2026** — Pre-sprint work begins (current)
