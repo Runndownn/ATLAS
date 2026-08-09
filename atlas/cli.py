@@ -14,17 +14,18 @@ from __future__ import annotations
 import asyncio
 import json
 import sys
+import uuid
 from pathlib import Path
 from typing import Any
 
-from atlas.core.event_bus import EventBus, InMemoryEventBus, RabbitMQEventBus
+from atlas.core.event_bus import EventBus
 from atlas.core.job_store import JobStore
 from atlas.core.orchestrator import (
     PipelineConfig,
-    PipelineOrchestrator,
     PipelinePhase,
     PipelineStatus,
 )
+from atlas.core.runtime import AtlasRuntime
 
 
 def _load_pipeline(path: str) -> dict[str, Any]:
@@ -45,19 +46,49 @@ def _load_pipeline(path: str) -> dict[str, Any]:
 
 
 def _build_pipeline_config(pipeline_def: dict[str, Any]) -> PipelineConfig:
-    """Build a PipelineConfig from a pipeline definition."""
+    """Build a PipelineConfig from a pipeline definition.
+
+    Handles:
+    - pipeline_id: "auto" generates a UUID; otherwise uses literal value
+    - phase_config: passed through to metadata per-phase settings
+    - continue_on_phase_error: honored for per-phase error tolerance
+    - metadata: all top-level keys preserved in job metadata
+    """
+    # Handle "auto" pipeline_id — generate UUID instead of using literal "auto"
+    pipeline_id = pipeline_def.get("pipeline_id", "auto")
+    if pipeline_id == "auto" or not pipeline_id:
+        pipeline_id = str(uuid.uuid4())
+
     source_path = pipeline_def.get("source_path", "")
-    phases = pipeline_def.get("phases", [p.value for p in PipelinePhase])
+    phases_raw = pipeline_def.get("phases")
+    if phases_raw:
+        phases = [PipelinePhase(p) for p in phases_raw]
+    else:
+        phases = list(PipelinePhase)
+
+    # Extract phase_config and error semantics
+    phase_config = pipeline_def.get("phase_config", {})
+    continue_on_error = pipeline_def.get("continue_on_phase_error", False)
+    abort_on_error = pipeline_def.get("abort_on_error", True)
+
+    # Build metadata — preserve all top-level keys from the YAML
+    metadata = {
+        "pipeline_name": pipeline_def.get("name", "default"),
+        "phase_config": phase_config,
+        "continue_on_phase_error": continue_on_error,
+        "abort_on_error": abort_on_error,
+    }
+
+    # Merge any additional metadata from the YAML
+    extra_meta = pipeline_def.get("metadata", {})
+    metadata.update(extra_meta)
 
     return PipelineConfig(
-        pipeline_id=pipeline_def.get("pipeline_id", str(__import__("uuid").uuid4())),
+        pipeline_id=pipeline_id,
         name=pipeline_def.get("name", "default"),
-        phases=[PipelinePhase(p) for p in phases],
+        phases=phases,
         source_path=source_path,
-        metadata={
-            "pipeline_name": pipeline_def.get("name", "default"),
-            "abort_on_error": pipeline_def.get("abort_on_error", True),
-        },
+        metadata=metadata,
     )
 
 
@@ -73,10 +104,10 @@ async def _run_pipeline(args: list[str]) -> int:
     pipeline_def = _load_pipeline(pipeline_path)
     config = _build_pipeline_config(pipeline_def)
 
-    job_store = JobStore(db_path)
-    await job_store.connect()
-    event_bus: EventBus = InMemoryEventBus()
-    orchestrator = PipelineOrchestrator(job_store, event_bus)
+    # Use AtlasRuntime to ensure all phase handlers are wired
+    runtime = AtlasRuntime(db_path=db_path)
+    await runtime.connect()
+    orchestrator = runtime.orchestrator
 
     job = await orchestrator.start_pipeline(config)
     print(f"Started pipeline '{config.name}' with job_id={job.job_id}")
@@ -91,9 +122,11 @@ async def _run_pipeline(args: list[str]) -> int:
             print(f"Pipeline {job.status}: job_id={job.job_id}")
             if job.status == "error" and job.last_error:
                 print(f"Error: {job.last_error}")
+            await runtime.close()
             return 0 if job.status == "completed" else 1
         await asyncio.sleep(0.5)
 
+    await runtime.close()
     return 0
 
 
@@ -118,7 +151,16 @@ async def _list_jobs(args: list[str]) -> int:
 
 
 async def _job_action(action: str, args: list[str]) -> int:
-    """Execute a job action (status/pause/resume/cancel)."""
+    """Execute a job action (status/pause/resume/cancel).
+
+    For status queries, reads directly from the JobStore. For control
+    actions (pause/resume/cancel), hydrates the job into an orchestrator
+    instance and applies the state change.
+
+    Note: control actions currently work within the same process. For
+    cross-process control, a runtime daemon consuming a control table
+    is recommended (see assessment note on process-local controls).
+    """
     if not args:
         print(f"Usage: atlas job <id> {action}")
         return 1
@@ -126,15 +168,14 @@ async def _job_action(action: str, args: list[str]) -> int:
     job_id = args[0]
     db_path = args[1] if len(args) > 1 else "atlas_jobs.db"
 
-    job_store = JobStore(db_path)
-    await job_store.connect()
-    event_bus: EventBus = InMemoryEventBus()
-    orchestrator = PipelineOrchestrator(job_store, event_bus)
-
+    # --- Status: read directly from store ---
     if action == "status":
-        job = await orchestrator.get_job(job_id)
+        job_store = JobStore(db_path)
+        await job_store.connect()
+        job = await job_store.get_job(job_id)
         if job is None:
             print(f"Job {job_id} not found")
+            await job_store.close()
             return 1
         print(f"Job ID:    {job.job_id}")
         print(f"Status:    {job.status}")
@@ -151,39 +192,44 @@ async def _job_action(action: str, args: list[str]) -> int:
             print(f"\nPhases:")
             for p in phases:
                 print(f"  {p.phase:<24} {p.status:<12} {p.progress_percent:.0f}%")
+        await job_store.close()
         return 0
 
-    if action == "pause":
-        success = await orchestrator.pause_pipeline(job_id)
-        if success:
-            print(f"Paused job {job_id}")
-            return 0
-        print(f"Could not pause job {job_id} (not running)")
+    # --- Control actions: pause/resume/cancel ---
+    # Use AtlasRuntime to ensure handlers are wired (needed for resume)
+    runtime = AtlasRuntime(db_path=db_path)
+    await runtime.connect()
+    orchestrator = runtime.orchestrator
+    job = await job_store if False else await runtime.job_store.get_job(job_id)
+
+    if job is None:
+        print(f"Job {job_id} not found")
+        await runtime.close()
         return 1
 
-    if action == "resume":
-        success = await orchestrator.resume_pipeline(job_id)
-        if success:
-            print(f"Resumed job {job_id}")
-            return 0
-        print(f"Could not resume job {job_id} (not paused)")
-        return 1
+    # Load job into orchestrator's in-memory dict for process-local control
+    orchestrator._jobs[job.job_id] = job
 
-    if action == "cancel":
-        success = await orchestrator.cancel_pipeline(job_id)
-        if success:
-            print(f"Cancelled job {job_id}")
-            return 0
-        print(f"Could not cancel job {job_id}")
-        return 1
-
-    return 1
+    try:
+        if action == "pause":
+            success = await orchestrator.pause_pipeline(job_id)
+            msg = f"Paused job {job_id}" if success else f"Could not pause job {job_id} (not running)"
+        elif action == "resume":
+            success = await orchestrator.resume_pipeline(job_id)
+            msg = f"Resumed job {job_id}" if success else f"Could not resume job {job_id} (not paused)"
+        elif action == "cancel":
+            success = await orchestrator.cancel_pipeline(job_id)
+            msg = f"Cancelled job {job_id}" if success else f"Could not cancel job {job_id}"
+        else:
+            msg = f"Unknown action: {action}"
+            success = False
+        print(msg)
+        return 0 if success else 1
+    finally:
+        await runtime.close()
 
 
 async def _amain() -> int:
-    """Main async entry point."""
-    args = sys.argv[1:]
-
     """Main async entry point."""
     args = sys.argv[1:]
 

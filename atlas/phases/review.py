@@ -98,8 +98,26 @@ class ReviewPhase(Phase):
             "evidence_count": len(evidence),
             "promotion_candidates": len(promotions),
             "timestamp": datetime.now(UTC).isoformat(),
-            "evidence_sample": evidence[:10],
-            "promotion_sample": [p.__dict__ for p in promotions[:5]],
+            "evidence_sample": [
+                {
+                    "evidence_id": e.evidence_id,
+                    "observation": e.observation,
+                    "evidence_type": e.evidence_type,
+                    "confidence": e.confidence,
+                    "source": e.source,
+                }
+                for e in evidence[:10]
+            ],
+            "promotion_sample": [
+                {
+                    "promotion_id": p.promotion_id,
+                    "content_hash": p.content_hash,
+                    "source_path": p.source_path,
+                    "artifact_type": p.artifact_type,
+                    "risk_level": p.risk_level,
+                }
+                for p in promotions[:5]
+            ],
         }
 
         await self.emit_event(job, "pipeline_ready_for_promotion", {

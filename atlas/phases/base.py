@@ -47,6 +47,8 @@ class Phase(ABC):
     def __init__(self, event_bus: EventBus | None = None):
         self._event_bus = event_bus
         self._progress = PhaseProgress()
+        self._phase_record: PhaseRecord | None = None
+        self._job: JobRecord | None = None
 
     @abstractmethod
     async def execute(
@@ -68,6 +70,11 @@ class Phase(ABC):
         """
         ...
 
+    def _bind(self, job: JobRecord, phase_record: PhaseRecord) -> None:
+        """Bind this phase to its job and phase record for progress propagation."""
+        self._job = job
+        self._phase_record = phase_record
+
     @property
     def progress(self) -> PhaseProgress:
         """Current progress of this phase."""
@@ -80,7 +87,11 @@ class Phase(ABC):
         total: int | None = None,
         message: str | None = None,
     ) -> None:
-        """Update phase progress (call from within execute)."""
+        """Update phase progress (call from within execute).
+
+        Updates both the PhaseProgress instance and the bound
+        PhaseRecord so progress is persisted.
+        """
         self._progress.percent = percent
         if processed is not None:
             self._progress.processed = processed
@@ -88,6 +99,12 @@ class Phase(ABC):
             self._progress.total = total
         if message is not None:
             self._progress.message = message
+
+        # Propagate to PhaseRecord so it persists via update_phase_record
+        if self._phase_record is not None:
+            self._phase_record.progress_percent = percent
+            if message is not None:
+                self._phase_record.error = None  # Clear error on progress
 
     async def emit_event(
         self,
