@@ -119,7 +119,7 @@ class TestPipelineOrchestrator:
         executed = False
 
         class TestHandler:
-            async def execute(self, job: JobRecord, config: PipelineConfig) -> None:
+            async def execute(self, job: JobRecord, config: PipelineConfig, phase_record) -> None:
                 nonlocal executed
                 executed = True
 

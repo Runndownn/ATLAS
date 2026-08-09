@@ -184,8 +184,13 @@ async def _amain() -> int:
     """Main async entry point."""
     args = sys.argv[1:]
 
-    if not args:
+    """Main async entry point."""
+    args = sys.argv[1:]
+
+    # Handle --help and -h
+    if not args or args[0] in ("--help", "-h"):
         print("ATLAS — Adaptive Task Lifecycle Engine")
+        print("")
         print("Usage: atlas <command> [args...]")
         print("")
         print("Commands:")
@@ -195,6 +200,7 @@ async def _amain() -> int:
         print("  job <id> pause [db_path]         Pause a running job")
         print("  job <id> resume [db_path]        Resume a paused job")
         print("  job <id> cancel [db_path]        Cancel a job")
+        print("")
         return 0
 
     command = args[0]
