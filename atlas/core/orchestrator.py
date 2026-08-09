@@ -74,7 +74,6 @@ class PhaseHandler(Protocol):
         self,
         job: JobRecord,
         config: PipelineConfig,
-        phase_record: PhaseRecord,
     ) -> None:
         """Execute a phase for the given job."""
         ...
@@ -144,7 +143,7 @@ class PipelineOrchestrator:
                 phase_id=str(uuid.uuid4()),
                 job_id=job.job_id,
                 phase=phase.value,
-                status=PipelineStatus.RUNNING,
+                status=PipelineStatus.RUNNING.value,
                 started_at=datetime.now(UTC),
             )
             await self._job_store.add_phase_record(phase_record)
@@ -164,7 +163,7 @@ class PipelineOrchestrator:
                 else:
                     logger.warning("No handler registered for phase %s", phase.value)
 
-                phase_record.status = PipelineStatus.COMPLETED
+                phase_record.status = PipelineStatus.COMPLETED.value
                 phase_record.completed_at = datetime.now(UTC)
                 phase_record.progress_percent = 100.0
                 await self._job_store.update_phase_record(phase_record)
@@ -175,7 +174,7 @@ class PipelineOrchestrator:
                 logger.error("Phase %s failed: %s", phase.value, exc, exc_info=True)
                 job.error_count += 1
                 job.last_error = str(exc)
-                phase_record.status = PipelineStatus.ERROR
+                phase_record.status = PipelineStatus.ERROR.value
                 phase_record.completed_at = datetime.now(UTC)
                 phase_record.error = str(exc)
                 await self._job_store.update_phase_record(phase_record)
