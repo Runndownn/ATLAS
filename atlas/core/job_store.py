@@ -196,124 +196,21 @@ class JobStore:
     async def create_job(self, job: JobRecord) -> None:
         """Insert a new job record."""
         async with self._lock:
-            conn = self._get_conn()
-            conn.execute(
-                """
-                INSERT INTO atlas_jobs
-                    (job_id, root_id, source_path,
-                     phase, status, progress_percent, metadata, created_at, updated_at)
-                VALUES (:job_id, :root_id, :source_path,
-                        :phase, :status, :progress_percent, :metadata, :created_at, :updated_at)
-                """,
-                job.to_dict(),
-            )
-            conn.commit()
-
-    async def update_job(self, job: JobRecord) -> None:
-        """Update an existing job record."""
-        async with self._lock:
-            conn = self._get_conn()
-            conn.execute(
-                """
-                UPDATE atlas_jobs SET
-                    root_id = :root_id,
-                    source_path = :source_path,
-                    phase = :phase,
-                    status = :status,
-                    progress_percent = :progress_percent,
-                    error_count = :error_count,
-                    last_error = :last_error,
-                    started_at = :started_at,
-                    paused_at = :paused_at,
-                    completed_at = :completed_at,
-                    cancelled_at = :cancelled_at,
-                    resumed_at = :resumed_at,
-                    metadata = :metadata,
-                    updated_at = :updated_at
-                WHERE job_id = :job_id
-                """,
-                job.to_dict(),
-            )
-            conn.commit()
-
-    async def add_phase_record(self, phase: PhaseRecord) -> None:
-        """Insert a phase execution record."""
-        async with self._lock:
-            conn = self._get_conn()
-            conn.execute(
-                """
-                INSERT INTO atlas_phases
-                    (phase_id, job_id, phase, status, progress_percent,
-                     started_at, completed_at, error, created_at, updated_at)
-                VALUES (:phase_id, :job_id, :phase, :status, :progress_percent,
-                        :started_at, :completed_at, :error, :created_at, :updated_at)
-                """,
-                phase.to_dict(),
-            )
-            conn.commit()
-
-    async def update_phase_record(self, phase: PhaseRecord) -> None:
-        """Update an existing phase record."""
-        async with self._lock:
-            conn = self._get_conn()
-            conn.execute(
-                """
-                UPDATE atlas_phases SET
-                    status = :status,
-                    progress_percent = :progress_percent,
-                    completed_at = :completed_at,
-                    error = :error,
-                    updated_at = :updated_at
-                WHERE phase_id = :phase_id
-                """,
-                phase.to_dict(),
-            )
-            conn.commit()
-
-    async def get_job(self, job_id: str) -> JobRecord | None:
-        """Fetch a job by ID."""
-        conn = self._get_conn()
-        row = conn.execute(
-            "SELECT * FROM atlas_jobs WHERE job_id = ?",
-            (job_id,),
-        ).fetchone()
-        if row is None:
-            return None
-        return self._row_to_job(row)
-
-    async def list_jobs(self) -> list[JobRecord]:
-        """List all jobs."""
-        conn = self._get_conn()
-        rows = conn.execute(
-            "SELECT * FROM atlas_jobs ORDER BY created_at DESC"
-        ).fetchall()
-        return [self._row_to_job(row) for row in rows]
-
-    async def list_phases(self, job_id: str) -> list[PhaseRecord]:
-        """List all phase records for a job."""
-        conn = self._get_conn()
-        rows = conn.execute(
-            "SELECT * FROM atlas_phases WHERE job_id = ? ORDER BY created_at",
-            (job_id,),
-        ).fetchall()
-        return [self._row_to_phase(row) for row in rows]
-
-    def _row_to_job(self, row: sqlite3.Row) -> JobRecord:
-        """Convert a database row to a JobRecord."""
-        d = dict(row)
-        for key in ("started_at", "paused_at", "completed_at", "cancelled_at", "resumed_at", "created_at", "updated_at"):
-            if d[key]:
-                d[key] = datetime.fromisoformat(d[key])
-        if d.get("metadata"):
-            d["metadata"] = json.loads(d["metadata"])
-        else:
-            d["metadata"] = {}
-        return JobRecord(**d)
-
-    def _row_to_phase(self, row: sqlite3.Row) -> PhaseRecord:
-        """Convert a database row to a PhaseRecord."""
-        d = dict(row)
-        for key in ("started_at", "completed_at", "created_at", "updated_at"):
-            if d[key]:
-                d[key] = datetime.fromisoformat(d[key])
-        return PhaseRecord(**d)
+<<<<<<< ours
+            conn = await asyncio.to_thread(self._get_conn)
+            try:
+                await asyncio.to_thread(
+                    lambda: conn.execute(
+                        """
+                        INSERT INTO atlas_jobs
+                            (job_id, root_id, source_path,
+                             phase, status, progress_percent, metadata, created_at, updated_at)
+                        VALUES (:job_id, :root_id, :source_path,
+                                :phase, :status, :progress_percent, :metadata, :created_at, :updated_at)
+                        """,
+                        job.to_dict(),
+                    )
+                )
+                await asyncio.to_thread(conn.commit)
+            finally:
+                conn.close()
