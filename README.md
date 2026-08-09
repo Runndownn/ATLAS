@@ -298,6 +298,40 @@ This project is developed using the **BinReaper Production TODO** methodology. T
 - **Aug 29–Sep 10, 2026** — Sprints 1b-1d: Safety layer, storage, phases (44 tests total)
 - **Sep 11–20, 2026** — Sprint 2: CLI polish, examples, CI, PyPI, docs
 
+### Project Gantt Chart
+
+```mermaid
+gantt
+    dateFormat  YYYY-MM-DD
+    title ATLAS Project Timeline
+    section Pre-sprint
+    Scaffold framework          :2026-08-09, 15d
+    section Sprint 1
+    Core orchestrator           :2026-08-24, 5d
+    section Sprint 1b
+    Safety layer                :2026-08-29, 5d
+    section Sprint 1c
+    Storage & identity          :2026-09-03, 3d
+    section Sprint 1d
+    Phase implementations       :2026-09-06, 5d
+    section Sprint 2
+    CLI polish + examples + CI  :2026-09-11, 10d
+    section Sprint 3
+    Final review & release      :2026-09-21, 2d
+```
+
+### Sprint Dates
+
+| Sprint | Dates | Scope | Owner |
+|--------|-------|-------|-------|
+| Pre-sprint Prep | Aug 9–23, 2026 | Repo init, framework design, foundation | Poolside |
+| Sprint 1 | Aug 24–28, 2026 | Core orchestrator, event bus, job store, CLI | Poolside |
+| Sprint 1b | Aug 29–Sep 2, 2026 | Filesystem discovery, archive safety | Poolside |
+| Sprint 1c | Sep 3–5, 2026 | Hash store, schema | Poolside |
+| Sprint 1d | Sep 6–10, 2026 | All 6 phases + integration tests | Poolside |
+| Sprint 2 | Sep 11–20, 2026 | CLI polish, examples, CI, PyPI, docs | Poolside |
+| Sprint 3 | Sep 21–22, 2026 | Final review, PyPI publish, handoff | Poolside |
+
 ## Hosting & Platform
 
 ATLAS is hosted and sponsored by **REDC2 Portal**, providing the infrastructure backbone for pipeline orchestration workloads, built using the **Geezer Mekanix Agentic Engineering Platform**. The platform transforms human intent into **Bounded. Observable. Evidence-Aware. Governed.** execution.
