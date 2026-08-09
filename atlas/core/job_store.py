@@ -109,8 +109,8 @@ class JobRecord:
         for key in ("started_at", "paused_at", "completed_at", "cancelled_at", "resumed_at", "created_at", "updated_at"):
             if d[key] is not None:
                 d[key] = d[key].isoformat()
-        if d.get("metadata"):
-            d["metadata"] = json.dumps(d["metadata"])
+        # Always serialize metadata as JSON for SQLite storage
+        d["metadata"] = json.dumps(d["metadata"])
         return d
 
 
@@ -144,11 +144,13 @@ class JobStore:
     def __init__(self, db_path: str = ":memory:"):
         self._db_path = db_path
         self._lock = asyncio.Lock()
-        self._pool: list[sqlite3.Connection] = []
+        self._conn: sqlite3.Connection | None = None
         self._initialized = False
 
     def _get_conn(self) -> sqlite3.Connection:
-        """Get or create a SQLite connection."""
+        """Get or create the shared SQLite connection."""
+        if self._conn is not None:
+            return self._conn
         conn = sqlite3.connect(self._db_path, check_same_thread=False)
         conn.row_factory = sqlite3.Row
         conn.executescript(
@@ -157,20 +159,28 @@ class JobStore:
                 "DEFAULT CURRENT_TIMESTAMP",
             )
         )
+        self._conn = conn
         return conn
 
     async def connect(self) -> None:
         """Initialize the database schema."""
         if self._initialized:
             return
-        conn = await asyncio.to_thread(self._get_conn)
-        conn.close()
+        self._get_conn()  # Creates + initializes the shared connection
         self._initialized = True
         logger.info("JobStore initialized with db_path=%s", self._db_path)
+
+    async def close(self) -> None:
+        """Close the database connection."""
+        if self._conn is not None:
+            self._conn.close()
+            self._conn = None
+            self._initialized = False
 
     async def create_job(self, job: JobRecord) -> None:
         """Insert a new job record."""
         async with self._lock:
+<<<<<<< ours
             conn = await asyncio.to_thread(self._get_conn)
             try:
                 await asyncio.to_thread(
@@ -188,141 +198,3 @@ class JobStore:
                 await asyncio.to_thread(conn.commit)
             finally:
                 conn.close()
-
-    async def update_job(self, job: JobRecord) -> None:
-        """Update an existing job record."""
-        async with self._lock:
-            conn = await asyncio.to_thread(self._get_conn)
-            try:
-                d = job.to_dict()
-                await asyncio.to_thread(
-                    lambda: conn.execute(
-                        """
-                        UPDATE atlas_jobs SET
-                            root_id = :root_id,
-                            source_path = :source_path,
-                            phase = :phase,
-                            status = :status,
-                            progress_percent = :progress_percent,
-                            error_count = :error_count,
-                            last_error = :last_error,
-                            started_at = :started_at,
-                            paused_at = :paused_at,
-                            completed_at = :completed_at,
-                            cancelled_at = :cancelled_at,
-                            resumed_at = :resumed_at,
-                            metadata = :metadata,
-                            updated_at = :updated_at
-                        WHERE job_id = :job_id
-                        """,
-                        d,
-                    )
-                )
-                await asyncio.to_thread(conn.commit)
-            finally:
-                conn.close()
-
-    async def add_phase_record(self, phase: PhaseRecord) -> None:
-        """Insert a phase execution record."""
-        async with self._lock:
-            conn = await asyncio.to_thread(self._get_conn)
-            try:
-                await asyncio.to_thread(
-                    lambda: conn.execute(
-                        """
-                        INSERT INTO atlas_phases
-                            (phase_id, job_id, phase, status, progress_percent,
-                             started_at, completed_at, error, created_at, updated_at)
-                        VALUES (:phase_id, :job_id, :phase, :status, :progress_percent,
-                                :started_at, :completed_at, :error, :created_at, :updated_at)
-                        """,
-                        phase.to_dict(),
-                    )
-                )
-                await asyncio.to_thread(conn.commit)
-            finally:
-                conn.close()
-
-    async def update_phase_record(self, phase: PhaseRecord) -> None:
-        """Update an existing phase record."""
-        async with self._lock:
-            conn = await asyncio.to_thread(self._get_conn)
-            try:
-                await asyncio.to_thread(
-                    lambda: conn.execute(
-                        """
-                        UPDATE atlas_phases SET
-                            status = :status,
-                            progress_percent = :progress_percent,
-                            completed_at = :completed_at,
-                            error = :error,
-                            updated_at = :updated_at
-                        WHERE phase_id = :phase_id
-                        """,
-                        phase.to_dict(),
-                    )
-                )
-                await asyncio.to_thread(conn.commit)
-            finally:
-                conn.close()
-
-    async def get_job(self, job_id: str) -> JobRecord | None:
-        """Fetch a job by ID."""
-        conn = await asyncio.to_thread(self._get_conn)
-        try:
-            row = await asyncio.to_thread(
-                lambda: conn.execute(
-                    "SELECT * FROM atlas_jobs WHERE job_id = ?",
-                    (job_id,),
-                ).fetchone()
-            )
-            if row is None:
-                return None
-            return self._row_to_job(row)
-        finally:
-            conn.close()
-
-    async def list_jobs(self) -> list[JobRecord]:
-        """List all jobs."""
-        conn = await asyncio.to_thread(self._get_conn)
-        try:
-            rows = await asyncio.to_thread(
-                lambda: conn.execute(
-                    "SELECT * FROM atlas_jobs ORDER BY created_at DESC"
-                ).fetchall()
-            )
-            return [self._row_to_job(row) for row in rows]
-        finally:
-            conn.close()
-
-    async def list_phases(self, job_id: str) -> list[PhaseRecord]:
-        """List all phase records for a job."""
-        conn = await asyncio.to_thread(self._get_conn)
-        try:
-            rows = await asyncio.to_thread(
-                lambda: conn.execute(
-                    "SELECT * FROM atlas_phases WHERE job_id = ? ORDER BY created_at",
-                    (job_id,),
-                ).fetchall()
-            )
-            return [self._row_to_phase(row) for row in rows]
-        finally:
-            conn.close()
-
-    def _row_to_job(self, row: sqlite3.Row) -> JobRecord:
-        """Convert a database row to a JobRecord."""
-        d = dict(row)
-        for key in ("started_at", "paused_at", "completed_at", "cancelled_at", "resumed_at", "created_at", "updated_at"):
-            if d[key]:
-                d[key] = datetime.fromisoformat(d[key])
-        if d.get("metadata"):
-            d["metadata"] = json.loads(d["metadata"])
-        return JobRecord(**d)
-
-    def _row_to_phase(self, row: sqlite3.Row) -> PhaseRecord:
-        """Convert a database row to a PhaseRecord."""
-        d = dict(row)
-        for key in ("started_at", "completed_at", "created_at", "updated_at"):
-            if d[key]:
-                d[key] = datetime.fromisoformat(d[key])
-        return PhaseRecord(**d)

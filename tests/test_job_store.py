@@ -16,7 +16,7 @@ async def job_store():
 class TestJobStore:
     @pytest.mark.asyncio
     async def test_create_and_retrieve_job(self, job_store):
-        job = JobRecord.create(source_path="/tmp/test", pipeline_name="test-pipeline")
+        job = JobRecord.create(source_path="/tmp/test")
         await job_store.create_job(job)
 
         retrieved = await job_store.get_job(job.job_id)
