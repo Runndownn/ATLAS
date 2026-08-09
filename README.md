@@ -294,6 +294,12 @@ This project is developed using the **BinReaper Production TODO** methodology. T
 - **2026-08-09** — Slices 2-4: Safety layer, storage layer, phase implementations. 44 tests passing, full integration test passing.
 - **2026-08-09** — README updated with Mermaid architecture charts and process documentation.
 
+## Hosting & Platform
+
+ATLAS is hosted and sponsored by **REDC2 portals**, providing the infrastructure backbone for pipeline orchestration workloads.
+
+The AI model powering framework development and planning decisions is the **Poolside Laguna S 2.1 (free)** — a 262,112-token model used through the Kilo Gateway for code generation, architectural reasoning, and sprint planning.
+
 ## License
 
 MIT — See [LICENSE](LICENSE) for details.
