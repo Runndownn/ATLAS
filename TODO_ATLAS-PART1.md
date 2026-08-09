@@ -55,6 +55,23 @@ In Greek mythology, Atlas held up the celestial spheres — he bore the weight o
 | 4 | Phase Implementations (all 6 phases) | Poolside | ✅ COMPLETE |
 | 5 | CLI polish + example pipelines + PyPI publish | Poolside | ✅ COMPLETE |
 
+### Timeline Overview
+
+| Period | Phase | Dates | Description |
+|---|---|---|---|
+| **Pre-sprint Preparation** | Scaffolding | Aug 9–23, 2026 | Repo init, framework design, Slices 1-4 foundation |
+| **Sprint 1** | Slice 1-4 Core | Aug 24–28, 2026 | Core orchestrator, event bus, job store, CLI |
+| **Sprint 1b** | Slice 2 Safety | Aug 29–Sep 2, 2026 | Filesystem discovery, archive safety, path safety |
+| **Sprint 1c** | Slice 3 Storage | Sep 3–5, 2026 | Hash store, schema |
+| **Sprint 1d** | Slice 4 Phases | Sep 6–10, 2026 | All 6 phases + integration tests |
+| **Sprint 2** | Slice 5 Polish | Sep 11–20, 2026 | CLI refinement, examples, CI, PyPI, docs |
+| **Sprint 3** | Review/Release | Sep 21–22, 2026 | Final review, PyPI publish, handoff |
+
+**Key dates:**
+- **Aug 9, 2026** — Pre-sprint work begins (current)
+- **Aug 24, 2026** — Official project start date
+- **Sep 20, 2026** — Final sprint completion
+
 ### Planning Documentation
 
 Full planning documents are maintained under `docs/08-planning/Plans_/Plan_atlas-pipeline-engine/`:

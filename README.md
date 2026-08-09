@@ -292,9 +292,11 @@ This project is developed using the **BinReaper Production TODO** methodology. T
 
 ### Development Log
 
-- **2026-08-24** — Project initialized. Slice 1: Core orchestrator, event bus, job store, CLI. 25 tests passing.
-- **2026-08-24** — Slices 2-4: Safety layer, storage layer, phase implementations. 44 tests passing, full integration test passing.
-- **2026-08-24** — README updated with Mermaid architecture charts and process documentation.
+- **Aug 9–23, 2026** — Pre-sprint preparation: repo init, framework design, Slices 1-4 foundation
+- **Aug 24, 2026** — Official project start date
+- **Aug 24–28, 2026** — Sprint 1: Core orchestrator, event bus, job store, CLI (25 tests)
+- **Aug 29–Sep 10, 2026** — Sprints 1b-1d: Safety layer, storage, phases (44 tests total)
+- **Sep 11–20, 2026** — Sprint 2: CLI polish, examples, CI, PyPI, docs
 
 ## Hosting & Platform
 
