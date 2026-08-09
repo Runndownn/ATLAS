@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ATLAS — Adaptive Task Lifecycle Engine
 
 > In Greek mythology, Atlas held up the celestial spheres. In your pipelines, ATLAS holds up and orchestrates multi-phase workloads.
@@ -50,3 +51,6 @@ atlas job <job-id> cancel
 ## License
 
 MIT
+=======
+# ATLAS
+>>>>>>> fc1c58fce8351b998f671b2a660d50566c16cfdc
