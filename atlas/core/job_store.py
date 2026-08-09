@@ -22,7 +22,6 @@ CREATE TABLE IF NOT EXISTS atlas_jobs (
     job_id          TEXT PRIMARY KEY,
     root_id         TEXT NOT NULL,
     source_path     TEXT,
-    pipeline_name   TEXT,
     phase           TEXT,
     status          TEXT NOT NULL,
     progress_percent REAL DEFAULT 0.0,
@@ -34,7 +33,7 @@ CREATE TABLE IF NOT EXISTS atlas_jobs (
     cancelled_at    TIMESTAMP,
     resumed_at      TIMESTAMP,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TRIGGER_DEFAULT,
+    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     metadata        TEXT
 );
 
@@ -90,7 +89,6 @@ class JobRecord:
     def create(
         cls,
         source_path: str,
-        pipeline_name: str = "default",
         metadata: dict[str, Any] | None = None,
     ) -> "JobRecord":
         """Create a new job record with generated IDs."""
@@ -99,7 +97,6 @@ class JobRecord:
             job_id=str(uuid4()),
             root_id=str(uuid4()),
             source_path=source_path,
-            pipeline_name=pipeline_name,
             metadata=metadata or {},
             created_at=now,
             updated_at=now,
@@ -180,15 +177,12 @@ class JobStore:
                     lambda: conn.execute(
                         """
                         INSERT INTO atlas_jobs
-                            (job_id, root_id, source_path, pipeline_name,
+                            (job_id, root_id, source_path,
                              phase, status, progress_percent, metadata, created_at, updated_at)
-                        VALUES (:job_id, :root_id, :source_path, :pipeline_name,
+                        VALUES (:job_id, :root_id, :source_path,
                                 :phase, :status, :progress_percent, :metadata, :created_at, :updated_at)
                         """,
-                        {
-                            **job.to_dict(),
-                            "pipeline_name": job.metadata.get("pipeline_name", "default"),
-                        },
+                        job.to_dict(),
                     )
                 )
                 await asyncio.to_thread(conn.commit)

@@ -97,7 +97,6 @@ class TestJobStore:
     async def test_job_metadata_round_trips(self, job_store):
         job = JobRecord.create(
             source_path="/tmp/test",
-            pipeline_name="test",
             metadata={"pipeline_name": "test", "abort_on_error": False},
         )
         await job_store.create_job(job)
