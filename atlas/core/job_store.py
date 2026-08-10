@@ -128,7 +128,6 @@ class JobRecord:
             if hasattr(obj, "value") and not isinstance(obj, (str, int, float, bool, dict, list, tuple)):
                 return str(obj)
             return obj
-            return obj
 
         d["metadata"] = json.dumps(_json_safe(d["metadata"]))
         return d

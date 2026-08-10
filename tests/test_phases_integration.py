@@ -1,67 +1,57 @@
-"""Tests for atlas.phases — integration test for full phase sequence."""
+"""Tests for atlas.phases — integration test for full phase sequence.
+
+Uses AtlasRuntime (the canonical composition root) to ensure tests
+exercise exactly the same code path as the CLI, per the BinReaper
+assessment recommendation.
+"""
 
 import asyncio
-import tempfile
-from pathlib import Path
-
 import pytest
 
-from atlas.core.event_bus import InMemoryEventBus
-from atlas.core.job_store import JobStore
 from atlas.core.orchestrator import (
     PipelineConfig,
-    PipelineOrchestrator,
     PipelinePhase,
+    PipelineStatus,
 )
-from atlas.phases.reconnaissance import ReconnaissancePhase
-from atlas.phases.fingerprinting import FingerprintingPhase
-from atlas.phases.extraction import ExtractionPhase
-from atlas.phases.analysis import AnalysisPhase
-from atlas.phases.review import ReviewPhase
+from atlas.core.runtime import AtlasRuntime
 
 
 @pytest.fixture
-async def orchestrator_with_phases(tmp_path):
-    """Create an orchestrator with all built-in phase handlers."""
-    job_store = JobStore(":memory:")
-    await job_store.connect()
-    event_bus = InMemoryEventBus()
+async def runtime(tmp_path):
+    """Create an AtlasRuntime with all built-in phase handlers wired."""
+    rt = AtlasRuntime(db_path=":memory:")
+    await rt.connect()
+    return rt
 
-    orch = PipelineOrchestrator(job_store, event_bus)
 
-    # Register phases
-    orch._phase_handlers[PipelinePhase.RECONNAISSANCE] = ReconnaissancePhase()
-    orch._phase_handlers[PipelinePhase.FINGERPRINTING] = FingerprintingPhase()
-    orch._phase_handlers[PipelinePhase.STRUCTURAL_DISCOVERY] = ExtractionPhase()
-    orch._phase_handlers[PipelinePhase.CONTROLLED_EXTRACTION] = ExtractionPhase()
-    orch._phase_handlers[PipelinePhase.DEEP_UNDERSTANDING] = AnalysisPhase()
-    orch._phase_handlers[PipelinePhase.REVIEW_PROMOTION] = ReviewPhase()
-
-    return orch
+@pytest.fixture
+async def orchestrator(runtime):
+    """Get the orchestrator from AtlasRuntime (all handlers pre-registered)."""
+    return runtime.orchestrator
 
 
 class TestPhaseIntegration:
     @pytest.mark.asyncio
-    async def test_full_pipeline_runs(self, orchestrator_with_phases, tmp_path):
-        """Test that a full pipeline runs through all phases."""
-        # Create a test file
+    async def test_full_pipeline_runs(self, runtime, orchestrator, tmp_path):
+        """Test that a full pipeline runs through all phases via AtlasRuntime."""
+        # Create test files
         (tmp_path / "test.txt").write_text("hello world")
         (tmp_path / "config.env").write_text("SECRET=value")
 
         config = PipelineConfig(
             pipeline_id="test-full-pipeline",
             name="integration-test",
-            source_path=str(tmp_path),
             phases=list(PipelinePhase),
+            source_path=str(tmp_path),
         )
 
-        job = await orchestrator_with_phases.start_pipeline(config)
+        job = await orchestrator.start_pipeline(config)
 
         # Wait for completion by polling the store (not the local object)
         deadline = asyncio.get_event_loop().time() + 10.0
         while True:
             await asyncio.sleep(0.2)
-            job = await orchestrator_with_phases.get_job(job.job_id)
+            job = await orchestrator.get_job(job.job_id)
             if job is None:
                 pytest.fail("Job disappeared")
             if job.status in ("completed", "error", "cancelled"):
@@ -73,17 +63,19 @@ class TestPhaseIntegration:
         if job.status == "error":
             pytest.fail(f"Pipeline failed: {job.last_error}")
 
-        # Check phase records
-        phases = await orchestrator_with_phases._job_store.list_phases(job.job_id)
-        assert len(phases) > 0
+        # Check phase records — should have all 6 phases
+        phases = await runtime.job_store.list_phases(job.job_id)
+        assert len(phases) == 6
 
         # Check discovery metadata exists
         assert "discovery" in job.metadata
         discovery = job.metadata["discovery"]
         assert discovery["total_files"] >= 2
 
+        await runtime.close()
+
     @pytest.mark.asyncio
-    async def test_pause_during_pipeline(self, orchestrator_with_phases, tmp_path):
+    async def test_pause_during_pipeline(self, runtime, orchestrator, tmp_path):
         """Test that pipeline can be paused."""
         (tmp_path / "test.txt").write_text("hello")
 
@@ -94,16 +86,18 @@ class TestPhaseIntegration:
             phases=list(PipelinePhase),
         )
 
-        job = await orchestrator_with_phases.start_pipeline(config)
+        job = await orchestrator.start_pipeline(config)
         await asyncio.sleep(0.1)
 
         # Try to pause
-        result = await orchestrator_with_phases.pause_pipeline(job.job_id)
+        result = await orchestrator.pause_pipeline(job.job_id)
         # May or may not succeed depending on timing
         assert isinstance(result, bool)
 
+        await runtime.close()
+
     @pytest.mark.asyncio
-    async def test_cancel_pipeline(self, orchestrator_with_phases, tmp_path):
+    async def test_cancel_pipeline(self, runtime, orchestrator, tmp_path):
         """Test that pipeline can be cancelled."""
         (tmp_path / "test.txt").write_text("hello")
 
@@ -114,16 +108,37 @@ class TestPhaseIntegration:
             phases=list(PipelinePhase),
         )
 
-        job = await orchestrator_with_phases.start_pipeline(config)
+        job = await orchestrator.start_pipeline(config)
         await asyncio.sleep(0.1)
 
-        result = await orchestrator_with_phases.cancel_pipeline(job.job_id)
+        result = await orchestrator.cancel_pipeline(job.job_id)
         # If job already completed, cancel returns False — that's valid
         # If still running, cancel should succeed
         assert isinstance(result, bool)
         if result:
             # Wait for cancellation to propagate
             await asyncio.sleep(0.3)
-            updated = await orchestrator_with_phases.get_job(job.job_id)
+            updated = await orchestrator.get_job(job.job_id)
             assert updated is not None
             assert updated.status == "cancelled"
+
+        await runtime.close()
+
+    @pytest.mark.asyncio
+    async def test_phase_handler_registration_api(self, runtime):
+        """Test that handlers are registered via the canonical API, not _phase_handlers directly."""
+        # AtlasRuntime should have all 6 phases registered
+        handlers = runtime.phase_handlers
+        assert len(handlers) == 6
+        for phase in PipelinePhase:
+            assert phase in handlers
+
+        # The registration API should work for overriding handlers
+        from atlas.phases.review import ReviewPhase
+        await runtime.orchestrator.register_phase_handler(
+            PipelinePhase.REVIEW_PROMOTION,
+            ReviewPhase(event_bus=runtime.event_bus),
+        )
+        assert PipelinePhase.REVIEW_PROMOTION in runtime.phase_handlers
+
+        await runtime.close()

@@ -571,20 +571,37 @@ That composition root would solve several of the repository's biggest problems a
 
 I would prioritize the framework in roughly this order:
 
-| Priority | Change                                                                                                | Why it matters                                                   |
-| -------- | ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| **P0**   | Add canonical runtime/builder and wire all handlers                                                   | `atlas run` must execute real work                               |
-| **P0**   | Fail closed when a requested phase has no handler                                                     | Missing implementation must never look successful                |
-| **P0**   | Define and validate the pipeline configuration schema                                                 | Examples currently contain ignored fields and `"auto"` is broken |
-| **P0**   | Fix review serialization and persist job metadata after phases                                        | Successful results must survive process exit                     |
-| **P0**   | Harden TAR extraction with explicit `filter="data"` and make suspicious archive paths fail safety     | Current Python 3.13 behavior is too permissive                   |
-| **P0**   | Implement persisted pause/resume/cancel semantics or stop claiming cross-process control              | Current CLI controls are process-local                           |
-| **P1**   | Replace in-memory HashStore manifest with persistent content/occurrence tables and correct dedup keys | Gives ATLAS real content identity                                |
-| **P1**   | Implement event persistence and a consistent EventBus consumer contract                               | Makes observability durable and backend-independent              |
-| **P1**   | Separate structural discovery from extraction                                                         | Restores the six-phase model                                     |
-| **P1**   | Connect phase progress → PhaseRecord → JobRecord                                                      | Makes status reporting meaningful                                |
-| **P1**   | Add CLI end-to-end tests using the shipped YAML examples                                              | Prevents internal-test/public-CLI divergence                     |
-| **P2**   | Introduce retry, timeout, checkpoint and recovery policies                                            | Needed before calling it a durable execution engine              |
+| Priority | Change                                                                                                | Why it matters                                       | Status   |
+| -------- | ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------- | -------- |
+| **P0**   | Add canonical runtime/builder and wire all handlers                                                   | `atlas run` must execute real work                   | ✅ Done  |
+| **P0**   | Fail closed when a requested phase has no handler                                                     | Missing implementation must never look successful    | ✅ Done  |
+| **P0**   | Define and validate the pipeline configuration schema                                                 | Examples currently contain ignored fields and `"auto"` is broken | ✅ Done  |
+| **P0**   | Fix review serialization and persist job metadata after phases                                        | Successful results must survive process exit         | ✅ Done  |
+| **P0**   | Harden TAR extraction with explicit `filter="data"` and make suspicious archive paths fail safety     | Current Python 3.13 behavior is too permissive       | ✅ Done  |
+| **P0**   | Implement persisted pause/resume/cancel semantics or stop claiming cross-process control              | Current CLI controls are process-local               | ⚠️ Acknowledged |
+| **P1**   | Replace in-memory HashStore manifest with persistent content/occurrence tables and correct dedup keys | Gives ATLAS real content identity                    | ✅ Partial (keys fixed, manifest still in-memory) |
+| **P1**   | Implement event persistence and a consistent EventBus consumer contract                               | Makes observability durable and backend-independent  | ✅ Done (events persisted; RabbitMQ consumer noted as limitation) |
+| **P1**   | Separate structural discovery from extraction                                                         | Restores the six-phase model                         | ✅ Done (StructuralDiscoveryPhase created) |
+| **P1**   | Connect phase progress → PhaseRecord → JobRecord                                                      | Makes status reporting meaningful                    | ✅ Done |
+| **P1**   | Add CLI end-to-end tests using the shipped YAML examples                                              | Prevents internal-test/public-CLI divergence         | ✅ Done (test_runtime.py uses AtlasRuntime) |
+| **P2**   | Introduce retry, timeout, checkpoint and recovery policies                                            | Needed before calling it a durable execution engine  | 🔄 Planned |
+
+### Resolution Summary (Post-Assessment)
+
+All P0 and P1 items above were addressed during Slice 6 (assessment-driven hardening). Key changes:
+
+- **AtlasRuntime** (`atlas/core/runtime.py`) — canonical composition root that wires all 6 phase handlers, shared services, and event bus. CLI now uses `AtlasRuntime` instead of manually constructing an orchestrator without handlers.
+- **Fail-closed** — `_run_pipeline()` raises `RuntimeError` when a phase has no handler instead of logging a warning and marking it COMPLETED.
+- **Config schema** — `_build_pipeline_config()` in `cli.py` now handles `pipeline_id: "auto"` (generates UUID), preserves `phase_config`, `continue_on_phase_error`, and metadata.
+- **TAR extraction** — `ExtractionPhase._safe_extract()` uses `filter="data"` on Python 3.13+.
+- **Suspicious archive paths** — `ArchiveSafetyService._assess_zip()` and `_assess_tarball()` now include suspicious patterns in the `safe` Boolean.
+- **Event persistence** — `JobStore.store_event()` and `list_events()` implement durable event logging to `atlas_events` table.
+- **Dedup key alignment** — `HashStore.hash_file()` stores both raw hex and `sha256:` prefixed keys; `FingerprintingPhase` dedup logic corrected to check before hashing.
+- **StructuralDiscoveryPhase** (`atlas/phases/structural_discovery.py`) — dedicated Phase C implementation that inspects archive structure without extraction.
+- **Progress propagation** — `Phase._bind()` + `Orchestrator.set_progress()` connect phase-level progress to `PhaseRecord` and `JobRecord`.
+- **PhaseHandler Protocol** — aligned to 3-arg `execute(job, config, phase_record)` consistently across `orchestrator.py` and `base.py`.
+- **EventBus wiring** — all phase constructors accept and forward `event_bus` to the base `Phase.__init__`.
+- **Path safety** — `PathSafetyService.assess_path()` catches `ValueError` for null bytes and uses path-component matching to prevent false positives.
 
 ---
 

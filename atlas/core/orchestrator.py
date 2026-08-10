@@ -68,12 +68,17 @@ class PipelineConfig:
 
 
 class PhaseHandler(Protocol):
-    """Protocol for phase handlers (plugin interface)."""
+    """Protocol for phase handlers (plugin interface).
+
+    All handlers must accept job, config, and phase_record so that
+    progress updates and phase-level state are propagated.
+    """
 
     async def execute(
         self,
         job: JobRecord,
         config: PipelineConfig,
+        phase_record: PhaseRecord,
     ) -> None:
         """Execute a phase for the given job."""
         ...
@@ -302,13 +307,14 @@ class PipelineOrchestrator:
         except Exception:
             logger.debug("Failed to persist event %s", envelope.routing_key, exc_info=True)
 
-    def set_progress(self, job: JobRecord, phase_record: PhaseRecord, percent: float) -> None:
+    def set_progress(
+        self, job: JobRecord, phase_record: PhaseRecord, percent: float
+    ) -> None:
         """Update progress for a phase and propagate to the job record.
 
         Call from within phase handlers via Phase.update_progress().
         """
         phase_record.progress_percent = percent
+        phase_record.updated_at = datetime.now(UTC)
         job.progress_percent = percent
-        job = self._jobs.get(job_id)
-        if job:
-            job.progress_percent = percent
+        job.updated_at = datetime.now(UTC)

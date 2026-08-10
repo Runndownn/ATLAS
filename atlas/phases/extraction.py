@@ -9,6 +9,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
+from atlas.core.event_bus import EventBus
 from atlas.core.job_store import JobRecord, PhaseRecord
 from atlas.core.orchestrator import PipelineConfig
 from atlas.phases.base import Phase, PhaseHandler
@@ -31,8 +32,12 @@ class ExtractionPhase(Phase):
     _ARCHIVE_SUFFIXES = (".zip", ".tar.gz", ".tgz", ".tar", ".tar.bz2",
                          ".tar.xz", ".tar.lz", ".tar.lzma", ".gz", ".bz2", ".xz")
 
-    def __init__(self, archive_safety: ArchiveSafetyService | None = None):
-        super().__init__()
+    def __init__(
+        self,
+        archive_safety: ArchiveSafetyService | None = None,
+        event_bus: EventBus | None = None,
+    ):
+        super().__init__(event_bus=event_bus)
         self._archive_safety = archive_safety or ArchiveSafetyService()
 
     def _is_archive(self, path: str) -> bool:

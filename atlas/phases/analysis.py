@@ -11,6 +11,7 @@ import logging
 from pathlib import Path
 from typing import Protocol
 
+from atlas.core.event_bus import EventBus
 from atlas.core.job_store import JobRecord, PhaseRecord
 from atlas.core.orchestrator import PipelineConfig
 from atlas.phases.base import Phase
@@ -47,8 +48,9 @@ class AnalysisPhase(Phase):
         self,
         hash_store: HashStore | None = None,
         plugins: list[AnalyzerPlugin] | None = None,
+        event_bus: EventBus | None = None,
     ):
-        super().__init__()
+        super().__init__(event_bus=event_bus)
         self._hash_store = hash_store or HashStore()
         self._plugins = plugins or []
 

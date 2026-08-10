@@ -64,7 +64,7 @@ class PathSafetyService:
         # Resolve and check containment
         try:
             resolved = path_obj.resolve()
-        except (OSError, RuntimeError) as exc:
+        except (OSError, RuntimeError, ValueError) as exc:
             return PathSafetyReport(
                 safe=False,
                 resolved_path="",
@@ -90,12 +90,9 @@ class PathSafetyService:
             relative_depth = len(resolved.parts)
         depth_exceeded = relative_depth > self._max_depth
 
-        # Check risky patterns
-        risky_found = []
-        path_str = str(path_obj)
-        for pattern in RISKY_PATTERNS:
-            if pattern in path_str:
-                risky_found.append(pattern)
+        # Check risky patterns on resolved path (avoids false positives on
+        # intermediate directory names like /tmp/.../root/)
+        risky_found = self._check_risky_patterns(str(resolved), raw_path)
 
         safe = (
             is_within
@@ -113,3 +110,33 @@ class PathSafetyService:
             risky_patterns=risky_found,
             depth=relative_depth,
         )
+
+    def _check_risky_patterns(self, resolved_path: str, raw_path: str) -> list[str]:
+        """Check path for risky patterns using path-component matching.
+
+        Uses prefix matching for absolute patterns (e.g. '/etc/'),
+        and component matching for relative patterns (e.g. '.ssh/').
+        Substring matching is only used for '..' traversal detection.
+        """
+        risky: list[str] = []
+
+        for pattern in RISKY_PATTERNS:
+            if pattern == "..":
+                # Path traversal: check raw path for '..' component
+                if ".." in Path(raw_path).parts:
+                    risky.append(pattern)
+            elif pattern.startswith("/"):
+                # Absolute path pattern: check if resolved path starts with it
+                if resolved_path == pattern.rstrip("/") or resolved_path.startswith(pattern):
+                    risky.append(pattern)
+            elif pattern.startswith("\\"):
+                # Windows-style pattern: substring check on raw path
+                if pattern in raw_path:
+                    risky.append(pattern)
+            else:
+                # Relative pattern (e.g. '.ssh/'): check path components
+                root_part = pattern.rstrip("/")
+                if root_part in Path(resolved_path).parts:
+                    risky.append(pattern)
+
+        return risky

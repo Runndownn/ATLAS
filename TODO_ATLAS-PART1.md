@@ -1,5 +1,5 @@
 # TODO ATLAS-PART1: Adaptive Task Lifecycle Engine — Production TODO Plan
-# Status: ACTIVE
+# Status: COMPLETE
 # Repo: https://github.com/Runndownn/ATLAS
 # Start Date: 2026-08-24
 # Model: poolside/laguna-s-2.1:free
@@ -66,12 +66,13 @@ In Greek mythology, Atlas held up the celestial spheres — he bore the weight o
 | **Sprint 1c** | Slice 3 Storage | Sep 3–5, 2026 | Hash store, schema |
 | **Sprint 1d** | Slice 4 Phases | Sep 6–10, 2026 | All 6 phases + integration tests |
 | **Sprint 2** | Slice 5 Polish | Sep 11–20, 2026 | CLI refinement, examples, CI, PyPI, docs |
-| **Sprint 3** | Slice 6 Hardening | Sep 21–22, 2026 | Assessment-driven fixes (48 tests passing) |
+| **Sprint 3** | Slice 6 Hardening | Sep 21–22, 2026 | Assessment-driven fixes (67 tests passing) |
 
 **Key dates:**
 - **Aug 9, 2026** — Pre-sprint work begins (current)
 - **Aug 24, 2026** — Official project start date
-- **Sep 20, 2026** — Final sprint completion
+- **Sep 20, 2026** — Sprint 2 completion
+- **Sep 22, 2026** — Sprint 3 (assessment hardening) completion, 67 tests passing
 
 ### Planning Documentation
 
@@ -114,7 +115,7 @@ Implement filesystem discovery with loop detection and archive bomb prevention.
 - `atlas/safety/filesystem_discovery.py` — FilesystemDiscovery with depth limit, symlink loop detection, risk flags
 - `atlas/safety/archive_safety.py` — ArchiveSafetyService with ZIP/TAR bomb detection, compression ratio limits, path traversal checks
 - `atlas/safety/path_safety.py` — PathSafetyService for traversal prevention
-- 22 tests passing (8 discovery + 6 archive safety + 8 integration)
+- 24 tests passing (8 discovery + 8 archive safety + 8 path safety)
 
 ### Acceptance Criteria Status
 - ✅ Filesystem discovery with depth limit, symlink loop prevention, extension filtering
@@ -133,7 +134,7 @@ Implement content-addressable storage with SHA-256/BLAKE3 hashing and SQLite pro
 ### Evidence Produced
 - `atlas/storage/hash_store.py` — HashStore with streaming SHA-256 + BLAKE3 (1 MiB chunks), content dedup tracking
 - `atlas/schema/__init__.py` — Schema exports
-- 3 tests for hash store
+- 10 tests for hash store
 
 ### Acceptance Criteria Status
 - ✅ Streaming SHA-256 + BLAKE3 hash computation
@@ -155,7 +156,7 @@ Implement default phase implementations — generic but extensible phases.
 - `atlas/phases/extraction.py` — Safe archive extraction phase
 - `atlas/phases/analysis.py` — Deep understanding with plugin interface
 - `atlas/phases/review.py` — Evidence recording + artifact promotion
-- 8 tests (integration) for full phase sequence
+- 11 tests (4 phases integration + 4 runtime + 3 path safety) for phase sequence and safety
 
 ### Acceptance Criteria Status
 - ✅ Phase ABC with async execute(), progress callback, event emission
@@ -177,7 +178,7 @@ Final CLI polish, example pipelines, and PyPI publishing.
 - Full README with architecture diagrams — ✅ DONE
 - GitHub Actions CI workflow — 🔲 TODO
 - PyPI publish workflow — 🔲 TODO
-- Final test suite: 44 tests passing — ✅
+- Final test suite: 67 tests passing — ✅
 
 ---
 
@@ -196,7 +197,7 @@ Final CLI polish, example pipelines, and PyPI publishing.
 - Candidate: Update `binreaper.authorized_challenge_solve` workflow to optionally delegate to ATLAS for multi-phase challenge analysis
 
 ### Tests/fixtures
-- ✅ 44 tests covering orchestrator, event bus, job store, safety, phases, and integration
+- ✅ 67 tests covering orchestrator, event bus, job store, safety, hash store, path safety, phases, runtime, and integration
 - Full test suite in `tests/`
 - Example pipeline fixtures in `examples/`
 - SQLite in-memory test fixtures
@@ -218,7 +219,7 @@ Final CLI polish, example pipelines, and PyPI publishing.
 Push Slice 1-4 to GitHub and verify full test suite passes:
 ```bash
 cd ~/work/ATLAS
-git add -A && git commit -m "feat: Slices 1-4 - Complete framework with 44 tests"
+git add -A && git commit -m "feat: Slices 1-6 - Complete framework with 67 tests"
 git push origin main
 ```
 

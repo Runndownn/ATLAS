@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import logging
 
+from atlas.core.event_bus import EventBus
 from atlas.core.job_store import JobRecord, PhaseRecord
 from atlas.core.orchestrator import PipelineConfig
 from atlas.phases.base import Phase, PhaseHandler
@@ -31,8 +32,9 @@ class ReconnaissancePhase(Phase):
         self,
         discovery: FilesystemDiscovery | None = None,
         archive_safety: ArchiveSafetyService | None = None,
+        event_bus: EventBus | None = None,
     ):
-        super().__init__()
+        super().__init__(event_bus=event_bus)
         self._discovery = discovery or FilesystemDiscovery()
         self._archive_safety = archive_safety or ArchiveSafetyService()
 

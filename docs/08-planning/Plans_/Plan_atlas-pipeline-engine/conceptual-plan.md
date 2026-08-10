@@ -5,7 +5,7 @@
 **Host/Sponsor:** REDC2 Portal (built on the Geezer Mekanix Agentic Engineering Platform)  
 **Framework Model:** poolside/laguna-s-2.1:free (262,112 tokens)  
 **Development Methodology:** BinReaper Production TODO  
-**Status:** ACTIVE — All 5 slices complete  
+**Status:** ACTIVE — All 6 slices complete (including assessment-driven hardening)  
 
 ## 1. Problem Statement
 
@@ -50,9 +50,10 @@ name: "my-pipeline"
 phases:
   - reconnaissance
   - fingerprinting
-  - extraction
-  - analysis
-  - review
+  - structural_discovery
+  - controlled_extraction
+  - deep_understanding
+  - review_promotion
 ```
 
 ### Phase
@@ -89,7 +90,7 @@ All filesystem operations pass through safety checks:
 | SQLite as primary store | In-memory by default, file path for persistence | Lightweight, no external dependencies required |
 | asyncio for concurrency | Pipeline runs asynchronously, phases can await | Prevents blocking on I/O, enables pause/resume |
 | Event Bus pattern | InMemoryEventBus + RabbitMQEventBus | Observability decoupled from core logic |
-| Phase ABC + Protocol | Phase base class + PhaseHandler Protocol | Extensibility without framework lock-in |
+| Phase ABC + Protocol | Phase base class + PhaseHandler Protocol (3-arg execute: job, config, phase_record) | Extensibility without framework lock-in |
 | Safety as layers | Separate safety/ module with clear boundaries | Defense in depth, each check independently testable |
 
 ## 5. Data Model
@@ -134,8 +135,8 @@ What remains is pure orchestration logic: phase sequencing, event emission, job 
 
 | Attribute | Target | Verification |
 |---|---|---|
-| **Reliability** | 99.9% job completion | 44 passing tests, integration tests |
-| **Observability** | Structured events for all lifecycle | EventBus emits on phase start/complete/error |
+| **Reliability** | 99.9% job completion | 67 passing tests, integration tests |
+| **Observability** | Structured events for all lifecycle | EventBus emits on phase start/complete/error + SQLite event persistence |
 | **Safety** | Zero path traversal exploits | PathSafetyService + ArchiveSafetyService |
 | **Extensibility** | Custom phases via Protocol | Phase ABC + register_phase_handler |
 | **Performance** | Streaming, 1MiB chunks | HashStore streaming hash |
@@ -146,18 +147,22 @@ What remains is pure orchestration logic: phase sequencing, event emission, job 
 | Risk | Mitigation |
 |---|---|
 | SQLite concurrency limits | asyncio.Lock serializes writes; shared connection |
-| Archive extraction exploits | Pre-extraction safety checks (bomb ratio, traversal, limits) |
-| Phase handler crashes | Try/except in orchestrator, recorded as phase error |
+| Archive extraction exploits | Pre-extraction safety checks (bomb ratio, traversal, limits) + TAR filter="data" |
+| Phase handler crashes | Try/except in orchestrator, recorded as phase error, fail-closed on missing handlers |
 | RabbitMQ unavailable | Graceful fallback to InMemoryEventBus |
 | Large file memory | Streaming 1 MiB chunks for hashing |
 | Symlink loops | Depth limit + visited path tracking |
+| CLI/runtime drift | AtlasRuntime composition root ensures CLI uses same handlers as tests |
+| Event durability | Events persisted to SQLite atlas_events table |
+| Phase progress stale | Progress propagated from Phase.update_progress → PhaseRecord → JobRecord |
 
 ## 10. Sprint Plan
 
 | Sprint | Slice | Scope | Tests | Status |
 |---|---|---|---|---|
 | Sprint 1 | Slice 1 | Core orchestrator, event bus, job store, CLI | 25 | ✅ Complete |
-| Sprint 1b | Slice 2 | Filesystem discovery, archive safety, path safety | 22 | ✅ Complete |
-| Sprint 1c | Slice 3 | Hash store, schema | 3 | ✅ Complete |
-| Sprint 1d | Slice 4 | All 6 phases + integration tests | 3 | ✅ Complete |
-| Sprint 2 | Slice 5 | CLI polish, examples, CI, PyPI, docs | 44 total | ✅ Complete |
+| Sprint 1b | Slice 2 | Filesystem discovery, archive safety, path safety | 24 | ✅ Complete |
+| Sprint 1c | Slice 3 | Hash store, schema, runtime root | 14 | ✅ Complete |
+| Sprint 1d | Slice 4 | All 6 phases + integration tests | 4 | ✅ Complete |
+| Sprint 2 | Slice 5 | CLI polish, examples, CI, PyPI, docs | 4 | ✅ Complete |
+| Sprint 3 | Slice 6 | Assessment-driven hardening | 67 total | ✅ Complete |

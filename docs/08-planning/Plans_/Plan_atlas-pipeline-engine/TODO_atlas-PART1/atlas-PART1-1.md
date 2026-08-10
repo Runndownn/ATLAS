@@ -36,7 +36,7 @@
   * Integration-check that every cited artifact maps to verified, missing, or assumed.
   * Security-review for accidental credential disclosure.
 
-  Status: ✅ COMPLETE — All 44 tests passing, 5 sprint slices complete, repo at github.com/Runndownn/ATLAS
+  Status: ✅ COMPLETE — All 67 tests passing, 6 sprint slices complete, repo at github.com/Runndownn/ATLAS
 
 ---
 
@@ -50,9 +50,9 @@
   * All tasks that reference repository state, Python version, or dependency configuration.
 
   Implementation requirements
-  * Resolve repository root: `/home/geezeradmin/work/ATLAS`
+  * Resolve repository root: `/mnt/geezer-venvs/work/ATLAS`
   * Resolve Python version: 3.13.12
-  * Document pyproject.toml dependencies: pydantic, python-dotenv
+  * Document pyproject.toml dependencies: typing-extensions>=4.0, PyYAML>=6.0
   * Create ticket stub `TODO-VERSION-REMOTE: confirm repository and runtime context`
 
   Acceptance criteria ("done" definition)
@@ -64,7 +64,7 @@
   * Integration-test `python -c "import atlas"` works
   * End-to-end test all CLI subcommands
 
-  Status: ✅ COMPLETE — 44 tests, CLI works, all imports resolve
+  Status: ✅ COMPLETE — 67 tests, CLI works, all imports resolve
 
 ---
 
@@ -271,7 +271,7 @@
   Acceptance criteria ("done" definition)
   * All CLI commands functional
   * Example pipelines run end-to-end
-  * 44 total tests passing
+  * 67 total tests passing
 
   Testing plan
   * Test `atlas --help`
@@ -296,7 +296,7 @@
   Implementation requirements
   * GitHub Actions workflow: test on Python 3.13, report coverage
   * PyPI packaging: name "atlas-pipeline", proper metadata
-  * 44 tests in CI
+  * 67 tests in CI
 
   Acceptance criteria ("done" definition)
   * CI workflow passes on main branch

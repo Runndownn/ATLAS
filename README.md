@@ -87,11 +87,12 @@ graph LR
     subgraph "Phase Pipeline"
         P1["1. Recon"]
         P2["2. Fingerprint"]
-        P3["3. Extract"]
-        P4["4. Analyze"]
-        P5["5. Review"]
+        P3["3. Structural Discovery"]
+        P4["4. Extraction"]
+        P5["5. Analyze"]
+        P6["6. Review"]
 
-        P1 --> P2 --> P3 --> P4 --> P5
+        P1 --> P2 --> P3 --> P4 --> P5 --> P6
     end
 
     subgraph "External Backends"
@@ -153,15 +154,17 @@ graph TB
 ```mermaid
 graph LR
     P1["1. Recon<br/>Filesystem Discovery"] --> P2["2. Fingerprint<br/>SHA-256 + BLAKE3"]
-    P2 --> P3["3. Extract<br/>Safe Archive Unpacking"]
-    P3 --> P4["4. Analyze<br/>Pattern Detection"]
-    P4 --> P5["5. Review<br/>Evidence + Promotion"]
+    P2 --> P3["3. Structural Discovery<br/>Archive Structure Inspection"]
+    P3 --> P4["4. Extract<br/>Safe Archive Unpacking"]
+    P4 --> P5["5. Analyze<br/>Pattern Detection"]
+    P5 --> P6["6. Review<br/>Evidence + Promotion"]
 
     style P1 fill:#e1f5fe
     style P2 fill:#f3e5f5
     style P3 fill:#e8f5e9
     style P4 fill:#fff3e0
     style P5 fill:#fce4ec
+    style P6 fill:#f1f8e9
 ```
 
 ## Pipeline Phases
@@ -183,11 +186,11 @@ ATLAS is built with a clear separation of concerns:
 
 ```
 atlas/
-├── core/           # Orchestrator, Event Bus, Job Store
-├── phases/         # Pipeline phase implementations
-├── safety/         # Archive safety + filesystem discovery
+├── core/           # Orchestrator, Event Bus, Job Store, AtlasRuntime
+├── phases/         # Pipeline phase implementations (7 phases)
+├── safety/         # Archive safety + filesystem discovery + path safety
 ├── storage/        # Content hashing + dedup store
-├── schema/         # SQLite migrations
+├── schema/         # SQLite schema exports
 ├── cli.py          # CLI entry point
 └── __init__.py     # Package exports
 ```
@@ -258,14 +261,16 @@ python -m pytest tests/test_orchestrator.py -v
 
 | File | Tests | Coverage |
 |------|-------|----------|
-| `test_orchestrator.py` | 13 | Orchestrator + JobRecord + PhaseRecord |
+| `test_orchestrator.py` | 12 | Orchestrator + JobRecord + PhaseRecord |
 | `test_event_bus.py` | 5 | InMemoryEventBus (publish/consume/close) |
-| `test_job_store.py` | 8 | SQLite persistence + metadata round-trip |
+| `test_job_store.py` | 8 | SQLite persistence + metadata round-trip + event persistence |
 | `test_filesystem_discovery.py` | 8 | Risk flags, symlink detection, depth limits |
-| `test_archive_safety.py` | 6 | ZIP assessment, traversal detection, limits |
-| `test_phases_integration.py` | 3 | Full pipeline end-to-end |
-| `test_runtime.py` | 5 | AtlasRuntime handler wiring + fail-closed tests |
-| **Total** | **48** | |
+| `test_archive_safety.py` | 8 | ZIP assessment, traversal detection, limits, manifest extraction |
+| `test_hash_store.py` | 10 | SHA-256 + BLAKE3, dedup key matching, streaming |
+| `test_path_safety.py` | 8 | Path traversal, null bytes, depth, symlink containment |
+| `test_runtime.py` | 4 | AtlasRuntime handler wiring + fail-closed tests |
+| `test_phases_integration.py` | 4 | Full pipeline end-to-end via AtlasRuntime |
+| **Total** | **67** | |
 
 ## Project Origin & Philosophy
 
@@ -292,17 +297,18 @@ This project is developed using the **BinReaper Production TODO** methodology. T
 | **Slice 1** | ✅ Complete | Core Orchestrator + Event Bus + Job Store + CLI + AtlasRuntime |
 | **Slice 2** | ✅ Complete | Safety Layer (filesystem discovery + archive safety + path safety) |
 | **Slice 3** | ✅ Complete | Storage & Identity (content hashing + dedup + event persistence) |
-| **Slice 4** | ✅ Complete | Phase Implementations (recon → fingerprint → extract → analyze → review) |
+| **Slice 4** | ✅ Complete | Phase Implementations (recon → fingerprint → structural_discovery → extract → analyze → review) |
 | **Slice 5** | ✅ Complete | CLI polish + example pipelines + CI + PyPI + docs |
-| **Slice 6** | 🔲 Planned | Assessment-driven hardening (fail-closed, TAR filter, progress wiring, config schema) |
+| **Slice 6** | ✅ Complete | Assessment-driven hardening (fail-closed, TAR filter, progress wiring, config schema, StructuralDiscoveryPhase, event persistence, dedup keys, path safety) |
 
 ### Development Log
 
 - **Aug 9–23, 2026** — Pre-sprint preparation: repo init, framework design, Slices 1-4 foundation
 - **Aug 24, 2026** — Official project start date
 - **Aug 24–28, 2026** — Sprint 1: Core orchestrator, event bus, job store, CLI (25 tests)
-- **Aug 29–Sep 10, 2026** — Sprints 1b-1d: Safety layer, storage, phases (44 tests total)
-- **Sep 11–20, 2026** — Sprint 2: CLI polish, examples, CI, PyPI, docs
+- **Aug 29–Sep 10, 2026** — Sprints 1b-1d: Safety layer, storage, phases (25+24+10+4=63 tests)
+- **Sep 11–20, 2026** — Sprint 2: CLI polish, examples, CI, PyPI, docs (4 runtime tests)
+- **Sep 21–22, 2026** — Sprint 3: Assessment-driven hardening (PathSafetyService, HashStore tests, event persistence, StructuralDiscoveryPhase, fail-closed, TAR filter, progress wiring, config schema) — 67 total tests
 
 ### Project Gantt Chart
 
@@ -323,7 +329,7 @@ gantt
     section Sprint 2
     CLI polish + examples + CI  :2026-09-11, 10d
     section Sprint 3
-    Final review & release      :2026-09-21, 2d
+    Assessment-driven hardening   :2026-09-21, 2d
 ```
 
 ### Sprint Dates
@@ -336,7 +342,7 @@ gantt
 | Sprint 1c | Sep 3–5, 2026 | Hash store, schema | Poolside |
 | Sprint 1d | Sep 6–10, 2026 | All 6 phases + integration tests | Poolside |
 | Sprint 2 | Sep 11–20, 2026 | CLI polish, examples, CI, PyPI, docs | Poolside |
-| Sprint 3 | Sep 21–22, 2026 | Final review, PyPI publish, handoff | Poolside |
+| Sprint 3 | Sep 21–22, 2026 | Assessment-driven hardening, 67 tests | Poolside |
 
 ## Hosting & Platform
 
@@ -346,13 +352,27 @@ The AI model powering framework development and planning decisions is the **Pool
 
 ## Known Limitations
 
-As documented in the [architectural assessment](docs/08-planning/Plans_/Plan_atlas-pipeline-engine/assessment.md):
+Following the [architectural assessment](docs/08-planning/Plans_/Plan_atlas-pipeline-engine/assessment.md), the following P0 and P1 items were resolved during Slice 6 hardening:
 
-- **Pause/resume/cancel are process-local** — control commands from a separate CLI process cannot control a running pipeline in another process
-- **Structural Discovery reuses Extraction** — phases C and D currently share `ExtractionPhase`; a dedicated `StructuralDiscoveryPhase` is planned
+- ✅ **AtlasRuntime composition root** — `AtlasRuntime` wires all 6 phase handlers; CLI uses the same runtime as tests
+- ✅ **Fail-closed orchestration** — Missing phase handlers raise RuntimeError instead of silently completing
+- ✅ **Config schema validation** — `pipeline_id: "auto"` generates UUID; `phase_config`, `continue_on_phase_error`, and metadata are preserved
+- ✅ **Review serialization fixed** — EvidenceRecord/PromotionRecord dataclasses serialize to JSON-safe dicts
+- ✅ **TAR extraction hardened** — Explicit `filter="data"` on Python 3.13+
+- ✅ **Suspicious archive paths fail safety** — Path traversal patterns now make `safe=False`
+- ✅ **Event persistence** — Lifecycle events written to SQLite `atlas_events` table
+- ✅ **HashStore dedup keys aligned** — `has_content()` works with both raw hex and `sha256:` prefix
+- ✅ **StructuralDiscoveryPhase** — Phase C now has a dedicated implementation (not reusing ExtractionPhase)
+- ✅ **Phase progress propagation** — `Phase.update_progress()` updates `PhaseRecord` and `JobRecord`
+- ✅ **EventBus wiring** — All phases receive the shared event bus
+- ✅ **Path safety hardened** — Null byte `ValueError` handling + precise pattern matching (no false positives)
+
+### Remaining limitations (P2 items)
+
+- **Pause/resume/cancel are process-local** — control commands from a separate CLI process cannot control a running pipeline in another process. A daemon/worker model is needed for cross-process control.
 - **Content store is in-memory** — `HashStore` maintains an in-memory manifest; not persisted across restarts
-- **Phase progress is coarse** — intermediate progress within a phase is tracked but only persisted at phase completion
 - **No RabbitMQ consumer** — `RabbitMQEventBus` publishes but does not consume; event bus is primarily observability side-channel
+- **Fingerprinting re-discovers files** — Phase B re-runs filesystem discovery instead of consuming Phase A's inventory (TOCTOU window)
 
 MIT — See [LICENSE](LICENSE) for details.
 

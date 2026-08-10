@@ -135,8 +135,16 @@ class Phase(ABC):
 
 
 class PhaseHandler(Protocol):
-    """Protocol for phase handlers compatible with PipelineOrchestrator."""
+    """Protocol for phase handlers compatible with PipelineOrchestrator.
 
-    async def execute(self, job: JobRecord, config: PipelineConfig) -> None:
+    Matches the Phase ABC execute() signature: three arguments.
+    """
+
+    async def execute(
+        self,
+        job: JobRecord,
+        config: PipelineConfig,
+        phase_record: PhaseRecord,
+    ) -> None:
         """Execute the phase."""
         ...

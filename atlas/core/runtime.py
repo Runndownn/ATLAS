@@ -25,6 +25,7 @@ from atlas.phases.extraction import ExtractionPhase
 from atlas.phases.fingerprinting import FingerprintingPhase
 from atlas.phases.reconnaissance import ReconnaissancePhase
 from atlas.phases.review import ReviewPhase
+from atlas.phases.structural_discovery import StructuralDiscoveryPhase
 from atlas.safety.archive_safety import ArchiveSafetyService
 from atlas.safety.filesystem_discovery import FilesystemDiscovery
 from atlas.storage.hash_store import HashStore
@@ -77,32 +78,42 @@ class AtlasRuntime:
 
     def _build_default_handlers(self) -> None:
         """Register all built-in phase handlers."""
+        _eb = self._event_bus
+
         # Phase A — Reconnaissance
         self._phase_handlers[PipelinePhase.RECONNAISSANCE] = ReconnaissancePhase(
             discovery=self._filesystem_discovery,
             archive_safety=self._archive_safety,
+            event_bus=_eb,
         )
 
         # Phase B — Fingerprinting
         self._phase_handlers[PipelinePhase.FINGERPRINTING] = FingerprintingPhase(
             hash_store=self._hash_store,
+            event_bus=_eb,
         )
 
-        # Phase C — Structural Discovery
-        self._phase_handlers[PipelinePhase.STRUCTURAL_DISCOVERY] = ExtractionPhase(
+        # Phase C — Structural Discovery (inspects archive structure, does NOT extract)
+        self._phase_handlers[PipelinePhase.STRUCTURAL_DISCOVERY] = StructuralDiscoveryPhase(
             archive_safety=self._archive_safety,
+            event_bus=_eb,
         )
 
         # Phase D — Controlled Extraction
         self._phase_handlers[PipelinePhase.CONTROLLED_EXTRACTION] = ExtractionPhase(
             archive_safety=self._archive_safety,
+            event_bus=_eb,
         )
 
         # Phase E — Deep Understanding
-        self._phase_handlers[PipelinePhase.DEEP_UNDERSTANDING] = AnalysisPhase()
+        self._phase_handlers[PipelinePhase.DEEP_UNDERSTANDING] = AnalysisPhase(
+            event_bus=_eb,
+        )
 
         # Phase F — Review / Promotion
-        self._phase_handlers[PipelinePhase.REVIEW_PROMOTION] = ReviewPhase()
+        self._phase_handlers[PipelinePhase.REVIEW_PROMOTION] = ReviewPhase(
+            event_bus=_eb,
+        )
 
     @property
     def orchestrator(self) -> PipelineOrchestrator:

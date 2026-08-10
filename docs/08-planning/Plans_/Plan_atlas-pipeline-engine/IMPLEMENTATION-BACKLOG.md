@@ -39,37 +39,60 @@ Slice 5 is complete only when all of the following are proven:
 
 - [x] Core orchestrator with pause/resume/cancel
 - [x] Event bus (in-memory + RabbitMQ)
-- [x] Job store (SQLite with jobs/phases/events tables)
-- [x] Safety layer (filesystem discovery, archive bomb, path traversal)
-- [x] Storage layer (SHA-256 + BLAKE3 hashing, content dedup)
-- [x] Phase implementations (recon, fingerprint, extract, analyze, review)
-- [x] CLI with run/jobs/status/pause/resume/cancel + --help
+- [x] Job store (SQLite with jobs/phases/events tables, event persistence)
+- [x] AtlasRuntime composition root (wires all 6 phase handlers)
+- [x] Safety layer (filesystem discovery, archive bomb detection, path traversal, TAR filter="data")
+- [x] Storage layer (SHA-256 + BLAKE3 hashing, content dedup, HashStore test coverage)
+- [x] Phase implementations (recon, fingerprint, structural_discovery, extraction, analysis, review)
+- [x] CLI with run/jobs/status/pause/resume/cancel + --help (uses AtlasRuntime)
 - [x] Example pipelines (CTF, document processing)
 - [x] CI workflow (GitHub Actions)
-- [x] 44 tests all passing
+- [x] 67 tests all passing
 - [x] README with Mermaid architecture charts
 - [x] BinReaper Production TODO plan (TODO_ATLAS-PART1.md)
 - [x] Planning docs in docs/08-planning/Plans_/ (this file + conceptual plan)
+- [x] AtlasRuntime in atlas/core/runtime.py (canonical composition root)
+- [x] StructuralDiscoveryPhase in atlas/phases/structural_discovery.py (Phase C separation)
+- [x] Assessment-driven hardening tracked in assessment.md (P0 + P1 items resolved)
 
 ## 4. Work Items
 
 | ID | Slice | Priority | Deliverable | Exit evidence |
 |---|---|---|---|---|
-| ATLAS-1 | 1 | P0 | Pipeline orchestrator | 13 tests, pause/resume/cancel |
+| ATLAS-1 | 1 | P0 | Pipeline orchestrator | 12 tests, pause/resume/cancel |
 | ATLAS-2 | 1 | P0 | Event bus | 5 tests, dual backend |
-| ATLAS-3 | 1 | P0 | Job store (SQLite) | 8 tests, schema + round-trip |
+| ATLAS-3 | 1 | P0 | Job store (SQLite) | 8 tests, schema + round-trip + event persistence |
 | ATLAS-4 | 1 | P0 | CLI | `atlas --help` works, all subcommands |
 | ATLAS-5 | 2 | P0 | Filesystem discovery | 8 tests, symlink depth, risk flags |
-| ATLAS-6 | 2 | P1 | Archive safety | 6 tests, bomb/traversal detection |
-| ATLAS-7 | 2 | P1 | Path safety | Traversal check tests |
-| ATLAS-8 | 3 | P0 | Hash store | 3 tests, SHA-256 + BLAKE3, dedup |
+| ATLAS-6 | 2 | P1 | Archive safety | 8 tests, bomb/traversal detection |
+| ATLAS-7 | 2 | P1 | Path safety | 8 tests, traversal + null byte + depth |
+| ATLAS-8 | 3 | P0 | Hash store | 10 tests, SHA-256 + BLAKE3, dedup |
 | ATLAS-9 | 3 | P0 | Phase base ABC | Protocol + progress tracking |
-| ATLAS-10 | 4 | P0 | Phase implementations | 3 integration tests |
-| ATLAS-11 | 4 | P1 | Phase handler registration | Orchestrator + phase wiring |
+| ATLAS-10 | 4 | P0 | Phase implementations | 4 integration tests |
+| ATLAS-11 | 4 | P1 | Phase handler registration | Orchestrator + AtlasRuntime wiring |
 | ATLAS-12 | 5 | P0 | Example pipelines | YAML fixtures + validation |
 | ATLAS-13 | 5 | P0 | CI workflow | GitHub Actions tests pass |
 | ATLAS-14 | 5 | P0 | README + docs | Architecture diagrams, usage |
 | ATLAS-15 | 5 | P1 | PyPI config | pyproject.toml + packaging |
+
+### Assessment-Driven Hardening (Slice 6)
+
+| ID | Priority | Deliverable | Exit evidence |
+|---|---|---|---|
+| ATLAS-16 | P0 | AtlasRuntime composition root | `atlas run` executes real phase work |
+| ATLAS-17 | P0 | Fail-closed on missing handlers | Bare orchestrator → ERROR, not COMPLETED |
+| ATLAS-18 | P0 | Config schema validation | `pipeline_id: "auto"` → UUID; phase_config preserved |
+| ATLAS-19 | P0 | Review serialization + job metadata persistence | EvidenceRecord dataclasses serialize to JSON |
+| ATLAS-20 | P0 | TAR extraction hardening | `filter="data"` + suspicious paths fail safety |
+| ATLAS-21 | P1 | Persistent pause/resume/cancel | Documented cross-process limitation |
+| ATLAS-22 | P1 | HashStore dedup key alignment | `has_content()` works with both raw hex and `sha256:` prefix |
+| ATLAS-23 | P1 | Event persistence | `store_event` / `list_events` in SQLite |
+| ATLAS-24 | P1 | StructuralDiscoveryPhase | Phase C separated from Phase D extraction |
+| ATLAS-25 | P1 | Phase progress propagation | `Phase.update_progress` → PhaseRecord → JobRecord |
+| ATLAS-26 | P1 | CLI end-to-end tests | `test_runtime.py` uses AtlasRuntime (same as CLI) |
+| ATLAS-27 | P1 | PhaseHandler Protocol 3-arg signature | `execute(job, config, phase_record)` consistent |
+| ATLAS-28 | P1 | EventBus wiring to phases | Phases receive event_bus, emit events |
+| ATLAS-29 | P2 | Path safety hardening | Null byte ValueError handling, precise pattern matching |
 
 ## 5. Phase Lifecycle Model
 
@@ -99,17 +122,19 @@ class Phase(ABC):
 ## 6. Architecture Boundaries
 
 ### Core (atlas/core/)
-- `orchestrator.py` — PipelineOrchestrator, PipelineConfig, PipelinePhase, PipelineStatus
+- `orchestrator.py` — PipelineOrchestrator, PipelineConfig, PipelinePhase, PipelineStatus, PhaseHandler Protocol (3-arg execute)
 - `event_bus.py` — EventBus Protocol, InMemoryEventBus, RabbitMQEventBus
-- `job_store.py` — JobStore, JobRecord, PhaseRecord, SQLite schema
+- `job_store.py` — JobStore, JobRecord, PhaseRecord, SQLite schema (jobs/phases/events with event persistence)
+- `runtime.py` — AtlasRuntime composition root (wires all 6 phase handlers)
 
 ### Phases (atlas/phases/)
-- `base.py` — Phase ABC + PhaseHandler Protocol + PhaseProgress
+- `base.py` — Phase ABC + PhaseHandler Protocol (3-arg execute) + PhaseProgress
 - `reconnaissance.py` — Filesystem discovery + risk flag computation
-- `fingerprinting.py` — Content hashing (SHA-256 + BLAKE3) + dedup
-- `extraction.py` — Safe archive unpacking
+- `fingerprinting.py` — Content hashing (SHA-256 + BLAKE3) + dedup (corrected key matching)
+- `structural_discovery.py` — Archive structure inspection (no extraction)
+- `extraction.py` — Safe archive unpacking (TAR filter="data" hardening)
 - `analysis.py` — Pattern detection + plugin interface
-- `review.py` — Evidence recording + artifact promotion
+- `review.py` — Evidence recording + artifact promotion (dataclass-safe serialization)
 
 ### Safety (atlas/safety/)
 - `filesystem_discovery.py` — FilesystemDiscovery, FileInfo, risk flags
@@ -117,19 +142,22 @@ class Phase(ABC):
 - `path_safety.py` — PathSafetyService, traversal pattern detection
 
 ### Storage (atlas/storage/)
-- `hash_store.py` — HashStore, SHA-256 + BLAKE3 streaming, content dedup
+- `hash_store.py` — HashStore, SHA-256 + BLAKE3 streaming (1 MiB chunks), in-memory manifest with both raw-hex and content_id keys for dedup
 
 ## 7. Testing Strategy
 
 | Test Type | Scope | Files | Count |
 |---|---|---|---|
-| Unit | Core components | test_orchestrator.py | 13 |
+| Unit | Core components | test_orchestrator.py | 12 |
 | Unit | Event bus | test_event_bus.py | 5 |
 | Unit | Job store | test_job_store.py | 8 |
 | Unit | Filesystem discovery | test_filesystem_discovery.py | 8 |
-| Unit | Archive safety | test_archive_safety.py | 6 |
-| Integration | Full pipeline | test_phases_integration.py | 3 |
-| **Total** | | | **44** |
+| Unit | Archive safety | test_archive_safety.py | 8 |
+| Unit | Hash store | test_hash_store.py | 10 |
+| Unit | Path safety | test_path_safety.py | 8 |
+| Integration | Full pipeline + runtime | test_phases_integration.py | 4 |
+| Integration | AtlasRuntime wiring + fail-closed | test_runtime.py | 4 |
+| **Total** | | | **67** |
 
 ### Test Principles
 - Use `:memory:` SQLite for test isolation
@@ -150,7 +178,7 @@ class Phase(ABC):
 
 | Step | Gate |
 |---|---|
-| 1. All 44 tests pass | CI green |
+| 1. All 67 tests pass | CI green |
 | 2. README validated | Usage commands work |
 | 3. PyPI publish | `pip install atlas-pipeline` works |
 | 4. Example pipelines verified | `atlas run examples/ctfd_pipeline.yaml` runs |

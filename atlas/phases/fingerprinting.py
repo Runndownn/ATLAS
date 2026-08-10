@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import logging
 
+from atlas.core.event_bus import EventBus
 from atlas.core.job_store import JobRecord, PhaseRecord
 from atlas.core.orchestrator import PipelineConfig
 from atlas.phases.base import Phase, PhaseHandler
@@ -27,8 +28,12 @@ class FingerprintingPhase(Phase):
     name = "fingerprinting"
     retryable = True
 
-    def __init__(self, hash_store: HashStore | None = None):
-        super().__init__()
+    def __init__(
+        self,
+        hash_store: HashStore | None = None,
+        event_bus: EventBus | None = None,
+    ):
+        super().__init__(event_bus=event_bus)
         self._hash_store = hash_store or HashStore()
 
     async def execute(
@@ -65,8 +70,8 @@ class FingerprintingPhase(Phase):
             if file_info.is_dir or file_info.is_symlink:
                 continue
 
-            # Check if already hashed (dedup) using raw sha256 hex from file_info
             try:
+                # Check if already hashed (dedup) using raw sha256 hex from file_info
                 if file_info.sha256 and self._hash_store.has_content(file_info.sha256):
                     duplicates += 1
                     continue
@@ -74,11 +79,9 @@ class FingerprintingPhase(Phase):
                 result_hash = self._hash_store.hash_file(file_info.path)
                 content_id = self._hash_store.get_content_id(result_hash.sha256)
 
-                if self._hash_store.has_content(content_id):
-                    duplicates += 1
-                else:
-                    hashes[result_hash.sha256] = content_id
-                    file_info.sha256 = result_hash.sha256
+                # Record as newly processed (hash_file already added it to the manifest)
+                hashes[result_hash.sha256] = content_id
+                file_info.sha256 = result_hash.sha256
                 processed += 1
 
                 if processed % 100 == 0:

@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 
+from atlas.core.event_bus import EventBus
 from atlas.core.job_store import JobRecord, PhaseRecord
 from atlas.core.orchestrator import PipelineConfig
 from atlas.phases.base import Phase
@@ -58,8 +59,8 @@ class ReviewPhase(Phase):
     name = "review_promotion"
     retryable = False  # Non-retryable: evidence recording should be idempotent
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, event_bus: EventBus | None = None):
+        super().__init__(event_bus=event_bus)
 
     async def execute(
         self,

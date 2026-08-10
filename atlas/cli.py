@@ -200,7 +200,7 @@ async def _job_action(action: str, args: list[str]) -> int:
     runtime = AtlasRuntime(db_path=db_path)
     await runtime.connect()
     orchestrator = runtime.orchestrator
-    job = await job_store if False else await runtime.job_store.get_job(job_id)
+    job = await runtime.job_store.get_job(job_id)
 
     if job is None:
         print(f"Job {job_id} not found")
@@ -264,7 +264,7 @@ async def _amain() -> int:
             print("Usage: atlas job <id> <status|pause|resume|cancel> [db_path]")
             return 1
         job_id, action = rest[0], rest[1]
-        return await _job_action(action, rest[2:] if len(rest) > 2 else [job_id])
+        return await _job_action(action, [job_id] + rest[2:])
     else:
         print(f"Unknown command: {command}")
         return 1
