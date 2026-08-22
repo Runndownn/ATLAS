@@ -3,3 +3,6 @@ __pycache__/
 *.egg-info/
 .venv/
 *.db
+# Production TODO packages - not tracked (DO NOT COMMIT)
+ATLAS_Full_Production_TODO_Package.zip
+ATLAS_Production_TODO_Package.zip
