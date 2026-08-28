@@ -1,0 +1,38 @@
+P0 WORKSTREAM 2
+
+
+Strengthen safety and evidence preservation
+Per-job quarantine workspaces                                               Recursive container budgets
+Controlled Extraction should materialize accepted content                   Nested archives need bounded recursive structural
+into isolated job-specific workspaces, not adjacent to the                  inspection. Limits should cover nesting depth, total
+source archive. The workspace becomes a managed                             expanded bytes, member counts, and other resource
+side-effect boundary.                                                       ceilings.
+
+
+One canonical path-safety policy                                            Durable detailed events
+Discovery, structural inspection, extraction, analyzer file                 Phase-level observations such as discovery progress,
+access, and future publication adapters should use the                      analyzer activity, extraction decisions, and errors should
+same containment and risky-path rules.                                      join the durable event history instead of existing only on a
+                                                                            transient bus.
+
+
+  Safety boundary pattern
+
+
+          Source                         Structural              Policy decision              Quarantine            Analyzer access
+        potentially          ->          inspection      ->      limits + path rules   ->      controlled     ->        bounded
+        untrusted                   no materialization                                         extraction              workspace
+
+
+
+
+    O P E R AT I O N A L O U T C O M E
+
+    Materialization is isolated, nested packaging cannot create unbounded work, path rules are consistent, and the
+    system retains a durable record of why a container or member was accepted, skipped, or rejected.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                        13
+

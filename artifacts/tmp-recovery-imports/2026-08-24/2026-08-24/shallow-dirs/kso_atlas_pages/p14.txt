@@ -1,0 +1,47 @@
+P0 WORKSTREAM 3
+
+
+Make execution durable
+Today, durable inspection and process-local execution control are different things. The P0 execution
+work closes that gap.
+
+
+    1                                                                          2
+
+   Long-running runtime                                                       Persisted control requests
+   Introduce a daemon or worker process that owns active jobs                 Pause, resume, and cancel become durable commands
+   instead of rebuilding execution context for every CLI                      stored or queued for the active worker to consume.
+   invocation.
+
+
+
+
+    3                                                                          4
+
+   Cooperative phase control                                                  Checkpoints
+   Long-running handlers periodically observe cancellation/                   Record recovery points so resumption is not equivalent to
+   pause state and stop at defined safe boundaries.                           blindly rerunning a phase whose side effects may already
+                                                                              have occurred.
+
+
+
+Durable control loop
+        Operator                  Persistent state                   Worker                       Phase                    Checkpoint
+    control request
+                          ->      request recorded
+                                                         ->      observes request
+                                                                                      ->        cooperates
+                                                                                                                  ->    safe recovery state
+
+
+
+    DEFINITION OF DONE
+
+    A second process can inspect a durable job, submit a control request, and have the active runtime honor it in a
+    defined way. Process loss no longer erases the control context needed to resume safely.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                            14
+

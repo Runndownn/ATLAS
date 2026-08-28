@@ -1,0 +1,292 @@
+{
+  "canonical_registry": "Plan_atlas-production/TODO_atlas-production-registry.json",
+  "canonical_registry_sha256": "72298a67bdabfedef74deecbc3d7b017bc471270fe97ddc10c32a3f3754c8527",
+  "counts": {
+    "canonical_tasks": 108,
+    "component_responsibility_rows": 61,
+    "epics": 27,
+    "files_excluding_this_manifest": 54,
+    "part1_documents": 36,
+    "pdf_requirements_revalidated": 30
+  },
+  "created_at": "2026-08-21",
+  "files": [
+    {
+      "bytes": 21431,
+      "path": "ATLAS_Production_Component_Responsibility_Matrix.csv",
+      "sha256": "d49c95457f3e5449fa49a9c9bc1aaa0f6a6c5e4b918e4a0be6f18ad25fd7001a"
+    },
+    {
+      "bytes": 3656,
+      "path": "ATLAS_Production_Macro_Coverage.csv",
+      "sha256": "86266f5ab4051b5441a5bcdba396e9e8bfcd04352efb0704f2b7aca7729ab3d4"
+    },
+    {
+      "bytes": 18694,
+      "path": "ATLAS_Production_PDF_Requirements_Revalidation.csv",
+      "sha256": "abc22ce75dc75b8697772a2dfda91650863444a39dc7992a52c1090ee0420d0f"
+    },
+    {
+      "bytes": 7655,
+      "path": "ATLAS_Production_Source_Delta_Report.md",
+      "sha256": "220dcbc2df30473cefe4309d6f6d5fead4ccee40faf7a710025585092c7d81b7"
+    },
+    {
+      "bytes": 6240,
+      "path": "ATLAS_Production_Source_Manifest.json",
+      "sha256": "1cc3e49c898847287b15e92a582a21fd45edc2ff7d475ef5c9125699be0f7d1e"
+    },
+    {
+      "bytes": 8313,
+      "path": "ATLAS_Production_TODO_Validation.json",
+      "sha256": "c74c336350aaf556e8508b9eb16c6c8932113bf8c49b59d34445ed8ffd6d7375"
+    },
+    {
+      "bytes": 61382,
+      "path": "ATLAS_Production_Task_Crosswalk.csv",
+      "sha256": "5756f3c68df9b8cac9c97626b3f8973b724c66c0a7a36321c5b7635a28445b7d"
+    },
+    {
+      "bytes": 28,
+      "path": "PART1_HEADER.md",
+      "sha256": "1c0fdd41e4f1bda05cac64d8e3a8a20c2399e63ed275c00cae393b228d6f57f7"
+    },
+    {
+      "bytes": 34755,
+      "path": "Plan_atlas-production/Plan-MASTER_atlas-production.md",
+      "sha256": "23a3f3f7d468d5290e099a32ec833c6c46d8b96b7205ea2274978854a1909a0d"
+    },
+    {
+      "bytes": 842295,
+      "path": "Plan_atlas-production/TODO-MASTER_atlas-production-v2.1/TODO-MASTER_atlas-production-v2.1.md",
+      "sha256": "8d2be6cb279da4d67a9dbe3acdbeddbdfc3e3596898e11a35b2350a31f5962c8"
+    },
+    {
+      "bytes": 25188,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-1.md",
+      "sha256": "897ef2a904fa2afe8596304e734d0cadecebfdd5b4403bb38d8f255a2ffe2e9a"
+    },
+    {
+      "bytes": 22398,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-10.md",
+      "sha256": "de9fd2f155598c4b35a3e572a42d839ad0a677dfca8b9f83ebd8b3e84eefef7b"
+    },
+    {
+      "bytes": 22139,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-11.md",
+      "sha256": "900ab007c4ed3da60730c95261b974d6f795c6c37d8d13f89022da58f1a866d5"
+    },
+    {
+      "bytes": 22124,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-12.md",
+      "sha256": "4b26655ddef2c1dd8295eaa66992d645132accbaf0dcc75046043f3507d91c71"
+    },
+    {
+      "bytes": 22453,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-13.md",
+      "sha256": "f89f3a7bc1253fd2a11991fc591421031765a30beb0c96b4c3c608ce1253af56"
+    },
+    {
+      "bytes": 22713,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-14.md",
+      "sha256": "c04979f747e0960f01d06e66dc21eb3a9dcfc151c3d43b4b2c7d7c9489e30eae"
+    },
+    {
+      "bytes": 22918,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-15.md",
+      "sha256": "3cd78b32c2a281c253002d55f6943de2de3bdf29bfbcbe432651d8e2d6ab5121"
+    },
+    {
+      "bytes": 21552,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-16.md",
+      "sha256": "2b21be6d28231cc3a0ab56bc31ff87eb7d1dfa5dbf430cfc6fa3ed5b3f22ca9f"
+    },
+    {
+      "bytes": 21866,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-17.md",
+      "sha256": "9ba245a351f68e9bed95d8b9aa5f783ef2cc73a39403e17b873a66402dea45ee"
+    },
+    {
+      "bytes": 22740,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-18.md",
+      "sha256": "cdeb447baac503be62cfcef3f5368a1bacc59a634b59040f7a1acf6fd94cd999"
+    },
+    {
+      "bytes": 22459,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-19.md",
+      "sha256": "7c61f28c477c5c8c1400019b7b000e0a8930996c2c09c7684eeca280ba95f49e"
+    },
+    {
+      "bytes": 24530,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-2.md",
+      "sha256": "2a5ac24cb2f6146e4c65d3ea7951cd1ab66e3c237a1b6b8b5bd5330ebf7e5d08"
+    },
+    {
+      "bytes": 21650,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-20.md",
+      "sha256": "5fc2dcc908a71835a5567212a91d1665b34305d0c7e667bb6a9774b9cc95004e"
+    },
+    {
+      "bytes": 22665,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-21.md",
+      "sha256": "b195937f8f9dc7d70921080a4bcff38eea26a5c29cf4076b684e2828e66b8846"
+    },
+    {
+      "bytes": 25290,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-22.md",
+      "sha256": "c9d5bd8d01ee9aa20c45bdd68b80bd6debcbbb7cb8b364a4ae1d5aeba66c33c6"
+    },
+    {
+      "bytes": 26537,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-23.md",
+      "sha256": "bb203316933745c2fa6982ad77c2ed77abd64db091fc20a830b20c3cd62abb17"
+    },
+    {
+      "bytes": 24094,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-24.md",
+      "sha256": "6735730dff5264ccbef741e34413fb56a25aa416edb050bbac1c31854d7e0e79"
+    },
+    {
+      "bytes": 23486,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-25.md",
+      "sha256": "952170377155e80df0aeddfa2e2c4b7d3cb2cfb4f5a6866404061589a21049af"
+    },
+    {
+      "bytes": 23571,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-26.md",
+      "sha256": "abed57ca2ddf5097bbef2dcdd4ed65f31171cdd73c73b4acc219a098b05e9d3b"
+    },
+    {
+      "bytes": 23914,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-27.md",
+      "sha256": "f8187bf22e9ed0cb1ae5a8e9fa708d63c8d8ec8ddf9edc6818ef19045f751deb"
+    },
+    {
+      "bytes": 23596,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-28.md",
+      "sha256": "5d37507d5de22454b24e408c05b610238be0be698bcb16fa60be3cd0e3c322d1"
+    },
+    {
+      "bytes": 24353,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-29.md",
+      "sha256": "1cd654ca547405553320b89462143485a843af2fca578d6a172f6f458cee3f59"
+    },
+    {
+      "bytes": 23931,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-3.md",
+      "sha256": "61b9141dddb2a58f734c8def20b62c23410eb501f00c6c8ac88a04e9c6433758"
+    },
+    {
+      "bytes": 24721,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-30.md",
+      "sha256": "e237295b47bb1625ce0ae0d25636b0aab3c100dffc0900a36219656aa771c42f"
+    },
+    {
+      "bytes": 24567,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-31.md",
+      "sha256": "6a7eb051c4c37e4ac0be532e179c9a350f141bcd698b7e4db9a797afd2133cb5"
+    },
+    {
+      "bytes": 24416,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-32.md",
+      "sha256": "82d189001f031d4f08574adb184bf03254c3649926d4ae23297f6df1b31f5067"
+    },
+    {
+      "bytes": 24213,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-33.md",
+      "sha256": "2ada62971b99d6d88febe7630c5b68c0e214ca5e5a666ae010e681f49b6b0eb0"
+    },
+    {
+      "bytes": 24200,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-34.md",
+      "sha256": "1735a28244b670e33899b5f3d5b96296749b5e1dcce31a49dd06db7f400150a4"
+    },
+    {
+      "bytes": 24121,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-35.md",
+      "sha256": "a23fabb5cdce2bb0327028bc0752e837b1c204941eadd841de2572db32bd0950"
+    },
+    {
+      "bytes": 24489,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-36.md",
+      "sha256": "d7855daf01d3f49a92255043909dcce60dbda9522ca28ce8a35f53a6877fd94a"
+    },
+    {
+      "bytes": 23688,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-4.md",
+      "sha256": "3dc4056a129d4b14aa6f8b86173946cc82f56ac2f19f4330aa0d4158479ce802"
+    },
+    {
+      "bytes": 22752,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-5.md",
+      "sha256": "2b05027298388f199c4f07491cb4e6dcbc980d02203d52948108627dd04971e2"
+    },
+    {
+      "bytes": 22595,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-6.md",
+      "sha256": "5cad4bb9ff172768e415a093b04c6bcd6eefccd4a6e296dd2d74665b167a0f1a"
+    },
+    {
+      "bytes": 22394,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-7.md",
+      "sha256": "b88877b4c0b8e1e29752a5cfbc34311f1f16d3b55fef55f026cf9f958462c38b"
+    },
+    {
+      "bytes": 22303,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-8.md",
+      "sha256": "8522bc458d60b1fd8866d2410728208c0d0aa456440d0665b6b0e7256b58ada2"
+    },
+    {
+      "bytes": 22993,
+      "path": "Plan_atlas-production/TODO_atlas-production-PART1/TODO_atlas-production-PART1-9.md",
+      "sha256": "b526b15b551bad959678a0867e75f5782bfc7877e21ff7af89ddcd7fcca7fcb9"
+    },
+    {
+      "bytes": 6656,
+      "path": "Plan_atlas-production/TODO_atlas-production-manifest.json",
+      "sha256": "470f8d99131df4d943cbf1f2e90cd24dca3c6a7ff3d948a6dee88680b2c12483"
+    },
+    {
+      "bytes": 1452269,
+      "path": "Plan_atlas-production/TODO_atlas-production-registry.json",
+      "sha256": "72298a67bdabfedef74deecbc3d7b017bc471270fe97ddc10c32a3f3754c8527"
+    },
+    {
+      "bytes": 459570,
+      "path": "Plan_atlas-production/TODO_atlas-production-v1.2/TODO_atlas-production-v1.2.md",
+      "sha256": "bd6c60def4dd642aadf81f8373c274f06ee6c7680359d326741f2fafa459657e"
+    },
+    {
+      "bytes": 5593,
+      "path": "README.md",
+      "sha256": "9e318d2ef30ca18bf2aac29c3f30ce05dc6a1bdcfa0d50b214c7db0c79ceb4ce"
+    },
+    {
+      "bytes": 18147,
+      "path": "tools/canonical-registry.schema.json",
+      "sha256": "628f2bf007f9ea2000b9fdfb4a98c1e22805faa1dd323c81e970ba3ed8e85ad3"
+    },
+    {
+      "bytes": 3752,
+      "path": "tools/generate_todo_system.py",
+      "sha256": "9b1cf6c905ec7f89e773ae5fa2d06675e11cb543922b4e1775439ba8732321d9"
+    },
+    {
+      "bytes": 38337,
+      "path": "tools/todo_system_lib.py",
+      "sha256": "76d82ad08e161707ee4e9bd149e282b562b1844bd63593edf572388fd792af05"
+    },
+    {
+      "bytes": 2355,
+      "path": "tools/validate_todo_system.py",
+      "sha256": "45833ae7ca735ffc28618fe4f6068a093eb35a7c35b1aa5c799cd468462914a0"
+    }
+  ],
+  "manifest_version": "1.0.0",
+  "package": "ATLAS Production TODO Package",
+  "plan_manifest": "Plan_atlas-production/TODO_atlas-production-manifest.json",
+  "plan_manifest_sha256": "470f8d99131df4d943cbf1f2e90cd24dca3c6a7ff3d948a6dee88680b2c12483",
+  "quality_gate_valid": true,
+  "self_hash_note": "This manifest intentionally omits its own hash to avoid recursive self-reference.",
+  "source_authority_sha256": "c2571cf6f6582a3e86f487e7ae817641d3b74e4425fe49e97889c9a29d9f9b97"
+}

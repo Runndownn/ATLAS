@@ -1,0 +1,79 @@
+{
+  "counts": {
+    "canonical_tasks": 108,
+    "complete": 0,
+    "incomplete": 108,
+    "part1_documents": 36,
+    "tasks_per_part1": 3,
+    "v12_tasks": 108,
+    "v21_tasks": 108
+  },
+  "evidence_mode": "ATTACHED-SNAPSHOT",
+  "generator_version": "2.0.0",
+  "input_fingerprint": "fb9d0d882d17d7d315c94dc9da82de435f3593769962eb7d1e9db235a0ad2d17",
+  "outputs": {
+    "Plan-MASTER_atlas-production.md": "23a3f3f7d468d5290e099a32ec833c6c46d8b96b7205ea2274978854a1909a0d",
+    "TODO-MASTER_atlas-production-v2.1/TODO-MASTER_atlas-production-v2.1.md": "8d2be6cb279da4d67a9dbe3acdbeddbdfc3e3596898e11a35b2350a31f5962c8",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-1.md": "897ef2a904fa2afe8596304e734d0cadecebfdd5b4403bb38d8f255a2ffe2e9a",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-10.md": "de9fd2f155598c4b35a3e572a42d839ad0a677dfca8b9f83ebd8b3e84eefef7b",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-11.md": "900ab007c4ed3da60730c95261b974d6f795c6c37d8d13f89022da58f1a866d5",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-12.md": "4b26655ddef2c1dd8295eaa66992d645132accbaf0dcc75046043f3507d91c71",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-13.md": "f89f3a7bc1253fd2a11991fc591421031765a30beb0c96b4c3c608ce1253af56",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-14.md": "c04979f747e0960f01d06e66dc21eb3a9dcfc151c3d43b4b2c7d7c9489e30eae",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-15.md": "3cd78b32c2a281c253002d55f6943de2de3bdf29bfbcbe432651d8e2d6ab5121",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-16.md": "2b21be6d28231cc3a0ab56bc31ff87eb7d1dfa5dbf430cfc6fa3ed5b3f22ca9f",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-17.md": "9ba245a351f68e9bed95d8b9aa5f783ef2cc73a39403e17b873a66402dea45ee",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-18.md": "cdeb447baac503be62cfcef3f5368a1bacc59a634b59040f7a1acf6fd94cd999",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-19.md": "7c61f28c477c5c8c1400019b7b000e0a8930996c2c09c7684eeca280ba95f49e",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-2.md": "2a5ac24cb2f6146e4c65d3ea7951cd1ab66e3c237a1b6b8b5bd5330ebf7e5d08",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-20.md": "5fc2dcc908a71835a5567212a91d1665b34305d0c7e667bb6a9774b9cc95004e",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-21.md": "b195937f8f9dc7d70921080a4bcff38eea26a5c29cf4076b684e2828e66b8846",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-22.md": "c9d5bd8d01ee9aa20c45bdd68b80bd6debcbbb7cb8b364a4ae1d5aeba66c33c6",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-23.md": "bb203316933745c2fa6982ad77c2ed77abd64db091fc20a830b20c3cd62abb17",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-24.md": "6735730dff5264ccbef741e34413fb56a25aa416edb050bbac1c31854d7e0e79",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-25.md": "952170377155e80df0aeddfa2e2c4b7d3cb2cfb4f5a6866404061589a21049af",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-26.md": "abed57ca2ddf5097bbef2dcdd4ed65f31171cdd73c73b4acc219a098b05e9d3b",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-27.md": "f8187bf22e9ed0cb1ae5a8e9fa708d63c8d8ec8ddf9edc6818ef19045f751deb",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-28.md": "5d37507d5de22454b24e408c05b610238be0be698bcb16fa60be3cd0e3c322d1",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-29.md": "1cd654ca547405553320b89462143485a843af2fca578d6a172f6f458cee3f59",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-3.md": "61b9141dddb2a58f734c8def20b62c23410eb501f00c6c8ac88a04e9c6433758",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-30.md": "e237295b47bb1625ce0ae0d25636b0aab3c100dffc0900a36219656aa771c42f",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-31.md": "6a7eb051c4c37e4ac0be532e179c9a350f141bcd698b7e4db9a797afd2133cb5",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-32.md": "82d189001f031d4f08574adb184bf03254c3649926d4ae23297f6df1b31f5067",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-33.md": "2ada62971b99d6d88febe7630c5b68c0e214ca5e5a666ae010e681f49b6b0eb0",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-34.md": "1735a28244b670e33899b5f3d5b96296749b5e1dcce31a49dd06db7f400150a4",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-35.md": "a23fabb5cdce2bb0327028bc0752e837b1c204941eadd841de2572db32bd0950",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-36.md": "d7855daf01d3f49a92255043909dcce60dbda9522ca28ce8a35f53a6877fd94a",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-4.md": "3dc4056a129d4b14aa6f8b86173946cc82f56ac2f19f4330aa0d4158479ce802",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-5.md": "2b05027298388f199c4f07491cb4e6dcbc980d02203d52948108627dd04971e2",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-6.md": "5cad4bb9ff172768e415a093b04c6bcd6eefccd4a6e296dd2d74665b167a0f1a",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-7.md": "b88877b4c0b8e1e29752a5cfbc34311f1f16d3b55fef55f026cf9f958462c38b",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-8.md": "8522bc458d60b1fd8866d2410728208c0d0aa456440d0665b6b0e7256b58ada2",
+    "TODO_atlas-production-PART1/TODO_atlas-production-PART1-9.md": "b526b15b551bad959678a0867e75f5782bfc7877e21ff7af89ddcd7fcca7fcb9",
+    "TODO_atlas-production-registry.json": "72298a67bdabfedef74deecbc3d7b017bc471270fe97ddc10c32a3f3754c8527",
+    "TODO_atlas-production-v1.2/TODO_atlas-production-v1.2.md": "bd6c60def4dd642aadf81f8373c274f06ee6c7680359d326741f2fafa459657e"
+  },
+  "part1_header_sha256": "1c0fdd41e4f1bda05cac64d8e3a8a20c2399e63ed275c00cae393b228d6f57f7",
+  "plan_directory": "Plan_atlas-production",
+  "registry_sha256": "72298a67bdabfedef74deecbc3d7b017bc471270fe97ddc10c32a3f3754c8527",
+  "schema_version": "1.0.0",
+  "slug": "atlas-production",
+  "source_repositories": [
+    {
+      "access_mode": "source-only",
+      "commit": "efa547cafc64b58d60d19dcc1e5ba32c6b046bc5",
+      "repository": "Runndownn/ATLAS",
+      "role": "frozen target implementation baseline cited by the canonical assessment"
+    },
+    {
+      "access_mode": "source-only",
+      "commit": "2b0c51b6132c2a16e63fc2e2de2d2b4598b5fe40",
+      "repository": "Runndownn/Yggdrasil",
+      "role": "frozen donor/reference baseline cited by the canonical assessment"
+    }
+  ],
+  "validation": {
+    "status": "passed",
+    "validator_version": "2.0.0"
+  }
+}

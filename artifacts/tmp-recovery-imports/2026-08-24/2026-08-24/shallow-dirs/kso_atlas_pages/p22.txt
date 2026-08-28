@@ -1,0 +1,39 @@
+AI AND AGENT GOVERNANCE
+
+
+AI belongs inside the lifecycle - not above it
+    The model should be able to analyze, classify, correlate, and propose. It
+    should not become the authority over source provenance, filesystem safety,
+    durable control, or final promotion.
+
+
+Appropriate AI roles                                                    ATLAS retains authority
+  • Classify artifact type or domain.                                     • Register and freeze the source occurrence set.
+  • Extract structured facts from documents or technical notes.           • Establish exact content identity.
+  • Propose relationships between findings.                               • Enforce archive and path safety.
+  • Summarize analyzer output into evidence candidates.                   • Control workspace materialization.
+  • Recommend routing to specialized analyzers.                           • Persist lifecycle and event history.
+  • Propose a promotion decision with supporting rationale.               • Apply review/policy gates and record publication.
+
+
+
+  Trust boundary for AI-assisted analysis
+
+
+      ATLAS intake                     Bounded                    Finding                Evidence review             Publication
+      frozen source +      ->          analyzer          ->      attributed +     ->      policy / human        ->    approved
+          identity                LLM / tool / parser            normalized                                          destination
+
+
+
+
+    DESIGN OBJECTIVE
+
+    Increase analytical capability without weakening the deterministic chain of custody. AI enriches the evidence
+    lane; ATLAS governs the evidence lifecycle.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                     22
+

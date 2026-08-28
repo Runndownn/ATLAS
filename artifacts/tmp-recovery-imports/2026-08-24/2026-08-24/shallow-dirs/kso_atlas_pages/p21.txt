@@ -1,0 +1,52 @@
+E N D - S TAT E A R C H I T E C T U R E
+
+
+The Artifact Lifecycle Control Plane
+At maturity, ATLAS becomes the common execution and provenance substrate beneath local tools,
+security analyzers, knowledge systems, and AI-assisted workflows.
+
+  Figure 6. Governed end-state architecture
+
+
+
+         GOVERNED END STATE
+
+
+
+                CLI / API / MCP                                   ATLAS Control Plane
+                                                                                                                             Work Queue                             Workers
+              submit / inspect / control                         policy + lifecycle + provenance                             durable dispatch                   bounded execution
+                                                                  jobs + controls + checkpoints
+
+
+
+
+                   Source Registry                               Quarantine / CAS                             Evidence Store                                 Event / Metrics
+                   roots + generations                          isolated materialization                      findings + evidence                           durable event history
+                  provenance authority                              content identities                      relationships + lineage                        observability adapters
+
+
+
+
+                                           Governed A-F lifecycle inside every job                                                              Review / Policy Gate
+                                            identity -> safety -> analysis -> evidence -> review                                                   approve / reject / hold
+                                            agents and tools execute within bounded phases                                                      destination-specific controls
+
+
+
+
+                                           Scale-out changes infrastructure, not the lifecycle meaning. Provenance and promotion remain first-class.
+
+
+
+
+   Control plane authority                                                                            Worker specialization
+   Pipeline registration, policy, lifecycle state, durable controls,                                  Execution can scale out by capability while workers remain
+   checkpoints, provenance and review decisions are                                                   bounded by job configuration, quarantine, resource policy,
+   centralized as authoritative records.                                                              and analyzer declarations.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                                                                      21
+

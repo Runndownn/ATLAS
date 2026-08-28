@@ -1,0 +1,46 @@
+P 1 A N A LY Z E R E C O S Y S T E M
+
+
+Turn Deep Understanding into a governed
+plugin platform
+Phase E is the extension point through which ATLAS becomes useful across security, repositories,
+documents, forensics, and AI-assisted workflows. The plugin seam therefore needs a contract
+stronger than "return any dictionary."
+
+
+Analyzer registry                                                        Resource controls
+Discover and register analyzers by capability, artifact type,            The runtime can enforce quotas and decide which worker
+domain, version, and supported inputs.                                   or sandbox is appropriate for each analyzer.
+
+
+Normalized finding schema                                                Plugin isolation
+Give all analyzers a shared envelope for severity/                       A parser or analyzer should not automatically inherit
+category, observation, source reference, confidence,                     unrestricted authority over the ATLAS runtime or host
+relationships, tool version, timestamps, and structured                  filesystem.
+data.
+                                                                         Versioned attribution
+Capability declarations                                                  Findings should record the analyzer/tool/model version so
+Plugins should declare filesystem access, network needs,                 later review can reproduce or reinterpret results.
+CPU/memory profile, external tools, and whether they can
+execute active content.
+
+
+
+    ARCHITECTURAL RULE
+
+    Domain intelligence belongs inside controlled plugins. Identity, safety, provenance, lifecycle state, and promotion
+    authority remain core ATLAS responsibilities.
+
+
+
+
+Examples of Phase E analyzers
+ YARA       Capa     FLOSS       file-format parsers     repository analyzers   document extractors   log parsers   PCAP analyzers
+
+ LLM analysis
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                       17
+

@@ -1,0 +1,50 @@
+USE CASES
+
+
+Where the lifecycle model creates leverage
+ Use case                             How ATLAS contributes
+
+ Incident-response evidence           Fingerprint case files, safely unpack collections, preserve provenance, dispatch forensic plugins, and
+ intake                               gate evidence promotion.
+
+                                      Quarantine samples, hash/deduplicate, inspect containers, and run YARA/Capa/FLOSS-style analyzers
+ Malware / static analysis
+                                      without executing specimens.
+
+                                      Treat PCAPs, Zeek/Suricata exports, logs, and supporting artifacts as one provenance-linked
+ Network forensics
+                                      investigation.
+
+ CVE research packages                Normalize advisories, PoCs, patches, and test evidence into one reviewed vulnerability record.
+
+ Security knowledge                   Deduplicate walkthroughs/notes, classify domains, extract structured techniques, and promote
+ ingestion                            validated knowledge.
+
+ RAG corpus production                Separate raw-source intake from parsing, chunking, embedding, and trusted-index promotion.
+
+ Training/evaluation corpus           Preserve provenance, detect duplicates or contamination, and require approval before dataset
+ curation                             admission.
+
+                                      Hash releases, inspect packages/manifests/SBOMs/signatures, and gate artifacts before repository
+ Software supply chain
+                                      use.
+
+                                      Snapshot files, establish identities, run language/security/license analyzers, and retain findings against
+ Repository intelligence
+                                      immutable content.
+
+                                      Register disk, memory, and archive artifacts and preserve lineage from tool outputs to original
+ Forensics case processing
+                                      evidence.
+
+ Migration / backup validation        Compare source and destination content identities and qualify backups before production restoration.
+
+ Firmware / package
+                                      Recursively inspect embedded containers under bounded extraction rules.
+ inspection
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                                     25
+

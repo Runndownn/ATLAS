@@ -1,0 +1,51 @@
+SECURITY & GOVERNANCE
+
+
+Controls that make the architecture defensible
+ Control                     Current / intended behavior                         Why it matters
+
+                                                                                 Unavailable functionality cannot masquerade as
+ Fail-closed dispatch        Missing configured handlers fail the job
+                                                                                 success
+
+ Pre-extraction              Structure and resource risk are assessed before     Untrusted containers are reasoned about before they
+ inspection                  materialization                                     create files
+
+ Quarantine boundary         Target: per-job isolated extraction workspaces      Controls the filesystem side effects of untrusted input
+
+                             Target: recursive depth, bytes, member counts,      Prevents archive recursion and analysis from becoming
+ Resource budgets
+                             analyzer quotas                                     resource exhaustion
+
+ Cryptographic               SHA-256, optional BLAKE3; target persistent CAS
+                                                                                 Anchors provenance to exact bytes, not filenames
+ identity                    model
+
+                             Lifecycle events persisted; detailed phase events   Supports incident reconstruction, audit, and operational
+ Durable events
+                             targeted for persistence                            observability
+
+                             Observation / parsed / inferred / hypothesis        Prevents all analyzer output from being treated as
+ Typed evidence
+                             distinctions                                        equivalent truth
+
+                             Target durable review decisions and destination
+ Promotion gate                                                                  Separates analysis capability from authority to publish
+                             policy
+
+                             Target checkpoint, idempotency, timeout, retry      Makes automation safe under process failure and
+ Recovery policy
+                             semantics                                           replay
+
+
+
+    GOVERNANCE PRINCIPLE
+
+    Evidence, operator decisions, access authority, and filesystem mutations should remain distinct concepts. The
+    more ATLAS scales, the more important this separation becomes.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                             23
+

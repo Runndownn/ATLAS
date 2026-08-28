@@ -1,0 +1,23 @@
+ATLAS DEVELOPMENT DIRECTION                                                            ARCHITECTURE / HARDENING / ROADMAP
+
+
+
+
+                         Artifact Lifecycle Control Plane
+                            Architecture, Hardening & Development Direction
+
+
+           CONTROL-PLANE THESIS
+
+           ATLAS is evolving from a compact local pipeline kernel into a governed artifact-processing
+           substrate that preserves identity, provenance, safety, evidence, and promotion decisions
+           from raw source material to trusted downstream use.
+
+
+
+
+REPOSITORY REFERENCE                        CURRENT MATURITY                            SEMANTIC SPINE
+
+Runndownn/ATLAS                             Pre-Alpha v0.1.0                            Recon -> Fingerprint -> Structure
+main @ efa547cafc64...                      Python 3.13+ / MIT                          Extract -> Analyze -> Review
+

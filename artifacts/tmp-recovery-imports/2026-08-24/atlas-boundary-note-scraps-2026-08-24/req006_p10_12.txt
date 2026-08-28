@@ -1,0 +1,141 @@
+PRE-ALPHA BOUNDARIES
+
+
+Where the runtime and the architecture still
+diverge
+ Area                           Current behavior                                           Required direction
+
+                                Stored in metadata; handlers do not consistently consume
+ Phase configuration                                                                       Typed, validated, injected, enforced policy
+                                it
+
+ Error policy                   Overlapping continue/abort concepts                        One authoritative runtime contract
+
+ Content store                  In-memory hash manifest                                    Persistent content + occurrence model
+
+                                Same bytes produce same hash; repeat work is not
+ Deduplication                                                                             Cross-run identity reuse with provenance
+                                durably avoided
+
+                                Phase object changes are not continuously persisted as
+ Progress                                                                                  Durable phase + aggregate progress
+                                live job progress
+
+ Pause / resume /                                                                          Persistent control requests + worker
+                                Depends on process-local runtime state
+ cancel                                                                                    cooperation
+
+ Detailed events                Phase-emitted observations may remain transient            Durable operational/evidentiary event stream
+
+                                                                                           Defined consumption, backpressure, delivery
+ RabbitMQ                       Partial publishing/fallback capability
+                                                                                           semantics
+
+ Nested archives                Detected and counted                                       Recursive bounded inspection
+
+ Analysis                       Plugin seam + basic metadata                               Registry + normalized findings + isolation
+
+ Promotion                      Conceptual evidence/candidates                             Persistent reviews + destination publication
+
+                                                                                           Idempotency, timeout, checkpoint, crash
+ Recovery                       State recorded; no complete checkpoint/retry model
+                                                                                           recovery
+
+
+
+    I N T E R P R E TAT I O N
+
+    These are not reasons to abandon the architecture. They are the exact seams where the pre-alpha
+    implementation must become semantically honest before ATLAS expands into a multi-process or distributed
+    service.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                            10
+PRIORITY MODEL
+
+
+Build integrity before scale
+The development direction contains nine major workstreams. Their sequencing is deliberate: first
+make the local lifecycle truthful and durable; then operationalize evidence and integrations; only then
+distribute the system.
+
+P0 - foundational                                                                                                                        3
+
+P1 - operational                                                                                                                         4
+
+P2 - expansion                                                                                                                           2
+
+Figure 4. Development workstreams by source-defined priority. Counts are from the supplied execution rewrite, not a performance score.
+
+
+
+    P0                       Semantic integrity. Immutable discovery manifest; persistent content/occurrence model; true dedup;
+                             configuration enforcement; live progress; one error policy.
+                             Safety and evidence. Quarantine workspaces; canonical path safety; recursive archive budgets;
+                             durable detailed events.
+                             Durable execution. Daemon/workers; persisted control requests; cooperative pause/cancel;
+                             checkpoints.
+
+
+
+    P1                       Reliability. retry/backoff/timeout/idempotency/crash recovery/migrations.
+                             Knowledge model. persistent findings, evidence, relationships, reviews and promotions.
+                             Analyzer ecosystem. registry, normalized schema, capabilities/resources, isolation.
+                             Integration. RabbitMQ semantics, REST, MCP, webhooks and event adapters.
+
+
+
+    P2                       Distributed scale. PostgreSQL projections, object/CAS storage, worker pools, quotas.
+                             Operator surface. Job Status Surface, review queue, artifact/evidence graph, provenance viewer.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                           11
+P0 WORKSTREAM 1
+
+
+Establish semantic integrity
+The first P0 objective is simple to state but foundational: every concept exposed by ATLAS
+configuration and APIs must correspond to one clear runtime meaning.
+
+
+Immutable discovery manifest                                     Runtime-enforced phase configuration
+Reconnaissance should produce a durable intake                   Values such as discovery depth, hash algorithms/chunk
+generation containing the exact occurrence set that later        size, extraction byte ceilings, and archive-member limits
+phases consume. Downstream phases should not silently            must be typed, validated, passed to handlers, and
+re-scan a changing source.                                       enforced.
+
+
+Persistent occurrence + identity                                 One failure-policy contract
+Store filesystem/source occurrences separately from              Remove ambiguity between "continue after phase error"
+cryptographic content identities. Many occurrences may           and "abort on error." A pipeline definition should predict
+reference one content identity; neither concept replaces         execution behavior exactly.
+the other.
+                                                                 Live progress as durable state
+Real duplicate avoidance                                         Persist intermediate phase progress during execution and
+Use persistent identity to prevent unnecessary repeat            derive meaningful job-level progress so a separate status
+processing while retaining every occurrence and its              process sees real activity.
+source provenance.
+
+
+
+    DEFINITION OF DONE
+
+    Intake state, identity, deduplication, configuration, progress, and failure policy all have one durable meaning that
+    is shared by the CLI, embedded API, tests, workers, and future remote interfaces.
+
+
+
+
+Why this must precede scale
+Distributing workers or adding APIs before semantic integrity would replicate ambiguity across components. P0-1
+makes the local engine authoritative enough to become a service safely.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                12
+

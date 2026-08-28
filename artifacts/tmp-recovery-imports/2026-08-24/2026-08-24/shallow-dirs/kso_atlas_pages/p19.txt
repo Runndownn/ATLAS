@@ -1,0 +1,37 @@
+P 2 E X PA N S I O N
+
+
+Scale and operator experience come after
+semantic stability
+Distributed scale                                                Operator surface
+
+   PostgreSQL projection                                          Job Status Surface
+   Move high-concurrency durable state beyond a single            Expose durable lifecycle state, checkpoints, progress,
+   SQLite connection while preserving the same job/phase/         current phase, failures, and control requests.
+   evidence semantics.
+
+
+                                                                  Review queue
+   Object or content-addressable storage                          Present pending promotion decisions with evidence,
+   Persist materialized and canonical content independently of    provenance, and destination policy in context.
+   worker-local disks.
+
+
+                                                                  Artifact/evidence graph
+   Worker pools + quotas                                          Let operators navigate occurrence -> content -> extraction
+   Dispatch analyzers by capability and bound resource usage      -> finding -> evidence -> decision -> publication lineage.
+   per job, phase, source, or tenant context.
+
+
+
+
+    SEQUENCING RULE
+
+    Scale changes infrastructure, not semantics. The local engine must define identity, control, recovery, and trust
+    correctly before those same concepts are distributed across workers and stores.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                 19
+

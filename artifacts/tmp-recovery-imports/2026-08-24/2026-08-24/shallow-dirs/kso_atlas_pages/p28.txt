@@ -1,0 +1,46 @@
+SUCCESS CRITERIA
+
+
+What completion should make possible
+The end state can be judged by the questions ATLAS can answer reliably - without reconstructing
+intent from logs, filenames, or model output.
+
+
+   Where did this artifact originate?                             Have these exact bytes been seen before?
+   Resolve SourceRoot, IntakeGeneration, and every observed       Resolve a persistent ContentIdentity and all associated
+   occurrence.                                                    occurrences.
+
+
+
+
+   What container produced this derived file?                     Which analyzer made this claim?
+   Follow StructuralReport and ExtractionRecord lineage.          Identify analyzer/tool/model version, input identity, and
+                                                                  normalized finding.
+
+
+
+
+   Was the claim observed or inferred?                            Who or what approved it?
+   Inspect evidence type, source, confidence, and related         Resolve the PromotionDecision, governing policy, and
+   evidence.                                                      review authority.
+
+
+
+
+   Where was it published?                                        Can the conclusion be reproduced?
+   Resolve every DestinationPublication linked to the approval.   Recover the exact bytes, analyzer version, configuration,
+                                                                  events, and lifecycle checkpoints.
+
+
+
+
+    Successful completion means ATLAS can preserve the chain from raw source
+    and exact bytes, through every structural and analytical operation, to the
+    evidence produced, the decision applied, and every trusted destination that
+    received it.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                28
+

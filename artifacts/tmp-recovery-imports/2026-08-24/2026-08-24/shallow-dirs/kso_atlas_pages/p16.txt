@@ -1,0 +1,49 @@
+P1 EVIDENCE MODEL
+
+
+Make findings, evidence, review, and publication
+first-class
+The mature control plane needs a persistent lineage model that connects source material to accepted
+downstream output. Jobs and phase records alone are not enough.
+
+  Figure 5. Target lineage and evidence model
+
+
+      TARGET LINEAGE MODEL
+
+
+
+
+               SourceRoot                       IntakeGeneration                ArtifactOccurrence                            ContentIdentity
+              registered source                   stable observation            where bytes appeared                            canonical digest
+
+
+
+
+                 StructuralReport                   ExtractionRecord               AnalysisFinding                           EvidenceRecord
+                   container context                materialization lineage         normalized output                        meaning + confidence
+
+
+
+
+                                          PromotionDecision                                    DestinationPublication
+                                          approved / rejected / held                             where trusted output went
+
+
+
+
+   Evidence is typed                                                            Promotion is a decision
+   Observed facts, parsed facts, inferred relationships, and                    Review records should capture approve/reject/hold
+   hypotheses should remain distinguishable, with provenance                    outcomes, decision authority, supporting evidence, and
+   and confidence where applicable.                                             destination-specific policy.
+
+
+
+  The target trace runs in both directions: a publication can be traced back to its evidence and source bytes; a source occurrence can be followed
+  forward through findings, review, and destination publication.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                                       16
+

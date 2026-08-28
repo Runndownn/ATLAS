@@ -1,0 +1,44 @@
+P H A S E D E TA I L
+
+
+D-F: controlled materialization, analysis, and
+trust
+    D                                                  E                                                  F
+
+   Controlled Extraction                             Deep Understanding                                  Review / Promotion
+   Today: reassess archives, block                   Today: basic metadata plus an                       Today: evidence-oriented records
+   unsafe results, enforce destination               analyzer plugin protocol.                           and candidate promotion concepts.
+   containment, and use safer TAR data
+                                                     Target: analyzer registry, normalized               Target: durable review decisions,
+   filtering.
+                                                     finding schema, declared capabilities/              policy gates, destination adapters,
+   Target: isolated per-job quarantine               resources, plugin isolation, and rich               and traceable publication history.
+   workspaces governed by one                        domain-specific analysis.
+   canonical path/archive policy.
+
+
+
+
+    Processing something is not the same as deciding that a derived assertion
+    deserves to become trusted knowledge.
+
+
+Evidence semantics are strategically important
+The review model already distinguishes direct observations, parsed facts, inferred relationships, and classification
+hypotheses. That is a stronger foundation than a generic "result" object because downstream systems can reason
+about how a claim was produced, not just its text.
+
+
+
+    A N A LY Z E R R E S P O N S I B I L I T Y                               AT L A S R E S P O N S I B I L I T Y
+
+    Produce normalized findings, tool/model attribution,                     Preserve provenance, maintain lifecycle state,
+    relevant source references, confidence where                             enforce policy boundaries, record review
+    appropriate, and enough context for review.                              outcomes, and control publication into trusted
+                                                                             destinations.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                                 07
+

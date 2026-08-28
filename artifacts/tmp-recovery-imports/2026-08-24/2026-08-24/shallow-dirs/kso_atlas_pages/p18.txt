@@ -1,0 +1,37 @@
+P 1 I N T E G R AT I O N
+
+
+External systems should use the lifecycle, not
+bypass it
+Complete event transport                                                  MCP / agent-facing interface
+RabbitMQ should move from partial publishing/fallback                     Agents can request governed artifact processing through
+behavior toward defined connection lifecycle, consumers/                  a constrained tool surface rather than manipulating local
+subscriptions, delivery semantics, and backpressure.                      files or internal stores directly.
+
+
+REST service                                                              Webhooks and event adapters
+A service interface can submit pipeline jobs, inspect                     External systems can observe terminal states, review
+status, retrieve evidence, and issue durable control                      requirements, publication events, and failures without
+requests.                                                                 being coupled to the core orchestrator.
+
+
+  Integration boundary
+
+
+     External caller                Control plane                   Lifecycle               Evidence /             Destination
+     CLI / REST / MCP      ->     validate + register    ->      A-F governed job   ->       review        ->     approved output
+                                                                                         policy boundary               only
+
+
+
+
+    KEY REQUIREMENT
+
+    Every external interface must preserve the same lifecycle and provenance rules as local execution. API
+    convenience must not create a second, less-governed processing path.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                      18
+

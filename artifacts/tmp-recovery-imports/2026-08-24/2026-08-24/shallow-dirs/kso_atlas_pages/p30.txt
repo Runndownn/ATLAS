@@ -1,0 +1,55 @@
+RENDERED ARCHITECTURE VISUAL                                                                                                     DIAGRAM 02
+
+
+
+Rendered Mermaid 02 - Evolution Roadmap
+The evolution view shows how ATLAS should mature in controlled stages, adding durability and reach without changing the
+meaning of the lifecycle itself.
+
+
+
+
+    STAGED ARCHITECTURAL EVOLUTION
+
+         Foundation first: semantics -> durability -> governance -> scale -> agentic access
+
+
+
+
+                       Current                                    v0.x hardened                             v1 service
+
+                  Local lifecycle kernel                         Reliable local engine                  Durable workers + APIs
+
+
+
+
+                   v1.x governed                                     Scale-out                                Agentic
+
+                 Evidence + policy gates                         Distributed processing                    AI inside controls
+
+
+
+
+    WHAT THIS DIAGRAM REPRESENTS
+
+    This diagram shows ATLAS maturing through staged capability, from the current local lifecycle kernel to a hardened
+    local engine, then to a durable service, governed control plane, distributed scale-out, and finally agentic integration.
+    Each stage adds infrastructure and operational reach without changing the A-F lifecycle semantics that define identity,
+    safety, analysis, evidence, and trust. Semantic integrity, durable state, recovery behavior, and control requests come
+    before service interfaces and distributed workers so unresolved local behavior is not multiplied across more
+    components. Governance is introduced before broad scale because persistent evidence, review decisions, quarantine,
+    and policy gates are what make larger deployments defensible. Agentic integration appears last because agents
+    should select or parameterize governed workflows, not replace ATLAS as the authority over provenance, policy,
+    lifecycle state, or final promotion.
+
+
+        DESIGN IMPLICATION
+
+        Treat scale as an infrastructure change, not a semantic redesign; every later stage should preserve the same provenance and
+        trust contracts proven locally.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                           30
+

@@ -1,0 +1,61 @@
+ADDITIONAL STRATEGIC VISUAL                                                                                                                     DIAGRAM 04
+
+
+
+Diagram 04 - ATLAS Capability Mind Map
+This mind map clusters ATLAS around its core system concerns so the product can be discussed as a coherent platform
+rather than a loose collection of utilities.
+
+
+
+
+    ATLAS CAPABILITY MIND MAP
+
+
+
+
+                       Identity                 Platform meaning stays centered even when capabilities expand.               Safety
+              fingerprints, content digests,                                                                     quarantine, controlled extraction,
+                      deduplication                                                                                           policy
+
+
+
+
+                                                                        ATLAS
+                     Lifecycle                                                                                             Evidence
+                                                                         control plane
+           recon -> fingerprint -> analyze ->                                                                    findings, confidence, promotion
+                        review                                                                                               decisions
+
+
+
+
+                    Integrations                                                                                         Use Cases
+           parsers, analyzers, AI, downstream                                                                forensics, IR, CTI, document pipelines
+                        systems
+
+
+
+
+    WHAT THIS DIAGRAM REPRESENTS
+
+    This mind map shows ATLAS as a central control-plane concept with six capability domains radiating outward: Identity,
+    Safety, Lifecycle, Evidence, Integrations, and Use Cases. The purpose of the visual is to show that the platform is
+    defined not by one tool or one workflow, but by the interaction between provenance, controlled execution, governance,
+    and extensibility. Each branch represents a family of responsibilities that can grow over time while remaining anchored
+    to the same lifecycle and trust model at the center. The map also helps stakeholders see where future features belong,
+    which reduces architectural drift and prevents important capabilities from being treated as disconnected add-ons.
+
+
+
+
+        DESIGN IMPLICATION
+
+        Use this view when aligning stakeholders, scoping roadmaps, or explaining why ATLAS should be built as a governed platform
+        rather than a point solution.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                                          32
+

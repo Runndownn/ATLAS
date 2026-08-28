@@ -1,0 +1,56 @@
+PRE-ALPHA BOUNDARIES
+
+
+Where the runtime and the architecture still
+diverge
+ Area                           Current behavior                                           Required direction
+
+                                Stored in metadata; handlers do not consistently consume
+ Phase configuration                                                                       Typed, validated, injected, enforced policy
+                                it
+
+ Error policy                   Overlapping continue/abort concepts                        One authoritative runtime contract
+
+ Content store                  In-memory hash manifest                                    Persistent content + occurrence model
+
+                                Same bytes produce same hash; repeat work is not
+ Deduplication                                                                             Cross-run identity reuse with provenance
+                                durably avoided
+
+                                Phase object changes are not continuously persisted as
+ Progress                                                                                  Durable phase + aggregate progress
+                                live job progress
+
+ Pause / resume /                                                                          Persistent control requests + worker
+                                Depends on process-local runtime state
+ cancel                                                                                    cooperation
+
+ Detailed events                Phase-emitted observations may remain transient            Durable operational/evidentiary event stream
+
+                                                                                           Defined consumption, backpressure, delivery
+ RabbitMQ                       Partial publishing/fallback capability
+                                                                                           semantics
+
+ Nested archives                Detected and counted                                       Recursive bounded inspection
+
+ Analysis                       Plugin seam + basic metadata                               Registry + normalized findings + isolation
+
+ Promotion                      Conceptual evidence/candidates                             Persistent reviews + destination publication
+
+                                                                                           Idempotency, timeout, checkpoint, crash
+ Recovery                       State recorded; no complete checkpoint/retry model
+                                                                                           recovery
+
+
+
+    I N T E R P R E TAT I O N
+
+    These are not reasons to abandon the architecture. They are the exact seams where the pre-alpha
+    implementation must become semantically honest before ATLAS expands into a multi-process or distributed
+    service.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                            10
+

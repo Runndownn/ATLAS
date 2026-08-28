@@ -1,0 +1,59 @@
+RENDERED ARCHITECTURE VISUAL                                                                                                             DIAGRAM 01
+
+
+
+Rendered Mermaid 01 - Lifecycle
+The lifecycle view shows the stable semantic progression that governs how an artifact moves from initial observation to a
+defended trust decision.
+
+
+
+
+    A-F ARTIFACT LIFECYCLE
+
+
+
+
+        A                          B                          C                           D                            E             F
+
+
+                                                                 Structural                 Controlled                   Deep         Review /
+      Reconnaissance              Fingerprinting
+                                                                 Discovery                  Extraction               Understanding   Promotion
+
+
+
+        observe source            establish identity         inspect containers          materialize safely                analyze   govern trust
+
+
+
+
+                                       Artifact state changes at every phase - not merely task completion.
+                                Identity, structure, materialization, findings, evidence and trust are progressively constrained.
+
+
+
+
+    WHAT THIS DIAGRAM REPRESENTS
+
+    This diagram shows the stable six-stage semantic path an artifact follows from initial observation to a governed trust
+    decision. Each transition represents a change in what ATLAS knows about the artifact or is authorized to do with it,
+    rather than a generic dependency between tasks. Structural Discovery deliberately precedes Controlled Extraction so
+    container risk can be evaluated before potentially hostile content is materialized on disk. Deep Understanding remains
+    an extensible analysis boundary where tools, parsers, security engines, or models can produce normalized findings
+    without inheriting authority over the lifecycle. Review / Promotion is the final trust gate, ensuring that analyzer output
+    does not automatically become authoritative downstream data.
+
+
+
+
+        DESIGN IMPLICATION
+
+        Preserve this A-F sequence as the semantic spine even if future implementations add workers, queues, APIs, or internal DAG
+        behavior.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                                      29
+

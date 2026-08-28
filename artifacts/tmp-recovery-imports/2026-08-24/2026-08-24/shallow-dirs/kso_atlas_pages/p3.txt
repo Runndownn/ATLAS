@@ -1,0 +1,53 @@
+SYSTEM IDENTITY
+
+
+What ATLAS is - and what it is not
+What it is                                                               What it is not
+ATLAS is a pre-alpha artifact lifecycle engine. Its job is
+to move potentially untrusted files, archives, repositories,                  Not a general DAG scheduler
+documents, security evidence, and related inputs through                      The runtime is asynchronous, but the artifact lifecycle is
+                                                                              deliberately ordered and sequential.
+a controlled series of state transitions.
+
+It originated from processing concepts in Yggdrasil and
+Geezer Mekanix, but deliberately strips away the larger                       Not a task queue
+platform concerns that surrounded those concepts -                            Current execution is local and process-oriented; durable
+                                                                              worker dispatch is an intended later stage.
+authentication, RBAC, multi-tenancy, secrets
+management, cognitive operations, TLS, and other
+infrastructure.
+                                                                              Not an agent framework
+What remains is the reusable processing kernel:                               AI and agent systems are expected to run inside bounded
+orchestration, state, events, discovery, hashing, archive                     analysis/review roles rather than control provenance or trust
+                                                                              transitions.
+safety, analysis extension points, and review/promotion
+concepts.
+
+                                                                              Not yet a knowledge fabric
+                                                                              Evidence and promotion concepts exist, but persistent
+                                                                              findings, review decisions, destination adapters, and full
+                                                                              lineage remain development work.
+
+
+
+
+    ARCHITECTURAL ROLE
+
+    ATLAS is best positioned as the governed ingestion and artifact-processing layer underneath security
+    systems, forensic workflows, repository intelligence, knowledge pipelines, corpus curation, and AI-assisted
+    analysis.
+
+
+
+
+Why the boundary matters
+Generic orchestration answers "which task runs next?" ATLAS is intended to answer a more evidence-sensitive
+question: what happened to this exact content, under which controls, and why was a result ever trusted?
+
+ Identity-aware      Provenance-aware        Safety-first    Evidence-aware      Review-gated      Extensible analysis
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                                03
+

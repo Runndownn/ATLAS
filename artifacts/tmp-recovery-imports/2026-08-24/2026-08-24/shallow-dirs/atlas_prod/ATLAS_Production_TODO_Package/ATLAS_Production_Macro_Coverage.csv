@@ -1,0 +1,28 @@
+Macro ID,Macro title,Macro priority,Decomposed task count,Canonical task IDs,Estimated hours,Coverage status
+AT-001,Establish deterministic current-behavior characterization,P0,4,"T2.1.1, T2.1.2, T2.1.3, T2.1.4",50,COVERED
+AT-002,Introduce a versioned PipelineDefinition and enforce canonical A–F semantics,P0,4,"T3.1.1, T3.1.2, T3.1.3, T3.1.4",56,COVERED
+AT-003,Create the StateStore abstraction and versioned SQLite migration system,P0,4,"T4.1.1, T4.1.2, T4.1.3, T4.1.4",60,COVERED
+AT-004,"Implement explicit Job, Phase, Attempt, and control transition guards",P0,4,"T5.1.1, T5.1.2, T5.1.3, T5.1.4",58,COVERED
+AT-005,Introduce SourceRoot and accepted IntakeGeneration records,P0,4,"T6.1.1, T6.1.2, T6.1.3, T6.1.4",58,COVERED
+AT-006,Persist occurrence-to-content identity using canonical SHA-256,P0,4,"T7.1.1, T7.1.2, T7.1.3, T7.1.4",50,COVERED
+AT-007,"Make state transition, event history, and outbox atomic",P0,4,"T8.1.1, T8.1.2, T8.1.3, T8.1.4",56,COVERED
+AT-008,"Persist progress, control requests, safe points, and versioned checkpoints",P0,4,"T9.1.1, T9.1.2, T9.1.3, T9.1.4",60,COVERED
+AT-009,Create one canonical race-resistant SourceAccess service,P0,4,"T10.1.1, T10.1.2, T10.1.3, T10.1.4",56,COVERED
+AT-010,Introduce quarantine workspaces and recursive cumulative archive budgets,P0,4,"T11.1.1, T11.1.2, T11.1.3, T11.1.4",62,COVERED
+AT-011,Add an optional local immutable content-addressable store,P1,4,"T12.1.1, T12.1.2, T12.1.3, T12.1.4",56,COVERED
+AT-012,Persist StructuralReport and ExtractionRecord as exact-byte contracts,P1,4,"T13.1.1, T13.1.2, T13.1.3, T13.1.4",56,COVERED
+AT-013,Define versioned typed plugin descriptors and a deterministic registry,P1,4,"T14.1.1, T14.1.2, T14.1.3, T14.1.4",58,COVERED
+AT-014,Separate lifecycle semantics from execution location with ExecutionBackend,P1,4,"T15.1.1, T15.1.2, T15.1.3, T15.1.4",62,COVERED
+AT-015,"Implement first-class findings, evidence, decisions, and publication attempts",P1,4,"T17.1.1, T17.1.2, T17.1.3, T17.1.4",64,COVERED
+AT-016,"Define retries, timeouts, idempotency, reconciliation, and crash recovery per phase",P1,4,"T18.1.1, T18.1.2, T18.1.3, T18.1.4",62,COVERED
+AT-017,Add a long-running local daemon as the authoritative active-job owner,P1,4,"T19.1.1, T19.1.2, T19.1.3, T19.1.4",58,COVERED
+AT-018,"Provide canonical status, telemetry, health, and diagnostic bundles",P1,4,"T20.1.1, T20.1.2, T20.1.3, T20.1.4",56,COVERED
+AT-019,"Implement REST, RabbitMQ, and webhook adapters over the shared command/event contracts",P2,4,"T21.1.1, T21.1.2, T21.1.3, T21.1.4",60,COVERED
+AT-020,Add subprocess execution with mediated artifacts and enforceable limits,P2,4,"T22.1.1, T22.1.2, T22.1.3, T22.1.4",62,COVERED
+AT-021,Add PostgreSQL and object-storage adapters only after measured trigger conditions,P3,4,"T25.1.1, T25.1.2, T25.1.3, T25.1.4",58,COVERED
+AT-022,"Add remote workers with leases, fencing, and the existing WorkSpec contract",P3,4,"T26.1.1, T26.1.2, T26.1.3, T26.1.4",64,COVERED
+AT-023,Expose MCP and operator UI only as bounded clients of canonical services,P3,4,"T27.1.1, T27.1.2, T27.1.3, T27.1.4",60,COVERED
+AT-024,Establish continuous release-quality gates and benchmark evidence,P1,4,"T24.1.1, T24.1.2, T24.1.3, T24.1.4",62,COVERED
+NEW-E1,"Authority, baseline, PDF, donor, and ownership reconciliation",P0,4,"T1.1.1, T1.1.2, T1.1.3, T1.1.4",42,JUSTIFIED REFINEMENT
+NEW-E16,"Phase-internal WorkItem, scheduler, result reuse, and unified budgets",P1,4,"T16.1.1, T16.1.2, T16.1.3, T16.1.4",62,JUSTIFIED REFINEMENT
+NEW-E23,"Retention, compatibility catalog, plugin SDK, and source-provider evolution",P2,4,"T23.1.1, T23.1.2, T23.1.3, T23.1.4",58,JUSTIFIED REFINEMENT

@@ -1,0 +1,42 @@
+PRIORITY MODEL
+
+
+Build integrity before scale
+The development direction contains nine major workstreams. Their sequencing is deliberate: first
+make the local lifecycle truthful and durable; then operationalize evidence and integrations; only then
+distribute the system.
+
+P0 - foundational                                                                                                                        3
+
+P1 - operational                                                                                                                         4
+
+P2 - expansion                                                                                                                           2
+
+Figure 4. Development workstreams by source-defined priority. Counts are from the supplied execution rewrite, not a performance score.
+
+
+
+    P0                       Semantic integrity. Immutable discovery manifest; persistent content/occurrence model; true dedup;
+                             configuration enforcement; live progress; one error policy.
+                             Safety and evidence. Quarantine workspaces; canonical path safety; recursive archive budgets;
+                             durable detailed events.
+                             Durable execution. Daemon/workers; persisted control requests; cooperative pause/cancel;
+                             checkpoints.
+
+
+
+    P1                       Reliability. retry/backoff/timeout/idempotency/crash recovery/migrations.
+                             Knowledge model. persistent findings, evidence, relationships, reviews and promotions.
+                             Analyzer ecosystem. registry, normalized schema, capabilities/resources, isolation.
+                             Integration. RabbitMQ semantics, REST, MCP, webhooks and event adapters.
+
+
+
+    P2                       Distributed scale. PostgreSQL projections, object/CAS storage, worker pools, quotas.
+                             Operator surface. Job Status Surface, review queue, artifact/evidence graph, provenance viewer.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                           11
+

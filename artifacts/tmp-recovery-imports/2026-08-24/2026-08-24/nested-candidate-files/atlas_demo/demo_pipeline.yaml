@@ -1,0 +1,28 @@
+abort_on_error: true
+continue_on_phase_error: false
+metadata:
+  author: BinReaperMekanix
+  challenge_type: auto-detect
+  pipeline_name: ctf-challenge-pipeline
+name: ctf-challenge-pipeline
+phase_config:
+  extraction:
+    max_members: 50000
+    max_uncompressed_mb: 1024
+  fingerprinting:
+    algorithms:
+    - sha256
+    - blake3
+    chunk_size: 1048576
+  reconnaissance:
+    follow_symlinks: false
+    max_depth: 16
+phases:
+- reconnaissance
+- fingerprinting
+- structural_discovery
+- controlled_extraction
+- deep_understanding
+- review_promotion
+pipeline_id: auto
+source_path: /tmp/atlas_demo/artifacts

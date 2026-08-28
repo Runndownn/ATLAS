@@ -1,0 +1,44 @@
+P1 RELIABILITY
+
+
+Define retry, timeout, idempotency, and recovery
+Once ATLAS owns durable jobs, it must define what a failure means for each phase - especially when
+a phase has filesystem or external side effects.
+
+ Control                  Purpose                            Design question ATLAS must answer
+
+ Retry policy             Recover transient failures         Which failures are retryable, and how many attempts are allowed?
+
+                                                             How does retry cadence adapt to repeated failure or external dependency
+ Backoff                  Avoid hot failure loops
+                                                             pressure?
+
+                          Bound long-running
+ Timeouts                                                    What is the phase-level deadline and what cleanup occurs on expiry?
+                          operations
+
+ Idempotency              Prevent duplicate side effects     Can the phase be replayed safely from its last durable checkpoint?
+
+ Crash recovery           Resume after process loss          Which persistent state proves what work completed before the crash?
+
+ Schema
+                          Evolve durable state safely        How are version changes applied and rolled back without corrupting jobs?
+ migrations
+
+
+
+
+    Automatic retry is only safe when ATLAS can prove whether repeating the
+    phase will duplicate a side effect or corrupt lineage.
+
+
+    COMPLETION CONDITION
+
+    Every built-in phase has explicit repeat-execution semantics, recovery state survives process interruption, and
+    database evolution is versioned rather than implicit.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                          15
+

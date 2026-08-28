@@ -1,0 +1,52 @@
+LIFECYCLE MODEL
+
+
+The six-phase semantic spine
+The A-F lifecycle carries more architectural meaning than the current implementation depth. It defines
+how an artifact progresses from unknown input toward governed downstream use.
+
+  Figure 2. ATLAS artifact lifecycle
+
+
+
+
+            A                                B                               C                                D                         E                     F
+
+             Reconnaissance                      Fingerprinting            Structural Discovery            Controlled Extraction       Deep Understanding    Review / Promotion
+                Observe source                   Establish identity              Inspect containers               Materialize safely            Analyze           Govern trust
+
+
+
+        Stable semantic lifecycle: the implementation may evolve, but the A-F trust progression remains the architectural spine.
+
+
+
+
+    A                                                                      B                                                                C
+
+   Reconnaissance                                                        Fingerprinting                                                  Structural Discovery
+   Observe source material, inventory                                    Compute cryptographic identity and                              Inspect archive/container organization
+   files, record risk indicators, and                                    distinguish exact content from the                              before materializing contents.
+   establish the intake boundary.                                        path or source occurrence where it
+                                                                         appeared.
+
+
+
+
+    D                                                                      E                                                                F
+
+   Controlled Extraction                                                 Deep Understanding                                              Review / Promotion
+   Materialize accepted content under                                    Run domain analyzers and convert                                Separate analyzer output from the
+   path, archive, resource, and                                          raw artifacts into structured findings.                         policy or human decision that allows it
+   workspace controls.                                                                                                                   to enter a trusted destination.
+
+
+
+  Design principle: arbitrary DAG behavior can be added around or within lifecycle stages later. The lifecycle itself should remain stable so
+  provenance and trust transitions stay intelligible.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                                                                     05
+

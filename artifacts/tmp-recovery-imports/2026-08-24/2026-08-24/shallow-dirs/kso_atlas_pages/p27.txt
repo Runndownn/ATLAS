@@ -1,0 +1,62 @@
+EXECUTION SEQUENCE
+
+
+The recommended development order
+ Order          Priority                 Workstream              Outcome
+
+
+                  P0                                             Immutable intake, persistent identity, real dedup, config enforcement,
+       1                                 Semantic integrity
+                                                                 live progress, one error policy.
+
+
+                  P0                     Safety + evidence       Quarantine, canonical path rules, recursive archive budgets, durable
+       2
+                                         preservation            phase events.
+
+
+                  P0                                             Daemon/workers, persisted controls, cooperative cancellation,
+       3                                 Durable execution
+                                                                 checkpoints.
+
+
+       4          P1                     Reliability controls    Retry/backoff/timeout/idempotency/crash recovery/migrations.
+
+
+                  P1                     Persistent evidence     Findings, evidence, relationships, reviews, promotions, publication
+       5
+                                         model                   lineage.
+
+
+       6          P1                     Analyzer ecosystem      Registry, normalized schema, capabilities/resources, isolation.
+
+
+       7          P1                     External integration    RabbitMQ completion, REST, MCP, webhooks, event adapters.
+
+
+       8          P2                     Distributed scale       PostgreSQL, object/CAS storage, worker pools, quotas.
+
+
+       9          P2                     Operator surface        Job Status Surface, review queue, evidence/provenance navigation.
+
+
+
+
+    CRITICAL SEQUENCING CONSTRAINT
+
+    Do not prioritize a large web UI, multi-agent orchestration, or distributed workers before the P0 semantics are
+    finished. Those features would scale current ambiguity instead of resolving it.
+
+
+
+
+Engineering decision rule
+When a proposed feature competes with a lifecycle-integrity requirement, prefer the requirement that improves
+provenance, recovery, policy consistency, or evidence quality. ATLAS's strategic differentiation depends on those
+properties remaining stronger than its orchestration novelty.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                            27
+

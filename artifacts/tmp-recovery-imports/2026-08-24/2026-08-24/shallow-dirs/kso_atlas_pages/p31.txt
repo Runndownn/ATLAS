@@ -1,0 +1,56 @@
+RENDERED ARCHITECTURE VISUAL                                                                                                                DIAGRAM 03
+
+
+
+Rendered Mermaid 03 - Target Lineage Chain
+The lineage view shows the target evidence chain that lets a trusted downstream publication be traced back to the exact
+source material that produced it.
+
+
+
+
+    TARGET PROVENANCE AND EVIDENCE CHAIN
+
+                                Trace both directions: source -> publication and publication -> exact source bytes.
+
+
+
+
+            SourceRoot                          IntakeGeneration               ArtifactOccurrence                     ContentIdentity
+
+           registered source                     stable observation             where bytes appeared                   canonical digest
+
+
+
+
+          AnalysisFinding                       EvidenceRecord                 PromotionDecision                 DestinationPublication
+
+           normalized output                    meaning + confidence            approve / reject / hold               trusted destination
+
+
+
+
+    WHAT THIS DIAGRAM REPRESENTS
+
+    This diagram shows the target traceability chain that allows ATLAS to follow information from a registered source
+    through to a final downstream publication. SourceRoot and IntakeGeneration establish where and when material was
+    observed, while ArtifactOccurrence and ContentIdentity deliberately separate location from the exact bytes that were
+    processed. AnalysisFinding and EvidenceRecord capture what a tool, parser, security engine, or model concluded and
+    how that conclusion is characterized, including meaning, provenance, and confidence where applicable.
+    PromotionDecision records the governance step that determines whether the evidence or artifact is approved, rejected,
+    or held for further review. DestinationPublication closes the chain by recording where approved material was sent,
+    enabling full bidirectional lineage from a trusted output back to the original observed bytes.
+
+
+
+
+        DESIGN IMPLICATION
+
+        This model is the foundation for reproducibility, deduplication without provenance loss, auditability, evidence review, and
+        trustworthy knowledge publication.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                                      31
+

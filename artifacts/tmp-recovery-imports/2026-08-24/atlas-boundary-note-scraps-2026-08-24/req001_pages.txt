@@ -1,0 +1,113 @@
+EXECUTIVE BRIEF
+
+
+The development direction in one view
+ATLAS is evolving from a compact local artifact-processing kernel into a governed control plane that
+can take raw or untrusted material and preserve a reproducible chain from source, to exact bytes, to
+structure, to analysis, to evidence, to an explicit downstream trust decision.
+
+
+    The differentiator is not that ATLAS can run six Python stages. The
+    differentiator is that it can make artifact identity, provenance, safety, evidence,
+    and promotion decisions part of the execution model itself.
+
+
+    01                                                                     02
+
+   Keep the lifecycle stable                                              Make semantics durable
+   Reconnaissance, Fingerprinting, Structural Discovery,                  The immediate work turns intake, content identity, progress,
+   Controlled Extraction, Deep Understanding, and Review/                 events, error policy, control requests, and checkpoints into
+   Promotion remain the semantic spine even as the runtime                persistent runtime truth instead of partial or process-local
+   grows.                                                                 behavior.
+
+
+
+
+    03                                                                     04
+
+   Govern materialization and trust                                       Scale only after integrity
+   Unsafe containers are inspected before extraction; extracted           Distributed workers, PostgreSQL, content-addressable/
+   content moves to quarantined workspaces; analysis findings             object storage, APIs, MCP, and operator surfaces follow
+   remain distinct from approved knowledge or publications.               after local semantics and recovery behavior are coherent.
+
+
+
+
+  6                                     3                                4                                  2
+  stable lifecycle phases               P0 workstreams: semantics,       P1 workstreams: reliability,       P2 workstreams: scale and
+                                        safety, durable execution        evidence, analyzers,               operator experience
+                                                                         integration
+
+
+
+
+    E N D - S TAT E T H E S I S
+
+    ATLAS should become an artifact lifecycle control plane, not another generic workflow or agent
+    framework. Agents, LLMs, parsers, security tools, and domain analyzers can operate inside governed phases;
+    ATLAS remains authoritative for lifecycle state, provenance, safety, evidence lineage, policy, and promotion.
+
+
+
+
+  Source basis: the supplied ATLAS development-direction material for Runndownn/ATLAS, frozen at main @
+  efa547cafc64b58d60d19dcc1e5ba32c6b046bc5. The report preserves the source's distinction between current behavior and intended
+  architecture.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                           02
+SYSTEM IDENTITY
+
+
+What ATLAS is - and what it is not
+What it is                                                               What it is not
+ATLAS is a pre-alpha artifact lifecycle engine. Its job is
+to move potentially untrusted files, archives, repositories,                  Not a general DAG scheduler
+documents, security evidence, and related inputs through                      The runtime is asynchronous, but the artifact lifecycle is
+                                                                              deliberately ordered and sequential.
+a controlled series of state transitions.
+
+It originated from processing concepts in Yggdrasil and
+Geezer Mekanix, but deliberately strips away the larger                       Not a task queue
+platform concerns that surrounded those concepts -                            Current execution is local and process-oriented; durable
+                                                                              worker dispatch is an intended later stage.
+authentication, RBAC, multi-tenancy, secrets
+management, cognitive operations, TLS, and other
+infrastructure.
+                                                                              Not an agent framework
+What remains is the reusable processing kernel:                               AI and agent systems are expected to run inside bounded
+orchestration, state, events, discovery, hashing, archive                     analysis/review roles rather than control provenance or trust
+                                                                              transitions.
+safety, analysis extension points, and review/promotion
+concepts.
+
+                                                                              Not yet a knowledge fabric
+                                                                              Evidence and promotion concepts exist, but persistent
+                                                                              findings, review decisions, destination adapters, and full
+                                                                              lineage remain development work.
+
+
+
+
+    ARCHITECTURAL ROLE
+
+    ATLAS is best positioned as the governed ingestion and artifact-processing layer underneath security
+    systems, forensic workflows, repository intelligence, knowledge pipelines, corpus curation, and AI-assisted
+    analysis.
+
+
+
+
+Why the boundary matters
+Generic orchestration answers "which task runs next?" ATLAS is intended to answer a more evidence-sensitive
+question: what happened to this exact content, under which controls, and why was a result ever trusted?
+
+ Identity-aware      Provenance-aware        Safety-first    Evidence-aware      Review-gated      Extensible analysis
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                                03
+

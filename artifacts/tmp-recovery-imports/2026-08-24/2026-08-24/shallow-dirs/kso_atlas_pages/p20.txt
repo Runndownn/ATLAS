@@ -1,0 +1,49 @@
+ARCHITECTURAL EVOLUTION
+
+
+A staged path from kernel to governed control
+plane
+The source direction describes a progressive expansion rather than a replacement architecture. Each
+stage adds operational capability while preserving the six-phase semantic spine.
+
+
+
+        Current                  v0.x hardened               v1 service             v1.x governed               Scale-out               Agentic
+   local lifecycle kernel       reliable local engine   durable workers + APIs   evidence + policy gates   distributed processing   AI inside controls
+
+
+ Stage                      Primary capability added                                       What remains invariant
+
+                            Six phases, SQLite lifecycle, safety, hashing, plugin
+ Current
+                            seam
+
+                            Immutable intake, persistent identity, config
+ v0.x hardened
+                            enforcement, checkpoints
+
+                            Daemon/workers, durable controls, retry/timeout,
+ v1 service
+                            REST/MCP                                                       A-F lifecycle, provenance, safety boundaries,
+                                                                                           evidence/review distinction
+                            Source registry, evidence registry, promotion gates,
+ v1.x governed
+                            quarantine, policy
+
+ Scale-out                  Worker pools, PostgreSQL, object/CAS storage, quotas
+
+ Agentic                    Agents select/parameterize workflows but cannot
+ integration                bypass lifecycle authority
+
+
+
+
+    The end state is not "ATLAS becomes more autonomous." It is "ATLAS
+    becomes more durable, inspectable, and governable while allowing more
+    specialized systems to operate inside it."
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                                           20
+

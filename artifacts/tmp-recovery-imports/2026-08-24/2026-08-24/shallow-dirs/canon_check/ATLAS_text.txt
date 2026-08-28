@@ -1,0 +1,1620 @@
+ATLAS DEVELOPMENT DIRECTION                                                            ARCHITECTURE / HARDENING / ROADMAP
+
+
+
+
+                         Artifact Lifecycle Control Plane
+                            Architecture, Hardening & Development Direction
+
+
+           CONTROL-PLANE THESIS
+
+           ATLAS is evolving from a compact local pipeline kernel into a governed artifact-processing
+           substrate that preserves identity, provenance, safety, evidence, and promotion decisions
+           from raw source material to trusted downstream use.
+
+
+
+
+REPOSITORY REFERENCE                        CURRENT MATURITY                            SEMANTIC SPINE
+
+Runndownn/ATLAS                             Pre-Alpha v0.1.0                            Recon -> Fingerprint -> Structure
+main @ efa547cafc64...                      Python 3.13+ / MIT                          Extract -> Analyze -> Review
+EXECUTIVE BRIEF
+
+
+The development direction in one view
+ATLAS is evolving from a compact local artifact-processing kernel into a governed control plane that
+can take raw or untrusted material and preserve a reproducible chain from source, to exact bytes, to
+structure, to analysis, to evidence, to an explicit downstream trust decision.
+
+
+    The differentiator is not that ATLAS can run six Python stages. The
+    differentiator is that it can make artifact identity, provenance, safety, evidence,
+    and promotion decisions part of the execution model itself.
+
+
+    01                                                                     02
+
+   Keep the lifecycle stable                                              Make semantics durable
+   Reconnaissance, Fingerprinting, Structural Discovery,                  The immediate work turns intake, content identity, progress,
+   Controlled Extraction, Deep Understanding, and Review/                 events, error policy, control requests, and checkpoints into
+   Promotion remain the semantic spine even as the runtime                persistent runtime truth instead of partial or process-local
+   grows.                                                                 behavior.
+
+
+
+
+    03                                                                     04
+
+   Govern materialization and trust                                       Scale only after integrity
+   Unsafe containers are inspected before extraction; extracted           Distributed workers, PostgreSQL, content-addressable/
+   content moves to quarantined workspaces; analysis findings             object storage, APIs, MCP, and operator surfaces follow
+   remain distinct from approved knowledge or publications.               after local semantics and recovery behavior are coherent.
+
+
+
+
+  6                                     3                                4                                  2
+  stable lifecycle phases               P0 workstreams: semantics,       P1 workstreams: reliability,       P2 workstreams: scale and
+                                        safety, durable execution        evidence, analyzers,               operator experience
+                                                                         integration
+
+
+
+
+    E N D - S TAT E T H E S I S
+
+    ATLAS should become an artifact lifecycle control plane, not another generic workflow or agent
+    framework. Agents, LLMs, parsers, security tools, and domain analyzers can operate inside governed phases;
+    ATLAS remains authoritative for lifecycle state, provenance, safety, evidence lineage, policy, and promotion.
+
+
+
+
+  Source basis: the supplied ATLAS development-direction material for Runndownn/ATLAS, frozen at main @
+  efa547cafc64b58d60d19dcc1e5ba32c6b046bc5. The report preserves the source's distinction between current behavior and intended
+  architecture.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                           02
+SYSTEM IDENTITY
+
+
+What ATLAS is - and what it is not
+What it is                                                               What it is not
+ATLAS is a pre-alpha artifact lifecycle engine. Its job is
+to move potentially untrusted files, archives, repositories,                  Not a general DAG scheduler
+documents, security evidence, and related inputs through                      The runtime is asynchronous, but the artifact lifecycle is
+                                                                              deliberately ordered and sequential.
+a controlled series of state transitions.
+
+It originated from processing concepts in Yggdrasil and
+Geezer Mekanix, but deliberately strips away the larger                       Not a task queue
+platform concerns that surrounded those concepts -                            Current execution is local and process-oriented; durable
+                                                                              worker dispatch is an intended later stage.
+authentication, RBAC, multi-tenancy, secrets
+management, cognitive operations, TLS, and other
+infrastructure.
+                                                                              Not an agent framework
+What remains is the reusable processing kernel:                               AI and agent systems are expected to run inside bounded
+orchestration, state, events, discovery, hashing, archive                     analysis/review roles rather than control provenance or trust
+                                                                              transitions.
+safety, analysis extension points, and review/promotion
+concepts.
+
+                                                                              Not yet a knowledge fabric
+                                                                              Evidence and promotion concepts exist, but persistent
+                                                                              findings, review decisions, destination adapters, and full
+                                                                              lineage remain development work.
+
+
+
+
+    ARCHITECTURAL ROLE
+
+    ATLAS is best positioned as the governed ingestion and artifact-processing layer underneath security
+    systems, forensic workflows, repository intelligence, knowledge pipelines, corpus curation, and AI-assisted
+    analysis.
+
+
+
+
+Why the boundary matters
+Generic orchestration answers "which task runs next?" ATLAS is intended to answer a more evidence-sensitive
+question: what happened to this exact content, under which controls, and why was a result ever trusted?
+
+ Identity-aware      Provenance-aware        Safety-first    Evidence-aware      Review-gated      Extensible analysis
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                                03
+CURRENT ARCHITECTURE
+
+
+A compact, readable execution kernel
+The current design is small by intent. AtlasRuntime centralizes construction; PipelineOrchestrator
+advances the lifecycle; SQLite records jobs and phases; safety and hashing services support phase
+work; the event bus decouples observers from execution.
+
+  Figure 1. Current pre-alpha runtime structure
+
+
+
+         CURRENT PRE-ALPHA RUNTIME
+
+
+
+                    Operator / CLI                                                AtlasRuntime                                PipelineOrchestrator
+                                                                            Canonical composition root                         Sequential phase control
+                   YAML / JSON pipeline
+                                                                          Shared services + all 6 handlers                        Fail-closed lifecycle
+
+
+
+
+                       JobStore                               EventBus                                Safety Services             Hash / Identity
+                   SQLite jobs / phases                  In-memory + RabbitMQ                         filesystem / archive        SHA-256 + BLAKE3
+                     selected events                      observer side-channel                          path controls            in-memory manifest
+
+
+
+
+                                          Six phase handlers: Recon -> Fingerprint -> Structure -> Extract -> Analyze -> Review
+                                                         Domain behavior is replaceable; lifecycle semantics remain stable.
+
+
+
+
+   Canonical composition                                                                          Deterministic control flow
+   AtlasRuntime prevents CLI/tests/future APIs from                                               The orchestrator walks one configured phase list in order.
+   accidentally constructing different handler graphs. This                                       That simplicity is a feature for evidence-sensitive processing
+   addresses an earlier fail-open wiring problem.                                                 because the sequence remains reconstructable.
+
+
+
+
+    CURRENT DURABILITY
+
+    Jobs and phase records are persisted in SQLite. Orchestrator lifecycle events also have durable representation.
+    Detailed phase-emitted observations remain more transient and are part of the hardening direction.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                                                     04
+LIFECYCLE MODEL
+
+
+The six-phase semantic spine
+The A-F lifecycle carries more architectural meaning than the current implementation depth. It defines
+how an artifact progresses from unknown input toward governed downstream use.
+
+  Figure 2. ATLAS artifact lifecycle
+
+
+
+
+            A                                B                               C                                D                         E                     F
+
+             Reconnaissance                      Fingerprinting            Structural Discovery            Controlled Extraction       Deep Understanding    Review / Promotion
+                Observe source                   Establish identity              Inspect containers               Materialize safely            Analyze           Govern trust
+
+
+
+        Stable semantic lifecycle: the implementation may evolve, but the A-F trust progression remains the architectural spine.
+
+
+
+
+    A                                                                      B                                                                C
+
+   Reconnaissance                                                        Fingerprinting                                                  Structural Discovery
+   Observe source material, inventory                                    Compute cryptographic identity and                              Inspect archive/container organization
+   files, record risk indicators, and                                    distinguish exact content from the                              before materializing contents.
+   establish the intake boundary.                                        path or source occurrence where it
+                                                                         appeared.
+
+
+
+
+    D                                                                      E                                                                F
+
+   Controlled Extraction                                                 Deep Understanding                                              Review / Promotion
+   Materialize accepted content under                                    Run domain analyzers and convert                                Separate analyzer output from the
+   path, archive, resource, and                                          raw artifacts into structured findings.                         policy or human decision that allows it
+   workspace controls.                                                                                                                   to enter a trusted destination.
+
+
+
+  Design principle: arbitrary DAG behavior can be added around or within lifecycle stages later. The lifecycle itself should remain stable so
+  provenance and trust transitions stay intelligible.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                                                                     05
+P H A S E D E TA I L
+
+
+A-C: establish observation, identity, and
+structure
+    A                                                  B                                     C
+
+   Reconnaissance                                    Fingerprinting                         Structural Discovery
+   Today: filesystem walk, file/byte                 Today: streaming SHA-256 and           Today: inspect archive members,
+   counts, archive detection, executable             optional BLAKE3 hashing, with an in-   suspicious paths, and nested-archive
+   indicators, sensitive-looking paths,              memory manifest.                       presence without extraction.
+   symlink awareness.
+                                                     Target: persist ContentIdentity        Target: recursively understand
+   Target: emit an immutable                         independently from                     nested containers and packaging
+   IntakeGeneration so every later                   ArtifactOccurrence, enabling cross-    relationships under strict depth,
+   phase works from a stable                         run duplicate recognition without      member, and byte budgets.
+   observation instead of a source tree              losing provenance.
+   that may change during processing.
+
+
+
+The key semantic correction: occurrence is not identity
+ATLAS must treat a filesystem path as an occurrence and a digest as the identity of the bytes. The same bytes can
+appear in a repository, a ZIP, a backup, an email attachment, and a forensic image. Those locations should remain
+separately traceable while converging on one content identity.
+
+
+    W H Y I T M AT T E R S
+
+    Persistent occurrence-to-content relationships enable true deduplication, repeat-analysis avoidance, lineage
+    queries, migration validation, and evidence defensibility without collapsing distinct provenance into one record.
+
+
+
+
+Immutable intake as a trust anchor
+If fingerprinting re-discovers a live filesystem instead of consuming the exact inventory observed during
+Reconnaissance, the source can change between phases. The long-term design therefore treats Reconnaissance as a
+snapshot authority: downstream phases operate on the recorded occurrence set, not a fresh traversal.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                     06
+P H A S E D E TA I L
+
+
+D-F: controlled materialization, analysis, and
+trust
+    D                                                  E                                                  F
+
+   Controlled Extraction                             Deep Understanding                                  Review / Promotion
+   Today: reassess archives, block                   Today: basic metadata plus an                       Today: evidence-oriented records
+   unsafe results, enforce destination               analyzer plugin protocol.                           and candidate promotion concepts.
+   containment, and use safer TAR data
+                                                     Target: analyzer registry, normalized               Target: durable review decisions,
+   filtering.
+                                                     finding schema, declared capabilities/              policy gates, destination adapters,
+   Target: isolated per-job quarantine               resources, plugin isolation, and rich               and traceable publication history.
+   workspaces governed by one                        domain-specific analysis.
+   canonical path/archive policy.
+
+
+
+
+    Processing something is not the same as deciding that a derived assertion
+    deserves to become trusted knowledge.
+
+
+Evidence semantics are strategically important
+The review model already distinguishes direct observations, parsed facts, inferred relationships, and classification
+hypotheses. That is a stronger foundation than a generic "result" object because downstream systems can reason
+about how a claim was produced, not just its text.
+
+
+
+    A N A LY Z E R R E S P O N S I B I L I T Y                               AT L A S R E S P O N S I B I L I T Y
+
+    Produce normalized findings, tool/model attribution,                     Preserve provenance, maintain lifecycle state,
+    relevant source references, confidence where                             enforce policy boundaries, record review
+    appropriate, and enough context for review.                              outcomes, and control publication into trusted
+                                                                             destinations.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                                 07
+A R T I FA C T S E M A N T I C S
+
+
+The system is managing trust state, not only
+tasks
+The core conceptual shift is from a task graph to an artifact state model. Each phase should leave
+behind durable evidence of what changed in the system's understanding or authority over the artifact.
+
+  Figure 3. Artifact state progression
+
+
+
+
+        Raw / unknown                                          Content identity                                         Materialized                              Promotion decision
+
+            Untrusted                                              Exact bytes                                       Controlled workspace                           Trusted candidate
+
+                                 Observed occurrence                                   Structure understood                                     Analyzed
+
+                                      Known source                                         Container context                                Evidence + findings
+
+
+
+
+      The central control problem is not task ordering alone; it is preserving how identity, structure, evidence and trust evolve.
+
+
+
+
+ State transition                       What becomes known or controlled                                                                               Primary record
+
+                                        Where the material was seen, at what intake generation, with which source
+ Unknown -> observed                                                                                                                                   ArtifactOccurrence
+                                        metadata
+
+ Observed -> identified                 Exact byte identity independent of location                                                                    ContentIdentity
+
+ Identified -> structured               Container members, nesting, suspicious paths, packaging relationships                                          StructuralReport
+
+ Structured ->
+                                        Which content was created on disk, where, and under which safety policy                                        ExtractionRecord
+ materialized
+
+ Materialized -> analyzed               Normalized tool/model findings and relationships                                                               AnalysisFinding
+
+                                                                                                                                                       Evidence +
+ Analyzed -> governed                   What evidence supports a decision and whether promotion was allowed
+                                                                                                                                                       PromotionDecision
+
+
+  This state model is what allows ATLAS to answer provenance questions later: origin, exact bytes, extraction lineage, analyzer attribution,
+  confidence, review decision, and destination publication.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                                                                          08
+C U R R E N T I M P L E M E N TAT I O N
+
+
+What is already strong
+   Clear composition root                                         Fail-closed phase dispatch
+   AtlasRuntime gives the CLI, tests, and future API layers one   Configured phases without a handler are treated as errors
+   canonical way to construct the engine and all six handlers.    instead of being silently marked successful.
+
+
+
+
+   Readable orchestration                                         Durable job and phase state
+   The execution path is compact and direct. For evidence-        SQLite stores job and phase lifecycle records, creating a
+   sensitive software, that readability supports assurance and    useful baseline for inspection and future recovery semantics.
+   debugging.
+
+
+
+
+   Safety is a separate domain                                    Streaming identity
+   Filesystem discovery, archive safety, and path checks are      SHA-256 and optional BLAKE3 are computed in chunks,
+   not buried in ad hoc phase code, which supports defense-in-    giving a scalable content-identity primitive even though
+   depth evolution.                                               persistent CAS is not implemented yet.
+
+
+
+
+   Analysis is extensible                                         Trust is modeled explicitly
+   The analyzer plugin protocol creates a natural seam for        Evidence and promotion concepts create the right boundary
+   security, repository, document, forensic, and AI analysis      between producing a result and treating it as authoritative.
+   engines.
+
+
+
+Hardening has already changed the trajectory
+The source describes an earlier architecture review that exposed fail-open handler wiring, structural-discovery/
+extraction conflation, TAR safety issues, event persistence gaps, duplicate-key behavior, serialization problems, and
+configuration issues. Subsequent code work addressed several of those findings. That assessment-to-hardening
+feedback loop should remain part of the project culture.
+
+
+    S T R AT E G I C A D VA N TA G E
+
+    ATLAS is still small enough that semantics can be corrected before distributed infrastructure and broad
+    integrations make those mistakes expensive to unwind.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                    09
+PRE-ALPHA BOUNDARIES
+
+
+Where the runtime and the architecture still
+diverge
+ Area                           Current behavior                                           Required direction
+
+                                Stored in metadata; handlers do not consistently consume
+ Phase configuration                                                                       Typed, validated, injected, enforced policy
+                                it
+
+ Error policy                   Overlapping continue/abort concepts                        One authoritative runtime contract
+
+ Content store                  In-memory hash manifest                                    Persistent content + occurrence model
+
+                                Same bytes produce same hash; repeat work is not
+ Deduplication                                                                             Cross-run identity reuse with provenance
+                                durably avoided
+
+                                Phase object changes are not continuously persisted as
+ Progress                                                                                  Durable phase + aggregate progress
+                                live job progress
+
+ Pause / resume /                                                                          Persistent control requests + worker
+                                Depends on process-local runtime state
+ cancel                                                                                    cooperation
+
+ Detailed events                Phase-emitted observations may remain transient            Durable operational/evidentiary event stream
+
+                                                                                           Defined consumption, backpressure, delivery
+ RabbitMQ                       Partial publishing/fallback capability
+                                                                                           semantics
+
+ Nested archives                Detected and counted                                       Recursive bounded inspection
+
+ Analysis                       Plugin seam + basic metadata                               Registry + normalized findings + isolation
+
+ Promotion                      Conceptual evidence/candidates                             Persistent reviews + destination publication
+
+                                                                                           Idempotency, timeout, checkpoint, crash
+ Recovery                       State recorded; no complete checkpoint/retry model
+                                                                                           recovery
+
+
+
+    I N T E R P R E TAT I O N
+
+    These are not reasons to abandon the architecture. They are the exact seams where the pre-alpha
+    implementation must become semantically honest before ATLAS expands into a multi-process or distributed
+    service.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                            10
+PRIORITY MODEL
+
+
+Build integrity before scale
+The development direction contains nine major workstreams. Their sequencing is deliberate: first
+make the local lifecycle truthful and durable; then operationalize evidence and integrations; only then
+distribute the system.
+
+P0 - foundational                                                                                                                        3
+
+P1 - operational                                                                                                                         4
+
+P2 - expansion                                                                                                                           2
+
+Figure 4. Development workstreams by source-defined priority. Counts are from the supplied execution rewrite, not a performance score.
+
+
+
+    P0                       Semantic integrity. Immutable discovery manifest; persistent content/occurrence model; true dedup;
+                             configuration enforcement; live progress; one error policy.
+                             Safety and evidence. Quarantine workspaces; canonical path safety; recursive archive budgets;
+                             durable detailed events.
+                             Durable execution. Daemon/workers; persisted control requests; cooperative pause/cancel;
+                             checkpoints.
+
+
+
+    P1                       Reliability. retry/backoff/timeout/idempotency/crash recovery/migrations.
+                             Knowledge model. persistent findings, evidence, relationships, reviews and promotions.
+                             Analyzer ecosystem. registry, normalized schema, capabilities/resources, isolation.
+                             Integration. RabbitMQ semantics, REST, MCP, webhooks and event adapters.
+
+
+
+    P2                       Distributed scale. PostgreSQL projections, object/CAS storage, worker pools, quotas.
+                             Operator surface. Job Status Surface, review queue, artifact/evidence graph, provenance viewer.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                           11
+P0 WORKSTREAM 1
+
+
+Establish semantic integrity
+The first P0 objective is simple to state but foundational: every concept exposed by ATLAS
+configuration and APIs must correspond to one clear runtime meaning.
+
+
+Immutable discovery manifest                                     Runtime-enforced phase configuration
+Reconnaissance should produce a durable intake                   Values such as discovery depth, hash algorithms/chunk
+generation containing the exact occurrence set that later        size, extraction byte ceilings, and archive-member limits
+phases consume. Downstream phases should not silently            must be typed, validated, passed to handlers, and
+re-scan a changing source.                                       enforced.
+
+
+Persistent occurrence + identity                                 One failure-policy contract
+Store filesystem/source occurrences separately from              Remove ambiguity between "continue after phase error"
+cryptographic content identities. Many occurrences may           and "abort on error." A pipeline definition should predict
+reference one content identity; neither concept replaces         execution behavior exactly.
+the other.
+                                                                 Live progress as durable state
+Real duplicate avoidance                                         Persist intermediate phase progress during execution and
+Use persistent identity to prevent unnecessary repeat            derive meaningful job-level progress so a separate status
+processing while retaining every occurrence and its              process sees real activity.
+source provenance.
+
+
+
+    DEFINITION OF DONE
+
+    Intake state, identity, deduplication, configuration, progress, and failure policy all have one durable meaning that
+    is shared by the CLI, embedded API, tests, workers, and future remote interfaces.
+
+
+
+
+Why this must precede scale
+Distributing workers or adding APIs before semantic integrity would replicate ambiguity across components. P0-1
+makes the local engine authoritative enough to become a service safely.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                12
+P0 WORKSTREAM 2
+
+
+Strengthen safety and evidence preservation
+Per-job quarantine workspaces                                               Recursive container budgets
+Controlled Extraction should materialize accepted content                   Nested archives need bounded recursive structural
+into isolated job-specific workspaces, not adjacent to the                  inspection. Limits should cover nesting depth, total
+source archive. The workspace becomes a managed                             expanded bytes, member counts, and other resource
+side-effect boundary.                                                       ceilings.
+
+
+One canonical path-safety policy                                            Durable detailed events
+Discovery, structural inspection, extraction, analyzer file                 Phase-level observations such as discovery progress,
+access, and future publication adapters should use the                      analyzer activity, extraction decisions, and errors should
+same containment and risky-path rules.                                      join the durable event history instead of existing only on a
+                                                                            transient bus.
+
+
+  Safety boundary pattern
+
+
+          Source                         Structural              Policy decision              Quarantine            Analyzer access
+        potentially          ->          inspection      ->      limits + path rules   ->      controlled     ->        bounded
+        untrusted                   no materialization                                         extraction              workspace
+
+
+
+
+    O P E R AT I O N A L O U T C O M E
+
+    Materialization is isolated, nested packaging cannot create unbounded work, path rules are consistent, and the
+    system retains a durable record of why a container or member was accepted, skipped, or rejected.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                        13
+P0 WORKSTREAM 3
+
+
+Make execution durable
+Today, durable inspection and process-local execution control are different things. The P0 execution
+work closes that gap.
+
+
+    1                                                                          2
+
+   Long-running runtime                                                       Persisted control requests
+   Introduce a daemon or worker process that owns active jobs                 Pause, resume, and cancel become durable commands
+   instead of rebuilding execution context for every CLI                      stored or queued for the active worker to consume.
+   invocation.
+
+
+
+
+    3                                                                          4
+
+   Cooperative phase control                                                  Checkpoints
+   Long-running handlers periodically observe cancellation/                   Record recovery points so resumption is not equivalent to
+   pause state and stop at defined safe boundaries.                           blindly rerunning a phase whose side effects may already
+                                                                              have occurred.
+
+
+
+Durable control loop
+        Operator                  Persistent state                   Worker                       Phase                    Checkpoint
+    control request
+                          ->      request recorded
+                                                         ->      observes request
+                                                                                      ->        cooperates
+                                                                                                                  ->    safe recovery state
+
+
+
+    DEFINITION OF DONE
+
+    A second process can inspect a durable job, submit a control request, and have the active runtime honor it in a
+    defined way. Process loss no longer erases the control context needed to resume safely.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                            14
+P1 RELIABILITY
+
+
+Define retry, timeout, idempotency, and recovery
+Once ATLAS owns durable jobs, it must define what a failure means for each phase - especially when
+a phase has filesystem or external side effects.
+
+ Control                  Purpose                            Design question ATLAS must answer
+
+ Retry policy             Recover transient failures         Which failures are retryable, and how many attempts are allowed?
+
+                                                             How does retry cadence adapt to repeated failure or external dependency
+ Backoff                  Avoid hot failure loops
+                                                             pressure?
+
+                          Bound long-running
+ Timeouts                                                    What is the phase-level deadline and what cleanup occurs on expiry?
+                          operations
+
+ Idempotency              Prevent duplicate side effects     Can the phase be replayed safely from its last durable checkpoint?
+
+ Crash recovery           Resume after process loss          Which persistent state proves what work completed before the crash?
+
+ Schema
+                          Evolve durable state safely        How are version changes applied and rolled back without corrupting jobs?
+ migrations
+
+
+
+
+    Automatic retry is only safe when ATLAS can prove whether repeating the
+    phase will duplicate a side effect or corrupt lineage.
+
+
+    COMPLETION CONDITION
+
+    Every built-in phase has explicit repeat-execution semantics, recovery state survives process interruption, and
+    database evolution is versioned rather than implicit.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                          15
+P1 EVIDENCE MODEL
+
+
+Make findings, evidence, review, and publication
+first-class
+The mature control plane needs a persistent lineage model that connects source material to accepted
+downstream output. Jobs and phase records alone are not enough.
+
+  Figure 5. Target lineage and evidence model
+
+
+      TARGET LINEAGE MODEL
+
+
+
+
+               SourceRoot                       IntakeGeneration                ArtifactOccurrence                            ContentIdentity
+              registered source                   stable observation            where bytes appeared                            canonical digest
+
+
+
+
+                 StructuralReport                   ExtractionRecord               AnalysisFinding                           EvidenceRecord
+                   container context                materialization lineage         normalized output                        meaning + confidence
+
+
+
+
+                                          PromotionDecision                                    DestinationPublication
+                                          approved / rejected / held                             where trusted output went
+
+
+
+
+   Evidence is typed                                                            Promotion is a decision
+   Observed facts, parsed facts, inferred relationships, and                    Review records should capture approve/reject/hold
+   hypotheses should remain distinguishable, with provenance                    outcomes, decision authority, supporting evidence, and
+   and confidence where applicable.                                             destination-specific policy.
+
+
+
+  The target trace runs in both directions: a publication can be traced back to its evidence and source bytes; a source occurrence can be followed
+  forward through findings, review, and destination publication.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                                       16
+P 1 A N A LY Z E R E C O S Y S T E M
+
+
+Turn Deep Understanding into a governed
+plugin platform
+Phase E is the extension point through which ATLAS becomes useful across security, repositories,
+documents, forensics, and AI-assisted workflows. The plugin seam therefore needs a contract
+stronger than "return any dictionary."
+
+
+Analyzer registry                                                        Resource controls
+Discover and register analyzers by capability, artifact type,            The runtime can enforce quotas and decide which worker
+domain, version, and supported inputs.                                   or sandbox is appropriate for each analyzer.
+
+
+Normalized finding schema                                                Plugin isolation
+Give all analyzers a shared envelope for severity/                       A parser or analyzer should not automatically inherit
+category, observation, source reference, confidence,                     unrestricted authority over the ATLAS runtime or host
+relationships, tool version, timestamps, and structured                  filesystem.
+data.
+                                                                         Versioned attribution
+Capability declarations                                                  Findings should record the analyzer/tool/model version so
+Plugins should declare filesystem access, network needs,                 later review can reproduce or reinterpret results.
+CPU/memory profile, external tools, and whether they can
+execute active content.
+
+
+
+    ARCHITECTURAL RULE
+
+    Domain intelligence belongs inside controlled plugins. Identity, safety, provenance, lifecycle state, and promotion
+    authority remain core ATLAS responsibilities.
+
+
+
+
+Examples of Phase E analyzers
+ YARA       Capa     FLOSS       file-format parsers     repository analyzers   document extractors   log parsers   PCAP analyzers
+
+ LLM analysis
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                       17
+P 1 I N T E G R AT I O N
+
+
+External systems should use the lifecycle, not
+bypass it
+Complete event transport                                                  MCP / agent-facing interface
+RabbitMQ should move from partial publishing/fallback                     Agents can request governed artifact processing through
+behavior toward defined connection lifecycle, consumers/                  a constrained tool surface rather than manipulating local
+subscriptions, delivery semantics, and backpressure.                      files or internal stores directly.
+
+
+REST service                                                              Webhooks and event adapters
+A service interface can submit pipeline jobs, inspect                     External systems can observe terminal states, review
+status, retrieve evidence, and issue durable control                      requirements, publication events, and failures without
+requests.                                                                 being coupled to the core orchestrator.
+
+
+  Integration boundary
+
+
+     External caller                Control plane                   Lifecycle               Evidence /             Destination
+     CLI / REST / MCP      ->     validate + register    ->      A-F governed job   ->       review        ->     approved output
+                                                                                         policy boundary               only
+
+
+
+
+    KEY REQUIREMENT
+
+    Every external interface must preserve the same lifecycle and provenance rules as local execution. API
+    convenience must not create a second, less-governed processing path.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                      18
+P 2 E X PA N S I O N
+
+
+Scale and operator experience come after
+semantic stability
+Distributed scale                                                Operator surface
+
+   PostgreSQL projection                                          Job Status Surface
+   Move high-concurrency durable state beyond a single            Expose durable lifecycle state, checkpoints, progress,
+   SQLite connection while preserving the same job/phase/         current phase, failures, and control requests.
+   evidence semantics.
+
+
+                                                                  Review queue
+   Object or content-addressable storage                          Present pending promotion decisions with evidence,
+   Persist materialized and canonical content independently of    provenance, and destination policy in context.
+   worker-local disks.
+
+
+                                                                  Artifact/evidence graph
+   Worker pools + quotas                                          Let operators navigate occurrence -> content -> extraction
+   Dispatch analyzers by capability and bound resource usage      -> finding -> evidence -> decision -> publication lineage.
+   per job, phase, source, or tenant context.
+
+
+
+
+    SEQUENCING RULE
+
+    Scale changes infrastructure, not semantics. The local engine must define identity, control, recovery, and trust
+    correctly before those same concepts are distributed across workers and stores.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                 19
+ARCHITECTURAL EVOLUTION
+
+
+A staged path from kernel to governed control
+plane
+The source direction describes a progressive expansion rather than a replacement architecture. Each
+stage adds operational capability while preserving the six-phase semantic spine.
+
+
+
+        Current                  v0.x hardened               v1 service             v1.x governed               Scale-out               Agentic
+   local lifecycle kernel       reliable local engine   durable workers + APIs   evidence + policy gates   distributed processing   AI inside controls
+
+
+ Stage                      Primary capability added                                       What remains invariant
+
+                            Six phases, SQLite lifecycle, safety, hashing, plugin
+ Current
+                            seam
+
+                            Immutable intake, persistent identity, config
+ v0.x hardened
+                            enforcement, checkpoints
+
+                            Daemon/workers, durable controls, retry/timeout,
+ v1 service
+                            REST/MCP                                                       A-F lifecycle, provenance, safety boundaries,
+                                                                                           evidence/review distinction
+                            Source registry, evidence registry, promotion gates,
+ v1.x governed
+                            quarantine, policy
+
+ Scale-out                  Worker pools, PostgreSQL, object/CAS storage, quotas
+
+ Agentic                    Agents select/parameterize workflows but cannot
+ integration                bypass lifecycle authority
+
+
+
+
+    The end state is not "ATLAS becomes more autonomous." It is "ATLAS
+    becomes more durable, inspectable, and governable while allowing more
+    specialized systems to operate inside it."
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                                           20
+E N D - S TAT E A R C H I T E C T U R E
+
+
+The Artifact Lifecycle Control Plane
+At maturity, ATLAS becomes the common execution and provenance substrate beneath local tools,
+security analyzers, knowledge systems, and AI-assisted workflows.
+
+  Figure 6. Governed end-state architecture
+
+
+
+         GOVERNED END STATE
+
+
+
+                CLI / API / MCP                                   ATLAS Control Plane
+                                                                                                                             Work Queue                             Workers
+              submit / inspect / control                         policy + lifecycle + provenance                             durable dispatch                   bounded execution
+                                                                  jobs + controls + checkpoints
+
+
+
+
+                   Source Registry                               Quarantine / CAS                             Evidence Store                                 Event / Metrics
+                   roots + generations                          isolated materialization                      findings + evidence                           durable event history
+                  provenance authority                              content identities                      relationships + lineage                        observability adapters
+
+
+
+
+                                           Governed A-F lifecycle inside every job                                                              Review / Policy Gate
+                                            identity -> safety -> analysis -> evidence -> review                                                   approve / reject / hold
+                                            agents and tools execute within bounded phases                                                      destination-specific controls
+
+
+
+
+                                           Scale-out changes infrastructure, not the lifecycle meaning. Provenance and promotion remain first-class.
+
+
+
+
+   Control plane authority                                                                            Worker specialization
+   Pipeline registration, policy, lifecycle state, durable controls,                                  Execution can scale out by capability while workers remain
+   checkpoints, provenance and review decisions are                                                   bounded by job configuration, quarantine, resource policy,
+   centralized as authoritative records.                                                              and analyzer declarations.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                                                                      21
+AI AND AGENT GOVERNANCE
+
+
+AI belongs inside the lifecycle - not above it
+    The model should be able to analyze, classify, correlate, and propose. It
+    should not become the authority over source provenance, filesystem safety,
+    durable control, or final promotion.
+
+
+Appropriate AI roles                                                    ATLAS retains authority
+  • Classify artifact type or domain.                                     • Register and freeze the source occurrence set.
+  • Extract structured facts from documents or technical notes.           • Establish exact content identity.
+  • Propose relationships between findings.                               • Enforce archive and path safety.
+  • Summarize analyzer output into evidence candidates.                   • Control workspace materialization.
+  • Recommend routing to specialized analyzers.                           • Persist lifecycle and event history.
+  • Propose a promotion decision with supporting rationale.               • Apply review/policy gates and record publication.
+
+
+
+  Trust boundary for AI-assisted analysis
+
+
+      ATLAS intake                     Bounded                    Finding                Evidence review             Publication
+      frozen source +      ->          analyzer          ->      attributed +     ->      policy / human        ->    approved
+          identity                LLM / tool / parser            normalized                                          destination
+
+
+
+
+    DESIGN OBJECTIVE
+
+    Increase analytical capability without weakening the deterministic chain of custody. AI enriches the evidence
+    lane; ATLAS governs the evidence lifecycle.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                     22
+SECURITY & GOVERNANCE
+
+
+Controls that make the architecture defensible
+ Control                     Current / intended behavior                         Why it matters
+
+                                                                                 Unavailable functionality cannot masquerade as
+ Fail-closed dispatch        Missing configured handlers fail the job
+                                                                                 success
+
+ Pre-extraction              Structure and resource risk are assessed before     Untrusted containers are reasoned about before they
+ inspection                  materialization                                     create files
+
+ Quarantine boundary         Target: per-job isolated extraction workspaces      Controls the filesystem side effects of untrusted input
+
+                             Target: recursive depth, bytes, member counts,      Prevents archive recursion and analysis from becoming
+ Resource budgets
+                             analyzer quotas                                     resource exhaustion
+
+ Cryptographic               SHA-256, optional BLAKE3; target persistent CAS
+                                                                                 Anchors provenance to exact bytes, not filenames
+ identity                    model
+
+                             Lifecycle events persisted; detailed phase events   Supports incident reconstruction, audit, and operational
+ Durable events
+                             targeted for persistence                            observability
+
+                             Observation / parsed / inferred / hypothesis        Prevents all analyzer output from being treated as
+ Typed evidence
+                             distinctions                                        equivalent truth
+
+                             Target durable review decisions and destination
+ Promotion gate                                                                  Separates analysis capability from authority to publish
+                             policy
+
+                             Target checkpoint, idempotency, timeout, retry      Makes automation safe under process failure and
+ Recovery policy
+                             semantics                                           replay
+
+
+
+    GOVERNANCE PRINCIPLE
+
+    Evidence, operator decisions, access authority, and filesystem mutations should remain distinct concepts. The
+    more ATLAS scales, the more important this separation becomes.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                             23
+A D VA N TA G E S
+
+
+Why ATLAS can be strategically useful
+   Versus one-off scripts                                           Versus generic workflow schedulers
+   Domain tools stop rebuilding the same intake, hashing,           ATLAS can preserve artifact semantics: exact content,
+   archive, state, event, provenance, and review scaffolding.       occurrence, structure, materialization lineage, findings,
+                                                                    evidence, and promotion decisions.
+
+
+
+
+   Versus agent frameworks                                          Versus direct ingestion into knowledge
+   Deterministic policy and lifecycle state remain outside model    stores
+   discretion. AI becomes a bounded capability, not the             ATLAS creates a governed buffer between raw/untrusted
+   execution authority.                                             material and trusted downstream data, with explicit evidence
+                                                                    and promotion controls.
+
+
+
+Operational advantages once hardened
+  • Repeatability: jobs can be reconstructed from immutable intake and versioned analyzer evidence.
+  • Deduplication without provenance loss: identical bytes converge on one identity while all occurrences remain traceable.
+  • Safer automation: structural inspection and resource budgets precede extraction and analysis.
+  • Cross-domain reuse: security, repository, document, forensic, and AI analyzers share one lifecycle.
+  • Decision traceability: approved knowledge can be traced back through evidence, findings, and exact source bytes.
+  • Incremental scale: the same semantics can move from local SQLite execution to workers and service interfaces later.
+
+
+    MOST DEFENSIBLE POSITIONING
+
+    ATLAS is infrastructure for governed artifact progression. It is valuable when raw input is untrusted,
+    repeated, nested, evidentiary, AI-analyzed, or destined for a trusted system.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                     24
+USE CASES
+
+
+Where the lifecycle model creates leverage
+ Use case                             How ATLAS contributes
+
+ Incident-response evidence           Fingerprint case files, safely unpack collections, preserve provenance, dispatch forensic plugins, and
+ intake                               gate evidence promotion.
+
+                                      Quarantine samples, hash/deduplicate, inspect containers, and run YARA/Capa/FLOSS-style analyzers
+ Malware / static analysis
+                                      without executing specimens.
+
+                                      Treat PCAPs, Zeek/Suricata exports, logs, and supporting artifacts as one provenance-linked
+ Network forensics
+                                      investigation.
+
+ CVE research packages                Normalize advisories, PoCs, patches, and test evidence into one reviewed vulnerability record.
+
+ Security knowledge                   Deduplicate walkthroughs/notes, classify domains, extract structured techniques, and promote
+ ingestion                            validated knowledge.
+
+ RAG corpus production                Separate raw-source intake from parsing, chunking, embedding, and trusted-index promotion.
+
+ Training/evaluation corpus           Preserve provenance, detect duplicates or contamination, and require approval before dataset
+ curation                             admission.
+
+                                      Hash releases, inspect packages/manifests/SBOMs/signatures, and gate artifacts before repository
+ Software supply chain
+                                      use.
+
+                                      Snapshot files, establish identities, run language/security/license analyzers, and retain findings against
+ Repository intelligence
+                                      immutable content.
+
+                                      Register disk, memory, and archive artifacts and preserve lineage from tool outputs to original
+ Forensics case processing
+                                      evidence.
+
+ Migration / backup validation        Compare source and destination content identities and qualify backups before production restoration.
+
+ Firmware / package
+                                      Recursively inspect embedded containers under bounded extraction rules.
+ inspection
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                                     25
+SECURITY KNOWLEDGE
+
+
+A direct fit: deterministic ingestion beneath
+RUDI-K / BinReaper
+The supplied direction identifies security knowledge ingestion as a particularly strong fit because the
+corpus already contains repeatable structures such as tools and usage, techniques and
+methodologies, processes and steps, lessons, challenges and solutions, and potential applications.
+
+  Incoming corpus                        A-B                       C-D                          E                            F
+  Markdown / PDF /              inventory + content              inspect +               domain / tools /            validate + promote
+    screenshots /
+                          ->          identity
+                                                         ->      controlled
+                                                                                 ->       commands /
+                                                                                                                ->
+   code / archives                                               extraction               relationships
+
+
+
+
+What ATLAS would own                                                   What downstream knowledge systems
+  • Source registration and intake generation.                         would own
+  • Exact content identity and duplicate recognition.                    • Canonical knowledge schema and taxonomy.
+  • Archive and path safety.                                             • Retrieval indexes and knowledge navigation.
+  • Controlled materialization.                                          • Domain-specific publication rules.
+  • Analyzer invocation and result attribution.                          • Long-term knowledge presentation and reuse.
+  • Evidence lineage and review state.                                   • Consumer-facing search and agent retrieval.
+
+
+
+    R E S U LT
+
+    ATLAS becomes the deterministic ingestion and provenance layer underneath the knowledge fabric rather than
+    being limited to CTF processing.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                        26
+EXECUTION SEQUENCE
+
+
+The recommended development order
+ Order          Priority                 Workstream              Outcome
+
+
+                  P0                                             Immutable intake, persistent identity, real dedup, config enforcement,
+       1                                 Semantic integrity
+                                                                 live progress, one error policy.
+
+
+                  P0                     Safety + evidence       Quarantine, canonical path rules, recursive archive budgets, durable
+       2
+                                         preservation            phase events.
+
+
+                  P0                                             Daemon/workers, persisted controls, cooperative cancellation,
+       3                                 Durable execution
+                                                                 checkpoints.
+
+
+       4          P1                     Reliability controls    Retry/backoff/timeout/idempotency/crash recovery/migrations.
+
+
+                  P1                     Persistent evidence     Findings, evidence, relationships, reviews, promotions, publication
+       5
+                                         model                   lineage.
+
+
+       6          P1                     Analyzer ecosystem      Registry, normalized schema, capabilities/resources, isolation.
+
+
+       7          P1                     External integration    RabbitMQ completion, REST, MCP, webhooks, event adapters.
+
+
+       8          P2                     Distributed scale       PostgreSQL, object/CAS storage, worker pools, quotas.
+
+
+       9          P2                     Operator surface        Job Status Surface, review queue, evidence/provenance navigation.
+
+
+
+
+    CRITICAL SEQUENCING CONSTRAINT
+
+    Do not prioritize a large web UI, multi-agent orchestration, or distributed workers before the P0 semantics are
+    finished. Those features would scale current ambiguity instead of resolving it.
+
+
+
+
+Engineering decision rule
+When a proposed feature competes with a lifecycle-integrity requirement, prefer the requirement that improves
+provenance, recovery, policy consistency, or evidence quality. ATLAS's strategic differentiation depends on those
+properties remaining stronger than its orchestration novelty.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                            27
+SUCCESS CRITERIA
+
+
+What completion should make possible
+The end state can be judged by the questions ATLAS can answer reliably - without reconstructing
+intent from logs, filenames, or model output.
+
+
+   Where did this artifact originate?                             Have these exact bytes been seen before?
+   Resolve SourceRoot, IntakeGeneration, and every observed       Resolve a persistent ContentIdentity and all associated
+   occurrence.                                                    occurrences.
+
+
+
+
+   What container produced this derived file?                     Which analyzer made this claim?
+   Follow StructuralReport and ExtractionRecord lineage.          Identify analyzer/tool/model version, input identity, and
+                                                                  normalized finding.
+
+
+
+
+   Was the claim observed or inferred?                            Who or what approved it?
+   Inspect evidence type, source, confidence, and related         Resolve the PromotionDecision, governing policy, and
+   evidence.                                                      review authority.
+
+
+
+
+   Where was it published?                                        Can the conclusion be reproduced?
+   Resolve every DestinationPublication linked to the approval.   Recover the exact bytes, analyzer version, configuration,
+                                                                  events, and lifecycle checkpoints.
+
+
+
+
+    Successful completion means ATLAS can preserve the chain from raw source
+    and exact bytes, through every structural and analytical operation, to the
+    evidence produced, the decision applied, and every trusted destination that
+    received it.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                28
+RENDERED ARCHITECTURE VISUAL                                                                                                             DIAGRAM 01
+
+
+
+Rendered Mermaid 01 - Lifecycle
+The lifecycle view shows the stable semantic progression that governs how an artifact moves from initial observation to a
+defended trust decision.
+
+
+
+
+    A-F ARTIFACT LIFECYCLE
+
+
+
+
+        A                          B                          C                           D                            E             F
+
+
+                                                                 Structural                 Controlled                   Deep         Review /
+      Reconnaissance              Fingerprinting
+                                                                 Discovery                  Extraction               Understanding   Promotion
+
+
+
+        observe source            establish identity         inspect containers          materialize safely                analyze   govern trust
+
+
+
+
+                                       Artifact state changes at every phase - not merely task completion.
+                                Identity, structure, materialization, findings, evidence and trust are progressively constrained.
+
+
+
+
+    WHAT THIS DIAGRAM REPRESENTS
+
+    This diagram shows the stable six-stage semantic path an artifact follows from initial observation to a governed trust
+    decision. Each transition represents a change in what ATLAS knows about the artifact or is authorized to do with it,
+    rather than a generic dependency between tasks. Structural Discovery deliberately precedes Controlled Extraction so
+    container risk can be evaluated before potentially hostile content is materialized on disk. Deep Understanding remains
+    an extensible analysis boundary where tools, parsers, security engines, or models can produce normalized findings
+    without inheriting authority over the lifecycle. Review / Promotion is the final trust gate, ensuring that analyzer output
+    does not automatically become authoritative downstream data.
+
+
+
+
+        DESIGN IMPLICATION
+
+        Preserve this A-F sequence as the semantic spine even if future implementations add workers, queues, APIs, or internal DAG
+        behavior.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                                      29
+RENDERED ARCHITECTURE VISUAL                                                                                                     DIAGRAM 02
+
+
+
+Rendered Mermaid 02 - Evolution Roadmap
+The evolution view shows how ATLAS should mature in controlled stages, adding durability and reach without changing the
+meaning of the lifecycle itself.
+
+
+
+
+    STAGED ARCHITECTURAL EVOLUTION
+
+         Foundation first: semantics -> durability -> governance -> scale -> agentic access
+
+
+
+
+                       Current                                    v0.x hardened                             v1 service
+
+                  Local lifecycle kernel                         Reliable local engine                  Durable workers + APIs
+
+
+
+
+                   v1.x governed                                     Scale-out                                Agentic
+
+                 Evidence + policy gates                         Distributed processing                    AI inside controls
+
+
+
+
+    WHAT THIS DIAGRAM REPRESENTS
+
+    This diagram shows ATLAS maturing through staged capability, from the current local lifecycle kernel to a hardened
+    local engine, then to a durable service, governed control plane, distributed scale-out, and finally agentic integration.
+    Each stage adds infrastructure and operational reach without changing the A-F lifecycle semantics that define identity,
+    safety, analysis, evidence, and trust. Semantic integrity, durable state, recovery behavior, and control requests come
+    before service interfaces and distributed workers so unresolved local behavior is not multiplied across more
+    components. Governance is introduced before broad scale because persistent evidence, review decisions, quarantine,
+    and policy gates are what make larger deployments defensible. Agentic integration appears last because agents
+    should select or parameterize governed workflows, not replace ATLAS as the authority over provenance, policy,
+    lifecycle state, or final promotion.
+
+
+        DESIGN IMPLICATION
+
+        Treat scale as an infrastructure change, not a semantic redesign; every later stage should preserve the same provenance and
+        trust contracts proven locally.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                           30
+RENDERED ARCHITECTURE VISUAL                                                                                                                DIAGRAM 03
+
+
+
+Rendered Mermaid 03 - Target Lineage Chain
+The lineage view shows the target evidence chain that lets a trusted downstream publication be traced back to the exact
+source material that produced it.
+
+
+
+
+    TARGET PROVENANCE AND EVIDENCE CHAIN
+
+                                Trace both directions: source -> publication and publication -> exact source bytes.
+
+
+
+
+            SourceRoot                          IntakeGeneration               ArtifactOccurrence                     ContentIdentity
+
+           registered source                     stable observation             where bytes appeared                   canonical digest
+
+
+
+
+          AnalysisFinding                       EvidenceRecord                 PromotionDecision                 DestinationPublication
+
+           normalized output                    meaning + confidence            approve / reject / hold               trusted destination
+
+
+
+
+    WHAT THIS DIAGRAM REPRESENTS
+
+    This diagram shows the target traceability chain that allows ATLAS to follow information from a registered source
+    through to a final downstream publication. SourceRoot and IntakeGeneration establish where and when material was
+    observed, while ArtifactOccurrence and ContentIdentity deliberately separate location from the exact bytes that were
+    processed. AnalysisFinding and EvidenceRecord capture what a tool, parser, security engine, or model concluded and
+    how that conclusion is characterized, including meaning, provenance, and confidence where applicable.
+    PromotionDecision records the governance step that determines whether the evidence or artifact is approved, rejected,
+    or held for further review. DestinationPublication closes the chain by recording where approved material was sent,
+    enabling full bidirectional lineage from a trusted output back to the original observed bytes.
+
+
+
+
+        DESIGN IMPLICATION
+
+        This model is the foundation for reproducibility, deduplication without provenance loss, auditability, evidence review, and
+        trustworthy knowledge publication.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                                      31
+ADDITIONAL STRATEGIC VISUAL                                                                                                                     DIAGRAM 04
+
+
+
+Diagram 04 - ATLAS Capability Mind Map
+This mind map clusters ATLAS around its core system concerns so the product can be discussed as a coherent platform
+rather than a loose collection of utilities.
+
+
+
+
+    ATLAS CAPABILITY MIND MAP
+
+
+
+
+                       Identity                 Platform meaning stays centered even when capabilities expand.               Safety
+              fingerprints, content digests,                                                                     quarantine, controlled extraction,
+                      deduplication                                                                                           policy
+
+
+
+
+                                                                        ATLAS
+                     Lifecycle                                                                                             Evidence
+                                                                         control plane
+           recon -> fingerprint -> analyze ->                                                                    findings, confidence, promotion
+                        review                                                                                               decisions
+
+
+
+
+                    Integrations                                                                                         Use Cases
+           parsers, analyzers, AI, downstream                                                                forensics, IR, CTI, document pipelines
+                        systems
+
+
+
+
+    WHAT THIS DIAGRAM REPRESENTS
+
+    This mind map shows ATLAS as a central control-plane concept with six capability domains radiating outward: Identity,
+    Safety, Lifecycle, Evidence, Integrations, and Use Cases. The purpose of the visual is to show that the platform is
+    defined not by one tool or one workflow, but by the interaction between provenance, controlled execution, governance,
+    and extensibility. Each branch represents a family of responsibilities that can grow over time while remaining anchored
+    to the same lifecycle and trust model at the center. The map also helps stakeholders see where future features belong,
+    which reduces architectural drift and prevents important capabilities from being treated as disconnected add-ons.
+
+
+
+
+        DESIGN IMPLICATION
+
+        Use this view when aligning stakeholders, scoping roadmaps, or explaining why ATLAS should be built as a governed platform
+        rather than a point solution.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                                          32
+ADDITIONAL STRATEGIC VISUAL                                                                                                        DIAGRAM 05
+
+
+
+Diagram 05 - ATLAS River Flow Chart
+The river-flow view expresses ATLAS as a continuously narrowing stream in which raw inputs are progressively filtered,
+enriched, reviewed, and routed into trusted outcomes.
+
+
+
+
+    ATLAS RIVER FLOW CHART
+
+
+
+
+                                            files
+
+      archives
+
+
+
+
+                                       Intake
+                                                                 Identity
+            Raw Sources
+                                                                                    Analysis
+                                                                                                           Review
+                                                                                                                             Trusted Output
+
+
+
+
+    repos
+
+                                           URLs
+                           Flow narrows as uncertainty is reduced and only reviewed, governed output reaches destinations.
+
+
+
+
+    WHAT THIS DIAGRAM REPRESENTS
+
+    This river flow chart shows ATLAS as a stream that begins with many raw inputs and becomes narrower as uncertainty
+    is reduced through intake, identity, analysis, and review. The tributaries depict the fact that different source types can
+    enter the system, but they are brought into a common controlled channel rather than handled as separate ad hoc
+    pipelines. Each stage along the river represents progressive normalization and governance, meaning the system is
+    always converting noisy observations into more structured and defensible information. By the time the flow reaches
+    trusted output, the visual makes clear that downstream publication is not a direct consequence of ingestion, but the
+    result of staged processing and explicit control.
+
+
+
+
+        DESIGN IMPLICATION
+
+        Use this view to explain ATLAS to non-specialists because it emphasizes progressive reduction of uncertainty and the
+        disciplined movement from raw source material to trustworthy output.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                                33
+CLOSING DIRECTION
+
+
+Protect the part of ATLAS that is genuinely
+differentiated
+    Do not allow ATLAS to become another agent framework. Preserve
+    deterministic artifact progression as the core abstraction.
+
+ATLAS has a legitimate architectural reason to exist because it can become the reusable, observable,
+evidence-aware boundary between raw or untrusted artifacts and trusted downstream systems.
+
+
+Protect these invariants                                               Use scale to amplify - not redefine
+  • The six-phase lifecycle remains explicit and ordered.                • Workers distribute execution, not authority.
+  • Exact content identity is distinct from occurrence/location.         • PostgreSQL scales state, not meaning.
+  • Materialization is controlled and isolated.                          • CAS/object storage scales content, not provenance
+  • Analyzer output is not automatically trusted.                          semantics.
+
+  • Evidence and promotion decisions are durable and                     • MCP/REST widen access, not privilege.
+    attributable.                                                        • AI increases analytical capability, not trust authority.
+  • External APIs and agents cannot bypass lifecycle policy.             • UI surfaces decisions; it does not become the source of
+                                                                           truth.
+
+
+
+    DEVELOPMENT DIRECTION
+
+    Build ATLAS into a governed artifact-processing substrate. Finish semantic integrity and durable control
+    first; operationalize evidence and analyzers second; scale infrastructure third. The payoff is one shared lifecycle
+    that BinReaper, RUDI-K, repository analysis, forensics, malware/network analysis, corpus curation, supply-chain
+    workflows, and future agents can reuse without independently rebuilding identity, safety, provenance, and trust
+    controls.
+
+
+
+
+  Prepared from the supplied ATLAS development-direction source. Repository reference in source: Runndownn/ATLAS, main @
+  efa547cafc64b58d60d19dcc1e5ba32c6b046bc5.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                        34
+                                                                                                                                      32
+                                                                                                                                      30
+

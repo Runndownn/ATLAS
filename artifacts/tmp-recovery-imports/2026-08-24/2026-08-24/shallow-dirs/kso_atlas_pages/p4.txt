@@ -1,0 +1,55 @@
+CURRENT ARCHITECTURE
+
+
+A compact, readable execution kernel
+The current design is small by intent. AtlasRuntime centralizes construction; PipelineOrchestrator
+advances the lifecycle; SQLite records jobs and phases; safety and hashing services support phase
+work; the event bus decouples observers from execution.
+
+  Figure 1. Current pre-alpha runtime structure
+
+
+
+         CURRENT PRE-ALPHA RUNTIME
+
+
+
+                    Operator / CLI                                                AtlasRuntime                                PipelineOrchestrator
+                                                                            Canonical composition root                         Sequential phase control
+                   YAML / JSON pipeline
+                                                                          Shared services + all 6 handlers                        Fail-closed lifecycle
+
+
+
+
+                       JobStore                               EventBus                                Safety Services             Hash / Identity
+                   SQLite jobs / phases                  In-memory + RabbitMQ                         filesystem / archive        SHA-256 + BLAKE3
+                     selected events                      observer side-channel                          path controls            in-memory manifest
+
+
+
+
+                                          Six phase handlers: Recon -> Fingerprint -> Structure -> Extract -> Analyze -> Review
+                                                         Domain behavior is replaceable; lifecycle semantics remain stable.
+
+
+
+
+   Canonical composition                                                                          Deterministic control flow
+   AtlasRuntime prevents CLI/tests/future APIs from                                               The orchestrator walks one configured phase list in order.
+   accidentally constructing different handler graphs. This                                       That simplicity is a feature for evidence-sensitive processing
+   addresses an earlier fail-open wiring problem.                                                 because the sequence remains reconstructable.
+
+
+
+
+    CURRENT DURABILITY
+
+    Jobs and phase records are persisted in SQLite. Orchestrator lifecycle events also have durable representation.
+    Detailed phase-emitted observations remain more transient and are part of the hardening direction.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                                                     04
+

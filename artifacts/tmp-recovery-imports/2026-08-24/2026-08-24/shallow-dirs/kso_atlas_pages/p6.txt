@@ -1,0 +1,45 @@
+P H A S E D E TA I L
+
+
+A-C: establish observation, identity, and
+structure
+    A                                                  B                                     C
+
+   Reconnaissance                                    Fingerprinting                         Structural Discovery
+   Today: filesystem walk, file/byte                 Today: streaming SHA-256 and           Today: inspect archive members,
+   counts, archive detection, executable             optional BLAKE3 hashing, with an in-   suspicious paths, and nested-archive
+   indicators, sensitive-looking paths,              memory manifest.                       presence without extraction.
+   symlink awareness.
+                                                     Target: persist ContentIdentity        Target: recursively understand
+   Target: emit an immutable                         independently from                     nested containers and packaging
+   IntakeGeneration so every later                   ArtifactOccurrence, enabling cross-    relationships under strict depth,
+   phase works from a stable                         run duplicate recognition without      member, and byte budgets.
+   observation instead of a source tree              losing provenance.
+   that may change during processing.
+
+
+
+The key semantic correction: occurrence is not identity
+ATLAS must treat a filesystem path as an occurrence and a digest as the identity of the bytes. The same bytes can
+appear in a repository, a ZIP, a backup, an email attachment, and a forensic image. Those locations should remain
+separately traceable while converging on one content identity.
+
+
+    W H Y I T M AT T E R S
+
+    Persistent occurrence-to-content relationships enable true deduplication, repeat-analysis avoidance, lineage
+    queries, migration validation, and evidence defensibility without collapsing distinct provenance into one record.
+
+
+
+
+Immutable intake as a trust anchor
+If fingerprinting re-discovers a live filesystem instead of consuming the exact inventory observed during
+Reconnaissance, the source can change between phases. The long-term design therefore treats Reconnaissance as a
+snapshot authority: downstream phases operate on the recorded occurrence set, not a fresh traversal.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                     06
+

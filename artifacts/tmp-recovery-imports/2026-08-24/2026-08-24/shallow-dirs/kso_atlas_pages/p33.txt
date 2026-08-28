@@ -1,0 +1,64 @@
+ADDITIONAL STRATEGIC VISUAL                                                                                                        DIAGRAM 05
+
+
+
+Diagram 05 - ATLAS River Flow Chart
+The river-flow view expresses ATLAS as a continuously narrowing stream in which raw inputs are progressively filtered,
+enriched, reviewed, and routed into trusted outcomes.
+
+
+
+
+    ATLAS RIVER FLOW CHART
+
+
+
+
+                                            files
+
+      archives
+
+
+
+
+                                       Intake
+                                                                 Identity
+            Raw Sources
+                                                                                    Analysis
+                                                                                                           Review
+                                                                                                                             Trusted Output
+
+
+
+
+    repos
+
+                                           URLs
+                           Flow narrows as uncertainty is reduced and only reviewed, governed output reaches destinations.
+
+
+
+
+    WHAT THIS DIAGRAM REPRESENTS
+
+    This river flow chart shows ATLAS as a stream that begins with many raw inputs and becomes narrower as uncertainty
+    is reduced through intake, identity, analysis, and review. The tributaries depict the fact that different source types can
+    enter the system, but they are brought into a common controlled channel rather than handled as separate ad hoc
+    pipelines. Each stage along the river represents progressive normalization and governance, meaning the system is
+    always converting noisy observations into more structured and defensible information. By the time the flow reaches
+    trusted output, the visual makes clear that downstream publication is not a direct consequence of ingestion, but the
+    result of staged processing and explicit control.
+
+
+
+
+        DESIGN IMPLICATION
+
+        Use this view to explain ATLAS to non-specialists because it emphasizes progressive reduction of uncertainty and the
+        disciplined movement from raw source material to trustworthy output.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                                33
+

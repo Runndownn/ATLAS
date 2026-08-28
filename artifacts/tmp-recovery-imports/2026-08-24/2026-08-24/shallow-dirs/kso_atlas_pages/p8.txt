@@ -1,0 +1,58 @@
+A R T I FA C T S E M A N T I C S
+
+
+The system is managing trust state, not only
+tasks
+The core conceptual shift is from a task graph to an artifact state model. Each phase should leave
+behind durable evidence of what changed in the system's understanding or authority over the artifact.
+
+  Figure 3. Artifact state progression
+
+
+
+
+        Raw / unknown                                          Content identity                                         Materialized                              Promotion decision
+
+            Untrusted                                              Exact bytes                                       Controlled workspace                           Trusted candidate
+
+                                 Observed occurrence                                   Structure understood                                     Analyzed
+
+                                      Known source                                         Container context                                Evidence + findings
+
+
+
+
+      The central control problem is not task ordering alone; it is preserving how identity, structure, evidence and trust evolve.
+
+
+
+
+ State transition                       What becomes known or controlled                                                                               Primary record
+
+                                        Where the material was seen, at what intake generation, with which source
+ Unknown -> observed                                                                                                                                   ArtifactOccurrence
+                                        metadata
+
+ Observed -> identified                 Exact byte identity independent of location                                                                    ContentIdentity
+
+ Identified -> structured               Container members, nesting, suspicious paths, packaging relationships                                          StructuralReport
+
+ Structured ->
+                                        Which content was created on disk, where, and under which safety policy                                        ExtractionRecord
+ materialized
+
+ Materialized -> analyzed               Normalized tool/model findings and relationships                                                               AnalysisFinding
+
+                                                                                                                                                       Evidence +
+ Analyzed -> governed                   What evidence supports a decision and whether promotion was allowed
+                                                                                                                                                       PromotionDecision
+
+
+  This state model is what allows ATLAS to answer provenance questions later: origin, exact bytes, extraction lineage, analyzer attribution,
+  confidence, review decision, and destination publication.
+
+
+
+
+ATLAS Development Direction | Artifact Lifecycle Control Plane                                                                                                                          08
+
