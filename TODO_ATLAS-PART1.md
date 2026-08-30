@@ -176,8 +176,8 @@ Final CLI polish, example pipelines, and PyPI publishing.
 - `examples/ctfd_pipeline.yaml` — ✅ CREATED
 - `examples/doc_processing.yaml` — ✅ CREATED
 - Full README with architecture diagrams — ✅ DONE
-- GitHub Actions CI workflow — 🔲 TODO
-- PyPI publish workflow — 🔲 TODO
+- GitHub Actions CI workflow — ✅ CREATED (`.github/workflows/tests.yml`)
+- PyPI publish workflow — ✅ CREATED (`.github/workflows/publish.yml`)
 - Final test suite: 67 tests passing — ✅
 
 ---
@@ -205,14 +205,14 @@ Final CLI polish, example pipelines, and PyPI publishing.
 ### Docs/runbooks
 - ✅ README with architecture diagrams (Mermaid), quickstart, phase documentation
 - ✅ TODO_ATLAS-PART1.md (this file) — BinReaper production TODO plan
-- TODO: Phase extension guide
-- TODO: Event bus integration guide
-- TODO: Deployment/runbook guide
+- ✅ Phase extension guide — CREATED (`docs/guides/extending-phases.md`)
+- ✅ Event bus integration guide — CREATED (`docs/guides/event-bus-integration.md`)
+- ✅ Deployment/runbook guide — CREATED (`docs/guides/deployment.md`)
 
 ### Platform integration
 - ✅ Publish to PyPI as `atlas-pipeline`
-- TODO: GitHub Actions for CI + release
-- TODO: Optional RabbitMQ extra: `pip install atlas[rabbitmq]`
+- ✅ GitHub Actions for CI + release (tests.yml + publish.yml)
+- ✅ Optional RabbitMQ extra: `pip install atlas-pipeline[rabbitmq]`
 
 ## Next Action
 
