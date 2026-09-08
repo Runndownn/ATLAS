@@ -3,6 +3,10 @@ __pycache__/
 *.egg-info/
 .venv/
 *.db
+# The CLI can create a SQLite runtime database at the root when `--help` is
+# passed as a database-path argument; retain the local artifact, but do not
+# track it as source.
+/--help
 # Production TODO packages - not tracked (DO NOT COMMIT)
 ATLAS_Full_Production_TODO_Package.zip
 ATLAS_Production_TODO_Package.zip
