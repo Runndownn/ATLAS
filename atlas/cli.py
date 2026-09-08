@@ -94,9 +94,13 @@ def _build_pipeline_config(pipeline_def: dict[str, Any]) -> PipelineConfig:
 
 async def _run_pipeline(args: list[str]) -> int:
     """Execute the 'atlas run' command."""
-    if not args:
-        print("Usage: atlas run <pipeline.yaml>")
-        return 1
+    if not args or args[0] in ("--help", "-h"):
+        print("Usage: atlas run <pipeline.yaml> [db_path]")
+        print("")
+        print("Arguments:")
+        print("  pipeline.yaml   Path to the pipeline definition file (.yaml/.yml/.json)")
+        print("  db_path         Optional SQLite path for job persistence (default: atlas_jobs.db)")
+        return 0
 
     pipeline_path = args[0]
     db_path = args[1] if len(args) > 1 else "atlas_jobs.db"
@@ -132,6 +136,13 @@ async def _run_pipeline(args: list[str]) -> int:
 
 async def _list_jobs(args: list[str]) -> int:
     """Execute the 'atlas jobs list' command."""
+    if args and args[0] in ("--help", "-h"):
+        print("Usage: atlas jobs list [db_path]")
+        print("")
+        print("Arguments:")
+        print("  db_path   Optional SQLite path (default: atlas_jobs.db)")
+        return 0
+
     db_path = args[0] if args else "atlas_jobs.db"
     job_store = JobStore(db_path)
     await job_store.connect()
@@ -162,8 +173,16 @@ async def _job_action(action: str, args: list[str]) -> int:
     is recommended (see assessment note on process-local controls).
     """
     if not args:
-        print(f"Usage: atlas job <id> {action}")
+        print(f"Usage: atlas job <id> {action} [db_path]")
         return 1
+
+    if "--help" in args or "-h" in args:
+        print(f"Usage: atlas job <id> {action} [db_path]")
+        print("")
+        print("Arguments:")
+        print("  id       The job ID")
+        print("  db_path  Optional SQLite path (default: atlas_jobs.db)")
+        return 0
 
     job_id = args[0]
     db_path = args[1] if len(args) > 1 else "atlas_jobs.db"
