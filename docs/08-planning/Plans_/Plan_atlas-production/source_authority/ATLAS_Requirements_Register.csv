@@ -1,0 +1,31 @@
+ID,Requirement / Idea,Source Location,Explicit / Inferred,Current ATLAS Support,Gap / Architectural Impact,Priority,Primary-source status
+REQ-001,"ATLAS remains artifact-lifecycle-specific, not generic workflow/agent framework","p.2-3,34",Explicit,Partial,Core naming still generic; phase list can act as arbitrary mini-workflow,P0,Pending original direction-document revalidation
+REQ-002,Six phases remain ordered semantic spine,"p.2,5,29,34",Explicit,Partial,Ordering not enforced,P0,Pending original direction-document revalidation
+REQ-003,Recon emits immutable `IntakeGeneration`,"p.6,12",Explicit,None,Downstream re-traverses mutable source,P0,Pending original direction-document revalidation
+REQ-004,Occurrence/location distinct from byte identity,"p.6,8,16,31",Explicit,None,Paths/hashes flattened into metadata,P0,Pending original direction-document revalidation
+REQ-005,Persistent cross-run content identity/dedup,"p.6,12",Explicit,Partial,HashStore process-local,P0,Pending original direction-document revalidation
+REQ-006,Typed/enforced phase configuration,"p.10,12",Explicit,None,`phase_config` stored but ignored,P0,Pending original direction-document revalidation
+REQ-007,One error-policy contract,"p.10,12",Explicit,None,continue/abort overlap,P0,Pending original direction-document revalidation
+REQ-008,Durable live progress,"p.10,12",Explicit,Partial,phase progress written only after handler return,P0,Pending original direction-document revalidation
+REQ-009,Structure inspection precedes materialization,"p.13,23,29",Explicit,Partial,sequence configurable; D reassesses live source independently,P0,Pending original direction-document revalidation
+REQ-010,Per-job quarantine workspace,"p.7,13,23",Explicit,None,source-adjacent extraction,P0,Pending original direction-document revalidation
+REQ-011,One canonical path/archive policy,p.13,Explicit,Partial,PathSafety exists but is not canonical runtime service,P0,Pending original direction-document revalidation
+REQ-012,Recursive bounded nested-container inspection,"p.6,13",Explicit,None,only nested count,P0,Pending original direction-document revalidation
+REQ-013,Durable detailed events,"p.10,13,23",Explicit,Partial,phase events transient,P0,Pending original direction-document revalidation
+REQ-014,Long-running owner for active jobs,p.14,Explicit,None,CLI process owns job,P0,Pending original direction-document revalidation
+REQ-015,Persisted control requests,p.14,Explicit,None,process-local controls,P0,Pending original direction-document revalidation
+REQ-016,Cooperative control/checkpoints,p.14,Explicit,None,"boundary-only polling, no checkpoints",P0,Pending original direction-document revalidation
+REQ-017,Retry/backoff/timeout/idempotency/crash recovery,p.15,Explicit,None/partial declarations,`retryable` not used,P1,Pending original direction-document revalidation
+REQ-018,Versioned migrations,p.15,Explicit,None,inline schema only,P1,Pending original direction-document revalidation
+REQ-019,Persistent findings/evidence/reviews/promotions/publications,p.16,Explicit,Conceptual only,no tables/contracts,P1,Pending original direction-document revalidation
+REQ-020,Evidence type remains explicit,"p.7,16,23",Explicit,Partial,"four evidence labels exist, but transient",P1,Pending original direction-document revalidation
+REQ-021,Analyzer registry + normalized finding envelope,p.17,Explicit,Minimal protocol,arbitrary dictionaries,P1,Pending original direction-document revalidation
+REQ-022,Analyzer capability/resource declarations and isolation,p.17,Explicit,None,same-process unrestricted plugins,P1,Pending original direction-document revalidation
+REQ-023,Versioned analyzer/tool/model attribution,p.17,Explicit,None,plugin name only,P1,Pending original direction-document revalidation
+REQ-024,Complete RabbitMQ semantics,p.18,Explicit,Partial,publisher/fallback only,P1,Pending original direction-document revalidation
+REQ-025,REST/MCP/webhooks cannot bypass lifecycle,p.18,Explicit,Not present,requires shared command layer before interfaces,P1/P2,Pending original direction-document revalidation
+REQ-026,PostgreSQL/object storage/workers only after semantic stability,"p.19-20,27",Explicit,Not present,deliberately defer,P2,Pending original direction-document revalidation
+REQ-027,AI may analyze/propose but not own provenance/safety/promotion,"p.22,34",Explicit,No AI runtime,architectural constraint for future plugins,P1+,Pending original direction-document revalidation
+REQ-028,Publications trace bidirectionally to exact source bytes,"p.16,28,31",Explicit,None,lineage model absent,P1,Pending original direction-document revalidation
+REQ-029,Exact bytes/analyzer/config/events/checkpoints support reproducibility,p.28,Explicit,Partial,current source may disappear/change; config/results incomplete,P1,Pending original direction-document revalidation
+REQ-030,"Scale changes infrastructure, not meaning","p.19-21,30,34",Explicit,Architectural future constraint,must be preserved in APIs/workers/stores,P2,Pending original direction-document revalidation

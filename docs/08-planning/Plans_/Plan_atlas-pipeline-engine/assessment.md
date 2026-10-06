@@ -616,3 +616,15 @@ At the present revision, however, it should be regarded as a **well-structured p
 **The underlying framework idea is still coherent.** ATLAS can become the reusable “home” orchestration layer for CTF evidence processing, repositories, documents, forensic artifacts, knowledge ingestion, or other staged workloads. The next engineering milestone should not be adding more features. It should be making the existing architecture truthful end-to-end: one runtime composition path, one config contract, one durable state model, one safety policy, one six-phase implementation, and tests that invoke exactly what users invoke.
 
 [1]: https://docs.python.org/3.13/library/tarfile.html?utm_source=chatgpt.com "tarfile — Read and write tar archive files — Python 3.13.14 documentation"
+
+---
+
+## Relationship to the production TODO plan
+
+This framework-development assessment (pre-alpha, 6 slices, code hardened against baseline `efa547cafc64b58d60d19dcc1e5ba32c6b046bc5`) is the **foundation** for the forward-looking implementation program.
+
+The forward-looking implementation program now lives at:
+
+- `docs/08-planning/Plans_/Plan_atlas-production/` — 126-task production TODO plan (30 epics, 42 PART1 packs, 27 verification registers)
+
+The production plan begins where this assessment ends — Wave 0 (`T1.1.1`) verifies the active checkout and authorities against the same frozen baseline commit, then Wave 1 (`T2.1.1`–`T2.1.4`) begins the first non-dummy implementation tasks. See `Plan_atlas-production/CURATION_ASSESSMENT.md` for extraction rationale and evidence basis.

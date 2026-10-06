@@ -1,0 +1,75 @@
+{
+  "manifest_version": 1,
+  "created_at": "2026-08-21",
+  "package": "ATLAS evidence-driven architecture assessment",
+  "self_hash_note": "This manifest intentionally omits its own hash to avoid recursive self-reference.",
+  "source_inputs": [
+    {
+      "path": "/mnt/data/Pasted markdown.md",
+      "bytes": 144413,
+      "sha256": "2c64fddcfa0aebcc81796c173046a78f29055e25993fe5b1f80f568051a9454c",
+      "role": "attached frozen assessment / evidence index"
+    }
+  ],
+  "files": [
+    {
+      "name": "ATLAS_Evidence_Driven_Architecture_Blueprint.md",
+      "path": "/mnt/data/ATLAS_Evidence_Driven_Architecture_Blueprint.md",
+      "bytes": 218167,
+      "sha256": "a65bd3d3e3788d18f937912eb9fdf6c50db03989cadf822c6cadd0edf61b8215"
+    },
+    {
+      "name": "ATLAS_Execution_Plan.md",
+      "path": "/mnt/data/ATLAS_Execution_Plan.md",
+      "bytes": 89799,
+      "sha256": "1027eb460a5dbb07e72b04c6376a15bcf944b7b8d0a63a992cbc27879e3fe571"
+    },
+    {
+      "name": "ATLAS_Evidence_Ledger.csv",
+      "path": "/mnt/data/ATLAS_Evidence_Ledger.csv",
+      "bytes": 17960,
+      "sha256": "7d8653a73a12ce534f81715ffe87e8042f1125258ec51736f8bfac09a2eb47c8"
+    },
+    {
+      "name": "ATLAS_Task_Registry.json",
+      "path": "/mnt/data/ATLAS_Task_Registry.json",
+      "bytes": 79294,
+      "sha256": "f36506f98274a1a78f0f7d5f702c9bdebc3320a31dd9d950fad1e2360d46e49f"
+    },
+    {
+      "name": "ATLAS_Requirements_Register.csv",
+      "path": "/mnt/data/ATLAS_Requirements_Register.csv",
+      "bytes": 5077,
+      "sha256": "f1711cc4303b16b3e6698fb1cd5af23318ca7d979101600ccef9bd011f60764a"
+    },
+    {
+      "name": "ATLAS_ADR_Index.csv",
+      "path": "/mnt/data/ATLAS_ADR_Index.csv",
+      "bytes": 3043,
+      "sha256": "56c3d248d94fb17160081f79a878035acaede5fc0d3d40a62f279efcc1fd013b"
+    },
+    {
+      "name": "ATLAS_Risk_Register.csv",
+      "path": "/mnt/data/ATLAS_Risk_Register.csv",
+      "bytes": 1812,
+      "sha256": "0b5f602f6e84825490306dbb6c0ad830a292e5fcb1f74ba52588725e3a4dde23"
+    },
+    {
+      "name": "ATLAS_Assessment_Validation.json",
+      "path": "/mnt/data/ATLAS_Assessment_Validation.json",
+      "bytes": 3077,
+      "sha256": "4bc47d287ca3acaf546b45b1b860e62a89d06013e98c1edadc9b7bd53185b5ef"
+    },
+    {
+      "name": "ATLAS_Assessment_Package_README.md",
+      "path": "/mnt/data/ATLAS_Assessment_Package_README.md",
+      "bytes": 2547,
+      "sha256": "ae4384f058c739d1a66223e7f8d62f6822bd42beed1eb57331af1256553db24a"
+    }
+  ],
+  "baselines": {
+    "atlas": "efa547cafc64b58d60d19dcc1e5ba32c6b046bc5",
+    "yggdrasil": "2b0c51b6132c2a16e63fc2e2de2d2b4598b5fe40"
+  },
+  "quality_gate_valid": true
+}

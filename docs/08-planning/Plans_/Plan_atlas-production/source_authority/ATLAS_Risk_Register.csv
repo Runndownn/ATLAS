@@ -1,0 +1,19 @@
+Risk,Likelihood,Impact,Mitigation,Dependency
+R-01 Old YAML changes semantics,High,High,legacy normalizer + fixtures,AT-002
+R-02 Existing DB migration damages state,Medium,Critical,backup/integrity/copy verification,AT-003
+R-03 Source TOCTOU survives path cleanup,High,High,handle verification + CAS option,AT-009
+R-04 Cross-platform no-follow semantics differ,High,High,capability-specific implementations/CI,AT-009
+R-05 Nested archive recursion causes DoS,High,High,cumulative budgets,AT-010
+R-06 CAS consumes local disk,Medium,High,quota/retention/status,AT-011
+R-07 CAS orphan accumulation after crash,Medium,Medium,immutable orphan reconciliation,AT-011
+R-08 Event outbox grows without bound,Medium,High,backlog metrics/retention/backpressure,AT-007
+R-09 Plugin escape/host mutation,High for third-party,Critical,capability policy/subprocess,AT-013/020
+R-10 Dual legacy/new metadata drifts,Medium,High,one canonical write path + derived legacy projection,migration
+R-11 Duplicate worker side effects,Medium later,Critical,fencing/idempotency,AT-004/016
+R-12 Unknown publication outcome,Medium,Critical,destination reconciliation,AT-015
+R-13 SQLite contention interpreted as need for architecture rewrite,Medium,Medium,benchmarks before PostgreSQL,AT-024
+R-14 RabbitMQ becomes accidental state authority,Medium,High,outbox + documented authority,AT-007/019
+R-15 Donor governance over-transplanted,High,Medium,optional adapters; no wholesale store import,all
+R-16 Existing tests create false confidence,High,High,adversarial/recovery test program,AT-001/024
+R-17 Cached analyzer results become stale,Medium,High,exact operation/config/input key; cacheable flag,AT-013
+R-18 AI output becomes implied authority,Medium later,Critical,finding-only capability + mandatory review semantics,AT-015

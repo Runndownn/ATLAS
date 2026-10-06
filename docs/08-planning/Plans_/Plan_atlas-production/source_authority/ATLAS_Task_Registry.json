@@ -1,0 +1,955 @@
+{
+  "registry_version": 1,
+  "generated_at": "2026-08-21",
+  "repository": "https://github.com/Runndownn/ATLAS",
+  "frozen_ref": "efa547cafc64b58d60d19dcc1e5ba32c6b046bc5",
+  "status": "proposed",
+  "owner_default": "@unassigned",
+  "evidence_limitations": [
+    "Exact current ATLAS HEAD unresolved",
+    "Yggdrasil live URL returned 404",
+    "Original product-direction PDF/document not independently accessible",
+    "Frozen repositories were not executed in this assessment"
+  ],
+  "tasks": [
+    {
+      "id": "AT-001",
+      "epic": "Truth reconciliation and correctness",
+      "title": "Establish deterministic current-behavior characterization",
+      "priority": "P0",
+      "deps": "None",
+      "rationale": "Pin the observable defects and compatibility surfaces before refactoring so corrections do not erase evidence or silently change unrelated behavior.",
+      "evidence": "GAP-001, GAP-002, GAP-003, GAP-004, GAP-006, GAP-007, GAP-009; [ATLAS-TEST:efa547cafc64b58d60d19dcc1e5ba32c6b046bc5:tests/test_runtime.py:L18-L144]; [ATLAS-TEST:efa547cafc64b58d60d19dcc1e5ba32c6b046bc5:tests/test_orchestrator.py:L103-L111]",
+      "files": "Existing `tests/`; create `tests/characterization/`, versioned fixtures under `tests/fixtures/v0_1/`; no production-file behavior changes in this task.",
+      "requirements": [
+        "Create executable fixtures for missing/non-directory/unreadable sources, invalid phase permutations, contradictory error-policy inputs, a failed phase under non-abort policy, source mutation between A and B, progress visibility, process-local pause/resume/cancel, event-persistence failure, and >50 analyzer findings.",
+        "Record current results as characterization expectations and tag each known-defect expectation with its GAP ID; do not label known-bad behavior as desired behavior.",
+        "Capture CLI exit status, persisted rows, job/phase terminal states, emitted events, filesystem side effects, and exceptions as machine-readable evidence.",
+        "Preserve existing public imports, sample YAML, CLI invocations, and database fixtures for later compatibility testing."
+      ],
+      "interfaces": "Versioned fixture manifest: `{fixture_id, requirement_ids, gap_ids, setup, command_or_api, expected_current, expected_target, cleanup}`. No public runtime API change.",
+      "invariants": [
+        "Every P0 correction is preceded by a reproducible failing or characterization test.",
+        "Fixtures are deterministic, sanitized, self-contained, and do not require network access."
+      ],
+      "edges": [
+        "Empty tree; unreadable child; dangling symlink; duplicate phase; missing handler; event-store full/fault; analyzer emits 0, 1, 50, and 51 findings."
+      ],
+      "failure": "A test-harness setup failure is distinct from a product failure and must fail the test run with retained diagnostics. Known-defect expectations remain explicitly marked until corrected by a later task.",
+      "security": "Use temporary directories, no privileged mounts by default, sanitized fixtures, and explicit cleanup. Platform-specific race tests must skip only with a documented capability reason.",
+      "observability": "Archive JUnit/JSON reports, persisted database copies for failing cases, captured event sequences, and filesystem manifests.",
+      "tests": "Pytest characterization suite; three clean deterministic runs; negative tests for traversal/symlink/archive mutation; subprocess-based CLI checks.",
+      "accept": [
+        "Each GAP-001 through GAP-015 has at least one executable reproducer or an explicit `INSUFFICIENT EVIDENCE` investigation record.",
+        "Three clean runs produce byte-identical machine-readable expectation files except normalized timestamps/temporary paths.",
+        "No production behavior changes are included.",
+        "CI retains the characterization artifacts on failure."
+      ],
+      "migration": "None.",
+      "rollback": "Delete only the new test/fixture files; production data is untouched.",
+      "completion": "Committed fixture manifest, test report, current-versus-target expectation matrix, and clean-run determinism evidence."
+    },
+    {
+      "id": "AT-002",
+      "epic": "Lifecycle and configuration semantics",
+      "title": "Introduce a versioned PipelineDefinition and enforce canonical A–F semantics",
+      "priority": "P0",
+      "deps": "AT-001",
+      "rationale": "The current caller-controlled phase list and overlapping failure flags permit extraction-before-structure and ambiguous terminal truth.",
+      "evidence": "GAP-002, GAP-003, REQ-001, REQ-002, REQ-006, REQ-007; [ATLAS:efa547cafc64b58d60d19dcc1e5ba32c6b046bc5:atlas/core/orchestrator.py:L25-L68,L128-L220]; [ATLAS:efa547cafc64b58d60d19dcc1e5ba32c6b046bc5:atlas/cli.py:L42-L91]",
+      "files": "Create `atlas/config/models.py`, `atlas/config/loader.py`; refactor `atlas/cli.py`, `atlas/core/orchestrator.py`; update `examples/*.yaml`; compatibility shim for `PipelineConfig`.",
+      "requirements": [
+        "Define `PipelineDefinition(schema_version, name, source, failure_policy, phases, metadata)` with six named phase slots in canonical order.",
+        "Represent disabled work as a validated phase policy that becomes a durable `SKIPPED` state; never by deleting or reordering semantic slots.",
+        "Replace `continue_on_phase_error` and `abort_on_error` with one `FailurePolicy`; reject contradictory legacy values rather than guessing.",
+        "Define typed phase-specific configuration and reject unknown required keys, invalid types, unsupported capabilities, and phase settings that have no consumer.",
+        "Compute and persist a canonical configuration digest after normalization."
+      ],
+      "interfaces": "`PipelineDefinitionV1`; `FailurePolicy={FAIL_REQUIRED_PHASE, CONTINUE_OPTIONAL_PHASE, COLLECT_FAILURES}` or an equivalent minimal enum; `LegacyPipelineLoader` normalizes unversioned YAML without changing public CLI syntax.",
+      "invariants": [
+        "A–F order is immutable for every job.",
+        "Every accepted configuration is versioned, validated, canonicalized, and digestible.",
+        "No public configuration key is accepted and then ignored."
+      ],
+      "edges": [
+        "Duplicate phase keys; omitted optional phase; unknown schema version; conflicting legacy flags; environment override with wrong type; YAML duplicate keys."
+      ],
+      "failure": "Invalid configuration fails before job creation with stable error codes and source locations; no partial job row or workspace is created.",
+      "security": "Configuration cannot grant undeclared filesystem/network/process capabilities. YAML parsing uses safe loaders and duplicate-key rejection.",
+      "observability": "Emit/configure `pipeline.validated` diagnostics containing schema version, digest, legacy-normalization warnings, and deprecated keys without secrets.",
+      "tests": "Parser unit/property tests, invalid-permutation tests, duplicate-key tests, all existing example YAML as compatibility fixtures, CLI preflight integration.",
+      "accept": [
+        "All six phase slots appear in every normalized pipeline in canonical order.",
+        "Every current example either normalizes successfully with an expected digest or fails with an approved migration message.",
+        "Contradictory legacy error flags are rejected before job creation.",
+        "No `phase_config` field remains unconsumed."
+      ],
+      "migration": "Support unversioned YAML through a documented compatibility window; provide `atlas pipeline migrate` or equivalent dry-run converter before deprecation.",
+      "rollback": "Keep the legacy loader and `PipelineConfig` facade behind a feature flag for one compatibility window; new stored definitions remain readable.",
+      "completion": "Versioned JSON/YAML schema, migration examples, compatibility matrix, parser tests, and configuration-digest evidence."
+    },
+    {
+      "id": "AT-003",
+      "epic": "Persistence and migrations",
+      "title": "Create the StateStore abstraction and versioned SQLite migration system",
+      "priority": "P0",
+      "deps": "AT-001",
+      "rationale": "Inline schema creation, independent commits, and absent schema versioning prevent safe evolution of authoritative records.",
+      "evidence": "GAP-009, REQ-018; [ATLAS:efa547cafc64b58d60d19dcc1e5ba32c6b046bc5:atlas/core/job_store.py:L19-L65,L172-L350]; [ATLAS:efa547cafc64b58d60d19dcc1e5ba32c6b046bc5:atlas/schema/__init__.py:L1-L9]",
+      "files": "Create `atlas/persistence/base.py`, `atlas/persistence/sqlite.py`, `atlas/persistence/migrations/`; refactor `atlas/core/job_store.py`; replace `atlas/schema/__init__.py` exports.",
+      "requirements": [
+        "Define explicit transaction ownership, read/write repository interfaces, connection lifecycle, foreign-key enforcement, busy timeout, WAL policy, and error taxonomy.",
+        "Add a schema metadata table and immutable numbered migrations with checksums and forward-only application.",
+        "Before migrating an existing database: integrity check, verified backup, schema fingerprint, migration transaction, row/invariant verification, migration event, retained backup.",
+        "Provide backup, restore-verification, and orphan/partial-migration diagnostics.",
+        "Keep SQLite as authoritative local/reference backend; do not introduce PostgreSQL in this task."
+      ],
+      "interfaces": "`StateStore`, `Transaction`, repository interfaces for jobs/phases/events initially; `schema_migrations(version, checksum, applied_at, tool_version)`.",
+      "invariants": [
+        "No authoritative state is changed outside a StateStore transaction.",
+        "Fresh and upgraded databases converge to the same schema and invariants.",
+        "Foreign keys and required uniqueness constraints are actually enabled and tested."
+      ],
+      "edges": [
+        "Legacy v0.1 DB; empty DB; corrupt DB; full disk; lock contention; process kill during migration; checksum mismatch; newer unsupported schema."
+      ],
+      "failure": "Migration failure leaves the original database and verified backup intact; startup fails closed on corruption, unknown newer schema, or checksum drift.",
+      "security": "Database/workspace path must be outside untrusted source roots; restrictive file permissions; SQL parameters only; backup path canonicalization.",
+      "observability": "Migration start/end/failure events, lock-wait metrics, integrity-check result, schema version, backup hash and location.",
+      "tests": "Fresh install, every-version upgrade, interrupted migration fault injection, lock contention, FK enforcement, backup/restore, corruption and newer-schema negative tests.",
+      "accept": [
+        "Fresh and v0.1-upgraded databases have identical schema fingerprints and pass integrity/FK checks.",
+        "Killing migration at each defined fault point never destroys the pre-migration database.",
+        "No direct `aiosqlite` write remains outside the persistence package except approved migration bootstrap.",
+        "Backup and restore verification are documented and automated."
+      ],
+      "migration": "This task is the migration foundation; ship v0.1-to-v1 migration and retain legacy readers until AT-004+ data is available.",
+      "rollback": "Restore the verified pre-migration backup; application refuses to run a binary incompatible with the restored schema.",
+      "completion": "Migration manifest/checksums, fresh/upgrade test artifacts, backup hashes, schema diagram, and operator recovery procedure."
+    },
+    {
+      "id": "AT-004",
+      "epic": "Lifecycle/state-machine normalization",
+      "title": "Implement explicit Job, Phase, Attempt, and control transition guards",
+      "priority": "P0",
+      "deps": "AT-002, AT-003",
+      "rationale": "Current mutable status fields do not define legal transitions, attempts, fencing, immutable terminal truth, or stale-result behavior.",
+      "evidence": "REQ-014–REQ-017; GAP-007, GAP-008; state reconstruction in Sections 3 and 10.",
+      "files": "Create `atlas/models/states.py`, `atlas/core/lifecycle.py`; refactor `atlas/core/orchestrator.py`; add migrations/tables for phase runs and attempts.",
+      "requirements": [
+        "Define exhaustive legal transition tables and guards for jobs, phase runs, attempts, and control requests.",
+        "Represent each execution as a new immutable attempt with attempt number, backend identity, lease/fencing token, start/end, outcome, error class, checkpoint reference, and result digest.",
+        "Make terminal job/phase/attempt states immutable except through explicit reconciliation records.",
+        "Define failure propagation, skip reasons, suspension, cancellation, retry scheduling, restart, and replay semantics.",
+        "Reject late results whose fencing token or expected state no longer matches."
+      ],
+      "interfaces": "`JobState`, `PhaseState`, `AttemptState`, `ControlRequestState`, `TransitionCommand`, `TransitionResult`, `TransitionError(code, current, requested)`.",
+      "invariants": [
+        "Illegal transitions cannot be persisted.",
+        "A terminal record cannot silently become non-terminal.",
+        "Only the coordinator transaction can advance lifecycle authority.",
+        "A stale attempt can never overwrite a newer attempt."
+      ],
+      "edges": [
+        "Duplicate completion; cancel during retry delay; pause at terminal phase; resume non-suspended job; late worker result; crash after external effect but before result commit."
+      ],
+      "failure": "Guard rejection is deterministic and leaves state unchanged; unknown side-effect outcome enters `RECONCILIATION_REQUIRED`, not automatic retry.",
+      "security": "Fencing tokens are unguessable or monotonic within authoritative state; control actor/adapter identity is recorded; no API/CLI bypass.",
+      "observability": "Transition counters by from/to/result, rejection reason, attempt age, stale-result count, terminal-state audit record.",
+      "tests": "Exhaustive table/property tests, concurrent transition races, stale fencing, duplicate command idempotency, crash-point integration.",
+      "accept": [
+        "Every transition documented in Section 10 has a direct positive and negative test.",
+        "Concurrent incompatible transitions yield one committed winner and deterministic loser errors.",
+        "Terminal-state immutability and stale-result rejection are proven under concurrency.",
+        "Legacy status strings project consistently for compatibility readers."
+      ],
+      "migration": "Map legacy `completed→SUCCEEDED`, `error→FAILED`; create attempt 1 for active/historical phase rows where provenance is sufficient, otherwise mark `legacy_unattributed`.",
+      "rollback": "Compatibility projection permits old readers; rollback restores pre-migration DB, not ad-hoc state rewrites.",
+      "completion": "Machine-readable transition table, exhaustive test report, migration mapping, and concurrency/fencing evidence."
+    },
+    {
+      "id": "AT-005",
+      "epic": "Immutable intake",
+      "title": "Introduce SourceRoot and accepted IntakeGeneration records",
+      "priority": "P0",
+      "deps": "AT-003, AT-004",
+      "rationale": "Downstream phases currently rediscover mutable sources, so a job has no immutable occurrence set or completeness decision.",
+      "evidence": "GAP-001, GAP-004, REQ-003, REQ-014; [ATLAS:efa547cafc64b58d60d19dcc1e5ba32c6b046bc5:atlas/phases/reconnaissance.py:L20-L111]",
+      "files": "Create `atlas/intake/service.py`, `atlas/artifacts/models.py`; refactor `atlas/phases/reconnaissance.py`, `atlas/safety/filesystem_discovery.py`; add persistence migrations.",
+      "requirements": [
+        "Register `SourceRoot` with normalized locator, provider type, allowed-root policy, and stable source ID.",
+        "Build an `IntakeGeneration` in `BUILDING`; persist every observed occurrence candidate and exclusion/error reason.",
+        "Accept only after traversal completes and completeness/budget/error policy passes; compute deterministic manifest digest; partial traversal is `FAILED` or `BLOCKED`, never valid empty intake.",
+        "Use deterministic relative-path ordering and bounded traversal; record mount/symlink/special-file policy decisions.",
+        "Downstream phases receive only `intake_generation_id` and occurrence IDs."
+      ],
+      "interfaces": "`SourceRoot`, `IntakeGeneration`, `ArtifactOccurrenceCandidate`, `IntakePolicy`, `IntakeAcceptanceResult`.",
+      "invariants": [
+        "Only `ACCEPTED` generations may feed Fingerprinting.",
+        "Accepted manifests are immutable observation records.",
+        "A path is an occurrence locator, not content identity.",
+        "Every omission has an explicit policy or error reason."
+      ],
+      "edges": [
+        "Missing root; permission error mid-tree; disappearing entry; symlink loop; mount boundary; special file; maximum entries/bytes/depth reached; case/Unicode collision."
+      ],
+      "failure": "Incomplete generations remain non-accepted with retained diagnostics; no later phase interprets them as success.",
+      "security": "Allowed roots, canonical relative paths, no symlink following by default, mount policy, resource budgets, no source writes.",
+      "observability": "Entries/bytes/errors/exclusions by reason, traversal duration, manifest digest, budget utilization, source mutation indicators.",
+      "tests": "Deterministic traversal, missing/unreadable source, symlink/mount/collision fixtures, million-entry synthetic benchmark procedure, crash before/after acceptance.",
+      "accept": [
+        "Missing or incomplete source cannot produce a completed job.",
+        "Two unchanged traversals produce the same manifest digest and ordered occurrence set.",
+        "Fingerprinting no longer invokes filesystem discovery.",
+        "All accepted-generation rows are immutable through public APIs."
+      ],
+      "migration": "Legacy jobs receive `intake_generation_id=NULL` and `provenance_complete=false`; no fabricated occurrences.",
+      "rollback": "New intake tables are additive; legacy Recon path remains read-only behind a compatibility feature flag during one window.",
+      "completion": "Schema, intake service, deterministic manifest fixtures, mutation tests, and provenance-completeness status surface."
+    },
+    {
+      "id": "AT-006",
+      "epic": "Artifact identity and provenance",
+      "title": "Persist occurrence-to-content identity using canonical SHA-256",
+      "priority": "P0",
+      "deps": "AT-005",
+      "rationale": "Current hashes are process-local and disconnected from accepted occurrences, preventing cross-run deduplication and exact-byte lineage.",
+      "evidence": "GAP-004, GAP-005, REQ-004, REQ-005; [ATLAS:efa547cafc64b58d60d19dcc1e5ba32c6b046bc5:atlas/storage/hash_store.py:L34-L63]; [ATLAS:efa547cafc64b58d60d19dcc1e5ba32c6b046bc5:atlas/phases/fingerprinting.py:L20-L136]",
+      "files": "Create/extend `atlas/artifacts/models.py`, `atlas/artifacts/hasher.py`; refactor `atlas/storage/hash_store.py`, `atlas/phases/fingerprinting.py`; migrations.",
+      "requirements": [
+        "Canonical identity is `sha256:<hex>`; optional BLAKE3 is acceleration/integrity metadata, never the sole canonical identity.",
+        "Fingerprint only accepted regular-file occurrences; open through canonical source access (AT-009 integration point), stream bytes, validate pre/post handle metadata, and persist occurrence↔content relation atomically.",
+        "Recognize one content identity across many occurrences and runs.",
+        "Record hash algorithm/version, byte count, read start/end, mutation result, and capture/storage status.",
+        "Keep hashing separate from blob retention; CAS arrives in AT-011."
+      ],
+      "interfaces": "`ContentIdentity`, `OccurrenceContentBinding`, `HashObservation`, `Hasher` protocol; compatibility `HashStore` facade.",
+      "invariants": [
+        "Path, size, name, and timestamp never equal byte identity.",
+        "One SHA-256 identity may bind many occurrences; an occurrence generation binds at most one verified content identity.",
+        "Mutated/stale reads never receive a false binding."
+      ],
+      "edges": [
+        "File truncates/appends/replaces during read; sparse/large file; duplicate bytes; interrupted hash; unsupported special file; BLAKE3 unavailable."
+      ],
+      "failure": "Mutation yields a typed stale-source result and blocks dependent work according policy; interrupted hashes create no content binding.",
+      "security": "Race-resistant source opening, bounded read buffers, no active-content execution, digest comparison in constant behavior where applicable.",
+      "observability": "Bytes hashed, throughput, duplicate hit/miss, mutation failures, algorithm/version, restart dedup result.",
+      "tests": "Source swap/truncate/append, duplicate bytes in multiple paths/runs, multi-gigabyte streaming fixture/procedure, restart dedup, algorithm compatibility.",
+      "accept": [
+        "Cross-process/restart reprocessing recognizes existing SHA-256 identities.",
+        "Source mutation cannot attach the wrong identity to an occurrence.",
+        "No phase independently invents content IDs.",
+        "Legacy `HashStore.has_content()` compatibility behavior is covered."
+      ],
+      "migration": "Import verified legacy SHA-256 values as orphan `ContentIdentity` rows only; do not fabricate occurrence bindings.",
+      "rollback": "Compatibility facade can read new identities; additive tables permit reverting code after DB backup.",
+      "completion": "Identity schema, hash service, restart/mutation test artifacts, duplicate metrics, and migration report."
+    },
+    {
+      "id": "AT-007",
+      "epic": "Durable events",
+      "title": "Make state transition, event history, and outbox atomic",
+      "priority": "P0",
+      "deps": "AT-003, AT-004",
+      "rationale": "Current publish-then-persist behavior can commit authoritative state without durable evidence and treats RabbitMQ as an ambiguous side channel.",
+      "evidence": "GAP-009, GAP-010, REQ-013, REQ-024; [ATLAS:efa547cafc64b58d60d19dcc1e5ba32c6b046bc5:atlas/core/orchestrator.py:L298-L339]; [ATLAS:efa547cafc64b58d60d19dcc1e5ba32c6b046bc5:atlas/core/event_bus.py:L24-L230]",
+      "files": "Create `atlas/events/models.py`, `atlas/events/recorder.py`, `atlas/events/dispatcher.py`; split/refactor `atlas/core/event_bus.py`; migrations.",
+      "requirements": [
+        "Persist authoritative state mutation, required durable event, and transport outbox row in one StateStore transaction.",
+        "Define immutable event IDs, local sequence, schema version, correlation/causation IDs, entity IDs, class, occurred time, and typed payload.",
+        "Make transports projections only; implement at-least-once outbox dispatch with idempotent delivery keys, backoff, retention, backlog limits, and reconciliation.",
+        "Coalesce/sample high-volume progress events while keeping current progress authoritative.",
+        "Preserve legacy routing keys through a versioned adapter."
+      ],
+      "interfaces": "`DurableEvent`, `EventRecorder`, `OutboxMessage`, `EventDispatcher`, `EventTransport`.",
+      "invariants": [
+        "A successful required transition always has its durable event.",
+        "Transport success/failure never defines lifecycle state.",
+        "Event ordering is deterministic per authoritative store.",
+        "Redelivery cannot duplicate an authoritative effect."
+      ],
+      "edges": [
+        "DB full; transport down; duplicate dispatcher; crash after publish before ack; poison event; consumer failure; backlog overflow."
+      ],
+      "failure": "If event/outbox cannot commit, state transition does not commit. Delivery failure remains pending/dead-lettered with evidence; no swallowed persistence exceptions.",
+      "security": "Validate event type/schema, prevent payload secrets/path leakage, authenticate deployment transports optionally, reject event injection into authoritative command paths.",
+      "observability": "Outbox depth/age, delivery attempts, dead letters, sequence gaps, coalescing counts, transport health.",
+      "tests": "Transaction fault injection at each write, ordering/replay, duplicate dispatch, broker outage/recovery, backpressure, schema-version compatibility.",
+      "accept": [
+        "Every required state transition query returns its durable event in the same committed transaction.",
+        "RabbitMQ can be disabled or unavailable without corrupting state.",
+        "Crash/redelivery tests produce no duplicate lifecycle effects.",
+        "Outbox backlog has explicit bounded/degraded behavior."
+      ],
+      "migration": "Import legacy `atlas_events` as schema v0/legacy class; start new sequence after verified maximum; keep routing adapter.",
+      "rollback": "Disable external dispatchers while retaining history/outbox; restore pre-migration DB for schema rollback.",
+      "completion": "Event schema, transaction tests, broker fault report, outbox diagnostics, and transport authority documentation."
+    },
+    {
+      "id": "AT-008",
+      "epic": "Checkpoints, controls, and recovery",
+      "title": "Persist progress, control requests, safe points, and versioned checkpoints",
+      "priority": "P0",
+      "deps": "AT-004, AT-007",
+      "rationale": "Current progress and pause/resume/cancel are process-local; restart repeats phases without verified recovery state.",
+      "evidence": "GAP-006, GAP-007, GAP-008, REQ-008, REQ-015, REQ-016, REQ-017.",
+      "files": "Refactor `atlas/phases/base.py`, coordinator and CLI; create checkpoint/control models and persistence tables; add `atlas/core/context.py` if useful.",
+      "requirements": [
+        "Expose a typed `PhaseContext` for durable progress, control polling, checkpoint creation, artifact/result writes, and telemetry.",
+        "Persist idempotent `ControlRequest` records with requested/applied/rejected state and actor/correlation identity.",
+        "Define safe control points per built-in phase; `PAUSED` means the attempt durably acknowledged a safe checkpoint.",
+        "Version checkpoints by phase/operation/config/input digests and validate before resume.",
+        "Separate current progress state from sampled progress history."
+      ],
+      "interfaces": "`PhaseContext.report_progress`, `.poll_control`, `.checkpoint`, `ControlRequest`, `Checkpoint`, `ResumeDecision`.",
+      "invariants": [
+        "Pause is an acknowledged durable execution state, not a string edit.",
+        "A checkpoint is accepted only for exact phase/operation/config/input identity.",
+        "Cancellation cannot report success while side effects remain unknown."
+      ],
+      "edges": [
+        "Cancel during hashing/extraction/publication; duplicate control; stale checkpoint; resume after plugin upgrade; crash after checkpoint write; long uninterruptible call."
+      ],
+      "failure": "Unsafe control remains pending until safe point or timeout; invalid checkpoint is rejected and restart/reconciliation policy is explicit.",
+      "security": "Authorize control adapters at deployment boundary; record actor; avoid checkpointing secrets; protect checkpoint integrity with digests.",
+      "observability": "Live progress, last checkpoint, pending control age, safe-point latency, resume reason, rejected stale checkpoint count.",
+      "tests": "Two-process logical integration, crash/restart for each built-in phase, duplicate/stale control, checkpoint mismatch, cancellation cleanup.",
+      "accept": [
+        "A second process can observe live progress from persistent state.",
+        "Pause/resume/cancel requests are durably acknowledged or rejected with reasons.",
+        "Stale or incompatible checkpoints never resume work.",
+        "Built-in phases document maximum control latency and checkpoint granularity."
+      ],
+      "migration": "Legacy active jobs cannot be safely resumed unless compatibility evidence exists; mark them `RECOVERY_REQUIRED` or `legacy_nonresumable`.",
+      "rollback": "Disable resume use of new checkpoints while retaining them as diagnostics; controls fall back only for new jobs under explicit compatibility mode.",
+      "completion": "Control/checkpoint schemas, phase safe-point contracts, two-process tests, crash/restart report, and status output."
+    },
+    {
+      "id": "AT-009",
+      "epic": "Filesystem safety",
+      "title": "Create one canonical race-resistant SourceAccess service",
+      "priority": "P0",
+      "deps": "AT-005",
+      "rationale": "PathSafetyService is not the authoritative route for all opens, leaving bypasses and source TOCTOU exposure.",
+      "evidence": "GAP-004, GAP-012, REQ-011; [ATLAS:efa547cafc64b58d60d19dcc1e5ba32c6b046bc5:atlas/safety/path_safety.py:L26-L146].",
+      "files": "Create `atlas/safety/source_access.py`; extend `atlas/safety/path_safety.py`; integrate all phases and intake/artifact services.",
+      "requirements": [
+        "Resolve all source access from registered root + canonical relative path; prohibit arbitrary post-intake absolute paths.",
+        "Define symlink policy, mount-boundary policy, special-file policy, case/Unicode normalization policy, and platform capability fallback.",
+        "Use handle-relative/no-follow operations where supported; validate opened handle metadata against occurrence record.",
+        "Centralize temporary-file creation and destination path construction separately from source access.",
+        "Add static/runtime guards against direct phase `open()` bypass."
+      ],
+      "interfaces": "`SourceAccess.open_occurrence`, `stat_occurrence`, `read_stream`; `PathPolicy`; platform capability report.",
+      "invariants": [
+        "No built-in phase opens a user-supplied absolute source path after intake.",
+        "The accessed object must match the accepted occurrence identity constraints.",
+        "Unsupported safe semantics fail closed or require explicit reduced-assurance mode."
+      ],
+      "edges": [
+        "Symlink swap; parent rename; mount insertion; hard link; Windows reparse point; case-fold collision; Unicode normalization; device/FIFO/socket."
+      ],
+      "failure": "Unsafe/stale access returns typed error without following or materializing the target; job/phase policy determines block/fail, never silent skip.",
+      "security": "Required core control; allowed roots, no-follow, handle validation, secure temp files, source read-only guarantee.",
+      "observability": "Safety decision/reason, platform capability, denied path count, mutation/race detection, reduced-assurance mode.",
+      "tests": "Adversarial filesystem race fixtures, symlink/mount/reparse tests by OS, static bypass scan, property tests for canonical paths.",
+      "accept": [
+        "Static analysis finds no unapproved built-in direct source opens.",
+        "Symlink/mount/case/Unicode fixtures produce documented deterministic outcomes.",
+        "All phase source reads are attributable to an occurrence ID.",
+        "Reduced-assurance mode is never the silent default."
+      ],
+      "migration": "Existing absolute paths are normalized to SourceRoot + relative path only when safely provable; otherwise provenance incomplete.",
+      "rollback": "Compatibility path adapter remains read-only and loudly warns; no weakening of canonical policy for new jobs.",
+      "completion": "SourceAccess API, OS capability matrix, adversarial test corpus/results, and bypass inventory at zero or approved exceptions."
+    },
+    {
+      "id": "AT-010",
+      "epic": "Archive safety and containment",
+      "title": "Introduce quarantine workspaces and recursive cumulative archive budgets",
+      "priority": "P0",
+      "deps": "AT-006, AT-009",
+      "rationale": "Current extraction writes beside the source and nested-depth configuration is not recursively enforced.",
+      "evidence": "GAP-012, GAP-013, REQ-009, REQ-010, REQ-012; [ATLAS:efa547cafc64b58d60d19dcc1e5ba32c6b046bc5:atlas/phases/extraction.py:L20-L181]; [ATLAS:efa547cafc64b58d60d19dcc1e5ba32c6b046bc5:atlas/safety/archive_safety.py].",
+      "files": "Create `atlas/artifacts/workspace.py`; extend `atlas/safety/archive_safety.py`, `atlas/phases/structural_discovery.py`, `atlas/phases/extraction.py`.",
+      "requirements": [
+        "Create unique per-job/phase/attempt quarantine workspaces outside source roots with quotas and restrictive permissions.",
+        "Inspect nested containers recursively through a bounded work queue before materialization where feasible; enforce cumulative depth, member count, declared/actual expanded bytes, per-file bytes, compression ratio, temp bytes, and wall time.",
+        "Canonicalize member names and reject absolute, parent traversal, NUL, reserved/device, symlink/hardlink/device entries unless an explicit safe policy exists.",
+        "Require an accepted StructuralReport for the exact parent ContentIdentity before extraction.",
+        "Account actual bytes written, hash every materialized output, and persist derivation records; partial extraction remains contained."
+      ],
+      "interfaces": "`WorkspaceManager`, `ArchiveBudget`, `StructuralReport`, `MaterializationPlan`, `ExtractionRecord`.",
+      "invariants": [
+        "No extraction writes beneath a source root.",
+        "No materialization precedes an accepted report for exact bytes.",
+        "Budgets are cumulative across nested containers and actual writes.",
+        "Every materialized regular file receives content identity and lineage."
+      ],
+      "edges": [
+        "Malformed archive; overlapping paths; duplicate/case-colliding members; nested bomb; symlink/hardlink/device; disk exhaustion; encrypted member; partial write; recursive cycle by repeated content."
+      ],
+      "failure": "Stop at first required safety/budget violation; mark ExtractionRecord failed/blocked; retain or purge quarantine according policy with evidence; no partial publication.",
+      "security": "Required core control; active content is never executed; secure temp/open flags; no source-adjacent writes; total-job budgets.",
+      "observability": "Nested depth, member/byte budgets, actual versus declared bytes, quarantine usage, rejection reasons, cleanup status.",
+      "tests": "Adversarial archive corpus, generated path/member properties, nested bombs, disk-full fault injection, partial extraction cleanup, no-write-under-source assertion.",
+      "accept": [
+        "All adversarial archives terminate within configured resource bounds.",
+        "No Phase-D write occurs under source root.",
+        "Every extracted file has a derivation edge and hash before downstream use.",
+        "Nested-depth and cumulative-byte limits are enforced recursively, not only counted."
+      ],
+      "migration": "Legacy extracted directories are external/unmanaged artifacts and are never retroactively trusted; optional import requires re-intake.",
+      "rollback": "Disable new extraction only by blocking jobs; never fall back to source-adjacent legacy extraction for new jobs.",
+      "completion": "Workspace/recursive-budget implementation plan, corpus manifest, fault results, cleanup evidence, and lineage samples."
+    },
+    {
+      "id": "AT-011",
+      "epic": "Artifact storage",
+      "title": "Add an optional local immutable content-addressable store",
+      "priority": "P1",
+      "deps": "AT-006, AT-009",
+      "rationale": "Persistent identities enable safe deduplication, reproducibility, and stable inputs, but a true CAS must not be confused with hashing.",
+      "evidence": "REQ-005, REQ-029; GAP-005; ADR-005.",
+      "files": "Create `atlas/artifacts/store.py`; extend runtime/config/persistence; preserve `HashStore` facade.",
+      "requirements": [
+        "Store blobs at digest-derived immutable locations using staged exclusive write, streamed hash verification, fsync of file and directory where supported, and no-replace commit.",
+        "Verify an existing digest path before reuse; treat mismatch as integrity incident.",
+        "Record blob status, size, provider, retention class, verification time, and occurrence/capture provenance.",
+        "Reconcile harmless orphan blobs when filesystem commit succeeds but DB commit fails.",
+        "Make CAS optional; identity-only operation remains explicit with reduced reproducibility status."
+      ],
+      "interfaces": "`ContentStore.put/open/verify/has/reconcile`, `BlobRecord`, provider capability descriptor.",
+      "invariants": [
+        "A committed digest path is immutable and never overwritten.",
+        "Blob bytes must match canonical content identity.",
+        "CAS authority is content bytes; DB records link lifecycle/provenance."
+      ],
+      "edges": [
+        "Concurrent identical writers; partial blob; DB failure after finalize; disk quota; bit rot; cross-device rename; unsupported fsync/no-replace."
+      ],
+      "failure": "Unknown/mismatched existing blob fails closed; orphan is quarantined/reconciled; quota failure does not corrupt existing blobs.",
+      "security": "Store outside source/workspaces, restrictive permissions, no execution, safe filename derivation, integrity verification on configurable schedule.",
+      "observability": "Bytes stored/deduplicated, put latency, orphan count, verify failures, quota/retention usage, cache hit/miss.",
+      "tests": "Concurrent writers, every crash point, duplicate corpus, bit-flip verification, quota full, provider conformance.",
+      "accept": [
+        "Repeated identical content consumes one blob payload.",
+        "No concurrent writer overwrites existing content.",
+        "Crash-point tests leave either a valid committed blob, a detectable orphan, or no blob—never a false identity.",
+        "Identity-only and captured-byte status is visible in provenance."
+      ],
+      "migration": "Legacy identities can gain blobs only by re-reading verified occurrences or explicit import; never assume bytes exist.",
+      "rollback": "Disable new puts and keep read/verify access; immutable blobs can be retained or removed only through audited retention tooling.",
+      "completion": "Provider contract, local implementation, crash/concurrency report, retention/quota documentation, and dedup benchmark."
+    },
+    {
+      "id": "AT-012",
+      "epic": "Structural and extraction lineage",
+      "title": "Persist StructuralReport and ExtractionRecord as exact-byte contracts",
+      "priority": "P1",
+      "deps": "AT-010, AT-011",
+      "rationale": "Current structural and extraction phases exchange summaries/live paths rather than durable records bound to exact content.",
+      "evidence": "REQ-009, REQ-019, REQ-028; GAP-004, GAP-012, GAP-013.",
+      "files": "Extend `atlas/artifacts/models.py`; refactor `atlas/phases/structural_discovery.py`, `atlas/phases/extraction.py`; migrations.",
+      "requirements": [
+        "Persist reports keyed to parent ContentIdentity, inspector/version, policy/config digest, manifest, risk/budget assessment, and acceptance state.",
+        "Extraction consumes a report ID and verifies exact content/config/policy binding before materialization.",
+        "Persist one ExtractionRecord per attempt with workspace, plan, actual outputs, derivation edges, budgets, failure/cleanup status.",
+        "Support deterministic reuse only for declared deterministic inspectors and exact key matches."
+      ],
+      "interfaces": "`StructuralReport`, `ArchiveMember`, `ExtractionRecord`, `ArtifactDerivation`, `MaterializationOutcome`.",
+      "invariants": [
+        "A report for content X can never authorize content Y.",
+        "Derived artifacts retain parent container/member/attempt lineage.",
+        "Partial extraction is never promoted as complete."
+      ],
+      "edges": [
+        "Archive changes after report; inspector upgrade; policy change; same content at new path; duplicate members; failed cleanup."
+      ],
+      "failure": "Binding mismatch blocks extraction and emits stale-report evidence; partial/unknown extraction requires reconciliation or cleanup.",
+      "security": "Report data remains inert; no member materialization during structural inspection; policy digests prevent stale unsafe reuse.",
+      "observability": "Report cache hit/miss, stale binding, member/risk counts, extraction output/cleanup status, lineage query latency.",
+      "tests": "Swap archive after C, policy/config change, repeated identical content, partial write/crash, bidirectional lineage queries.",
+      "accept": [
+        "Phase D rejects any report/content/config/policy mismatch.",
+        "Every extracted content identity traces to exact parent/member/report/attempt.",
+        "Repeated deterministic structure analysis can be reused only under exact key equality.",
+        "Unknown/partial outcomes are visibly non-success."
+      ],
+      "migration": "Legacy structural/extraction metadata remains a non-authoritative summary with `lineage_complete=false`.",
+      "rollback": "New records are additive; disable reuse and extraction while retaining reports for diagnostics.",
+      "completion": "Schemas, phase contract changes, swap/reuse/crash tests, and sample lineage export."
+    },
+    {
+      "id": "AT-013",
+      "epic": "Plugin and analyzer contracts",
+      "title": "Define versioned typed plugin descriptors and a deterministic registry",
+      "priority": "P1",
+      "deps": "AT-002, AT-006",
+      "rationale": "Arbitrary in-process plugin dictionaries lack schema, version, capability, resource, determinism, and authority boundaries.",
+      "evidence": "GAP-014, GAP-015, REQ-021, REQ-022, REQ-023; [ATLAS:efa547cafc64b58d60d19dcc1e5ba32c6b046bc5:atlas/phases/analysis.py:L18-L134].",
+      "files": "Create `atlas/plugins/contracts.py`, `atlas/plugins/registry.py`; refactor `atlas/phases/analysis.py`; compatibility adapter for `AnalyzerPlugin`.",
+      "requirements": [
+        "Define stable plugin ID/version/API range, supported inputs, output schema, capabilities, filesystem/network/process needs, tools, CPU/memory/temp/time expectations, active-content risk, deterministic/cacheable flags, and provenance.",
+        "Build deterministic registry discovery with duplicate/conflict rejection and explicit enabled/deployed status.",
+        "Normalize output into typed AnalysisFinding records; reject arbitrary dictionaries and preserve complete result sets.",
+        "AI plugins may produce findings/recommendations but cannot mutate lifecycle, provenance, safety, evidence acceptance, or promotion decisions.",
+        "Version operation/config/policy/input digests for reproducibility and optional memoization."
+      ],
+      "interfaces": "`PluginDescriptor`, `Analyzer`, `AnalyzerInput`, `AnalyzerResult`, `AnalysisFinding`, `RegistrySnapshot`.",
+      "invariants": [
+        "Plugin output is data, never lifecycle authority.",
+        "Duplicate plugin IDs/versions cannot resolve nondeterministically.",
+        "Every finding attributes plugin/tool/model/version/config/input identities.",
+        "No findings are silently truncated."
+      ],
+      "edges": [
+        "Duplicate ID; incompatible API version; malformed result; unavailable external tool; nondeterministic plugin marked cacheable; 0/50/51/large findings; plugin crash."
+      ],
+      "failure": "Invalid plugin is disabled/rejected before work; optional plugin failure is isolated and recorded; required plugin failure follows pipeline policy.",
+      "security": "Capability least privilege; no direct StateStore; no implicit source/network; secret references mediated; output schema and size limits.",
+      "observability": "Registry snapshot/digest, plugin load/disable reason, execution/resource metrics, finding counts, cache eligibility/hit/miss.",
+      "tests": "Registry determinism, version compatibility, duplicate conflict, malformed/oversized results, attribution, losslessness, AI authority negative tests.",
+      "accept": [
+        "No arbitrary dictionary reaches durable findings.",
+        "Two clean registry builds produce the same ordered snapshot/digest.",
+        "More than 50 findings persist losslessly within declared limits.",
+        "A plugin cannot invoke lifecycle transitions through its context."
+      ],
+      "migration": "Wrap legacy `AnalyzerPlugin` behind an adapter with generated descriptor and deprecation warning; mark provenance as legacy where fields are unknown.",
+      "rollback": "Disable new plugin discovery and retain adapter for legacy trusted plugins; findings remain readable.",
+      "completion": "Plugin API/schema, registry snapshot artifact, compatibility tests, normalized finding fixtures, and security contract."
+    },
+    {
+      "id": "AT-014",
+      "epic": "Execution abstraction",
+      "title": "Separate lifecycle semantics from execution location with ExecutionBackend",
+      "priority": "P1",
+      "deps": "AT-004, AT-013",
+      "rationale": "A stable work/result contract is required before isolation or remote execution; the backend must never own lifecycle state.",
+      "evidence": "REQ-022, REQ-025, REQ-030; ADR-008.",
+      "files": "Create `atlas/execution/base.py`, `atlas/execution/inprocess.py`; integrate coordinator/plugins; later `subprocess.py` in AT-020.",
+      "requirements": [
+        "Define `WorkSpec` containing immutable operation, plugin/version, input identity references, config/policy digests, resource limits, deadline, idempotency key, and fencing token.",
+        "Define `WorkResult` with status, output references/digest, diagnostics, resource usage, and echoed authority fields.",
+        "Implement trusted in-process backend first and backend conformance suite.",
+        "Coordinator alone validates result and transitions attempts/phases; backend cannot access StateStore authority.",
+        "Support cancellation/deadline protocol and stale-result rejection."
+      ],
+      "interfaces": "`ExecutionBackend.submit/cancel/health`, `WorkSpec`, `WorkResult`, `BackendCapabilities`.",
+      "invariants": [
+        "Execution location does not change lifecycle semantics.",
+        "Backend result cannot advance state without coordinator validation.",
+        "Exact work key defines duplicate/replay behavior.",
+        "All backends pass the same conformance contract."
+      ],
+      "edges": [
+        "Timeout; backend loss; duplicate result; stale fencing; malformed/oversized output; cancellation race; backend shutdown."
+      ],
+      "failure": "Unknown result or lost backend leaves attempt timed out/lost/reconciliation-required according operation contract; no blind success.",
+      "security": "Minimize backend credentials/context; mediated artifact access; signed/authenticated protocol deferred to remote adapter but fields reserved.",
+      "observability": "Queue/run latency, backend health, resource usage, cancellations, stale/malformed results, conformance version.",
+      "tests": "In-process conformance, identical analyzer through direct/contract path, cancellation/timeout/stale results, serialization compatibility.",
+      "accept": [
+        "A bundled analyzer produces identical normalized findings through the backend contract.",
+        "Backend code has no direct lifecycle write capability.",
+        "Stale/malformed/duplicate results are rejected deterministically.",
+        "Conformance suite is reusable for AT-020/022."
+      ],
+      "migration": "Route trusted built-ins through in-process backend behind existing APIs; preserve direct plugin adapter during transition.",
+      "rollback": "Switch coordinator to compatibility direct executor while retaining WorkSpec/Result records for new jobs only.",
+      "completion": "Contracts, in-process backend, conformance suite, equivalence evidence, and authority-boundary documentation."
+    },
+    {
+      "id": "AT-015",
+      "epic": "Evidence, review, and publication",
+      "title": "Implement first-class findings, evidence, decisions, and publication attempts",
+      "priority": "P1",
+      "deps": "AT-012, AT-013",
+      "rationale": "Review currently produces transient candidates rather than durable approve/reject/hold decisions and verifiable publications.",
+      "evidence": "GAP-011, GAP-015, REQ-019, REQ-020, REQ-027, REQ-028; [ATLAS:efa547cafc64b58d60d19dcc1e5ba32c6b046bc5:atlas/phases/review.py:L19-L236].",
+      "files": "Create `atlas/review/service.py`, `atlas/review/publication.py`; refactor `atlas/phases/review.py`; extend artifact/finding models and migrations.",
+      "requirements": [
+        "Persist normalized findings separately from evidence records, promotion decisions, publication requests/attempts, and destination verification.",
+        "Define decision states `APPROVE/REJECT/HOLD` with actor/policy identity, exact evidence-set digest, reason, time, and supersession rules.",
+        "Require an authorized current decision before publication; harmless local jobs may use explicit policy decisions without interactive approval.",
+        "Use staged destination writes, idempotency keys, verification, no-replace/expected-replace semantics, and unknown-outcome reconciliation.",
+        "Provide bidirectional lineage from publication to exact source bytes and from source occurrence to all derived publications."
+      ],
+      "interfaces": "`AnalysisFinding`, `EvidenceRecord`, `PromotionDecision`, `PublicationRequest`, `PublicationAttempt`, `DestinationPublication`, `PublicationAdapter`.",
+      "invariants": [
+        "Finding ≠ evidence ≠ decision ≠ publication.",
+        "AI/plugin assertions cannot self-promote to trusted evidence/decision.",
+        "A decision is bound to an exact evidence set and policy version.",
+        "Unknown external outcome is never blindly retried."
+      ],
+      "edges": [
+        "Hold/reject; evidence superseded; destination already exists; partial external write; timeout after destination commit; duplicate request; destination outage."
+      ],
+      "failure": "Publication failure/unknown remains a non-success attempt with reconciliation instructions; no promotion record implies destination success.",
+      "security": "Destination policy/capability restrictions, optional deployment authorization, secret references, path/command injection prevention, immutable attribution.",
+      "observability": "Decision latency/outcomes, stale evidence, publication attempts/reconciliation, destination verification, lineage query diagnostics.",
+      "tests": "Approve/reject/hold E2E, stale evidence negative, duplicate/partial/unknown publication, unauthorized adapter, bidirectional lineage.",
+      "accept": [
+        "Every publication traces to exact source and derived content identities, findings, evidence, decision, policy, actor, and attempt.",
+        "Reject/hold cannot publish.",
+        "Unknown destination outcome enters reconciliation and does not auto-repeat mutation.",
+        "AI/plugin-only output cannot create an approved decision."
+      ],
+      "migration": "Legacy promotion candidates remain historical summaries with `decision_authority=none`; they are never treated as approved publications.",
+      "rollback": "Disable publication adapters; retain decisions/evidence as read-only records; restore DB for schema rollback.",
+      "completion": "Review/publication schemas, adapter contract, E2E/fault evidence, lineage export, and operator status."
+    },
+    {
+      "id": "AT-016",
+      "epic": "Reliability and recovery",
+      "title": "Define retries, timeouts, idempotency, reconciliation, and crash recovery per phase",
+      "priority": "P1",
+      "deps": "AT-004, AT-008, AT-012, AT-014",
+      "rationale": "Replay is unsafe unless each operation declares duplicate effects, checkpoints, and unknown-outcome handling.",
+      "evidence": "GAP-008, REQ-017; Sections 23 and ADR-011.",
+      "files": "Coordinator/lifecycle, phase contracts, execution backends, review/publication; create error/recovery policy module if needed.",
+      "requirements": [
+        "Define typed error taxonomy and per-operation retryability, maximum attempts, backoff/jitter, deadline, idempotency key, checkpoint/restart mode, and reconciliation hook.",
+        "Classify built-in operations as pure/restartable, checkpoint-resumable, idempotent side effect, or externally reconcilable side effect.",
+        "On startup, scan nonterminal attempts and deterministically resume, retry, reconcile, block, or fail based on verified state.",
+        "Never automatically retry an operation with unknown duplicate effects.",
+        "Retain failed attempt evidence and link successor attempts."
+      ],
+      "interfaces": "`RetryPolicy`, `OperationSemantics`, `RecoveryDecision`, `Reconciler`, typed `AtlasError` hierarchy.",
+      "invariants": [
+        "Anything that may run twice has declared duplicate-effect behavior.",
+        "Recovery resumes from verified durable state, not memory.",
+        "Unknown outcome cannot become success or blind retry.",
+        "Retries create new attempts and retain predecessors."
+      ],
+      "edges": [
+        "Crash before/after every transaction and external write; timeout while child still runs; stale checkpoint; repeated host restarts; dependency outage; retry storm."
+      ],
+      "failure": "Unreconcilable/unsafe state becomes `BLOCKED/RECONCILIATION_REQUIRED` with operator evidence; retry budget exhaustion is terminal under policy.",
+      "security": "Bound retries/resources, no secret leakage in errors, external reconciliation uses least privilege and exact idempotency identity.",
+      "observability": "Attempt/retry/recovery counters, reason codes, backoff, checkpoint age, unresolved outcomes, restart recovery summary.",
+      "tests": "Subprocess kill/fault injection at durable points for every built-in phase, repeated restart, retry exhaustion, external unknown outcome, stale checkpoint.",
+      "accept": [
+        "Every built-in phase has a documented/tested operation-semantics classification.",
+        "Crash matrix yields one deterministic recovery decision per fault point.",
+        "No side-effecting unknown outcome is automatically repeated.",
+        "Recovery diagnostics identify exact attempt/checkpoint/effect boundary."
+      ],
+      "migration": "Legacy active jobs are classified conservatively as nonresumable unless exact durable evidence proves safe continuation.",
+      "rollback": "Disable automatic recovery and require manual block/restart for new jobs; never weaken unknown-outcome safeguards.",
+      "completion": "Recovery matrix implementation, phase semantics registry, crash-test artifacts, and startup recovery report."
+    },
+    {
+      "id": "AT-017",
+      "epic": "Runtime ownership",
+      "title": "Add a long-running local daemon as the authoritative active-job owner",
+      "priority": "P1",
+      "deps": "AT-008, AT-016",
+      "rationale": "A CLI process cannot durably own jobs or honor controls from another process; hydrating private `_jobs` is not control.",
+      "evidence": "GAP-007, REQ-014, REQ-015; README remaining limitation on process-local controls.",
+      "files": "Create `atlas/service/daemon.py`; refactor `atlas/cli.py`, runtime/coordinator; add claim/lease tables as needed.",
+      "requirements": [
+        "Run a single local owner/claim loop that discovers runnable jobs, claims with lease/fencing token, executes/recoveries, and renews authority.",
+        "CLI submits commands and reads status through shared command/state service; it never edits private runtime maps.",
+        "Support graceful shutdown, abandoned-claim recovery, single-instance lock or multi-owner-safe claims, and health/readiness.",
+        "Keep same-process library mode for tests/embedded use under explicit ownership contract.",
+        "Do not add remote/distributed workers."
+      ],
+      "interfaces": "`AtlasDaemon`, `JobClaim`, `CommandService`, local IPC choice or database-mediated commands; unchanged public CLI verbs.",
+      "invariants": [
+        "Exactly one valid fenced owner advances an attempt.",
+        "CLI never manufactures active runtime state.",
+        "Daemon restart preserves durable lifecycle semantics.",
+        "Embedded and daemon modes use the same coordinator rules."
+      ],
+      "edges": [
+        "Two daemons; stale lease; host sleep; daemon kill; CLI during shutdown; database lock; orphan subprocess."
+      ],
+      "failure": "Lost lease stops authority; stale owner result rejected; readiness false on unusable store; claims recover after expiry/reconciliation.",
+      "security": "Local IPC/database permissions, actor attribution, no unauthenticated network listener by default, least-privileged daemon account.",
+      "observability": "Daemon identity/uptime, claim/lease age, runnable queue, recovery actions, health/readiness, shutdown status.",
+      "tests": "Launch daemon and second CLI process pause/resume/cancel; competing-daemon claim test; kill/restart; stale fencing; embedded equivalence.",
+      "accept": [
+        "Separate CLI process controls a job executing under daemon ownership.",
+        "Private `_jobs` hydration/mutation is removed from CLI.",
+        "Competing daemon cannot double-execute a fenced attempt.",
+        "Graceful and forced restart produce deterministic recovery."
+      ],
+      "migration": "CLI defaults may remain foreground for one window; add explicit `atlas daemon`/connection detection and deprecation path.",
+      "rollback": "Return to foreground mode for new jobs only; existing daemon-owned nonterminal jobs are blocked/recovered safely, not stolen.",
+      "completion": "Daemon/service code plan, ownership tests, health/status output, operator runbook, and compatibility behavior."
+    },
+    {
+      "id": "AT-018",
+      "epic": "Observability and diagnostics",
+      "title": "Provide canonical status, telemetry, health, and diagnostic bundles",
+      "priority": "P1",
+      "deps": "AT-007, AT-008",
+      "rationale": "Operators need authoritative progress, blockers, provenance, and recovery evidence without reading raw SQLite or logs.",
+      "evidence": "REQ-008, REQ-013, REQ-029; Sections 15 and 23.",
+      "files": "Create status/telemetry modules; extend CLI, runtime, persistence queries; documentation.",
+      "requirements": [
+        "Define structured JSON logs with stable error taxonomy and correlation/job/phase/attempt/work IDs.",
+        "Expose canonical job status projection: current phase/attempt, progress, pending control, checkpoint, blocker, retry, resource budget, outbox backlog, provenance completeness.",
+        "Define metrics and optional traces without making them authoritative.",
+        "Implement liveness/readiness/dependency health semantics and a sanitized diagnostic bundle with schema/config/runtime versions and relevant evidence.",
+        "Redact secrets and bound payload-derived text/path samples."
+      ],
+      "interfaces": "`StatusService`, `JobStatus`, telemetry adapter, `DiagnosticBundle`, health/readiness result.",
+      "invariants": [
+        "Status is derived from authoritative state, not transport.",
+        "Logs/metrics/traces never replace durable evidence.",
+        "Diagnostics are safe to share under documented redaction."
+      ],
+      "edges": [
+        "Huge job; high-cardinality paths; clock skew; telemetry sink outage; corrupted row; partial diagnostic bundle; secret-like metadata."
+      ],
+      "failure": "Telemetry sink failure degrades observability but not lifecycle state; diagnostics report missing components explicitly.",
+      "security": "Redaction before logging/export, path minimization, no raw file content by default, access controls optional deployment layer.",
+      "observability": "This task defines it: stable logs, metrics, traces, health/readiness, progress, errors, diagnostic bundle integrity.",
+      "tests": "Golden structured logs/status, redaction, telemetry outage, high-volume cardinality limits, health dependency semantics, diagnostic reproducibility.",
+      "accept": [
+        "A user can identify exact phase/attempt/checkpoint/blocker/recovery action without raw DB inspection.",
+        "Telemetry outage cannot change job outcome.",
+        "Diagnostic bundle contains no fixture secrets/raw payloads and has a manifest hash.",
+        "Health/readiness semantics are deterministic and tested."
+      ],
+      "migration": "Legacy jobs show reduced fields with `provenance_complete=false`; CLI output remains backward-readable with additive fields/JSON version.",
+      "rollback": "Disable optional sinks; keep status service and durable state queries.",
+      "completion": "Status schema, metric catalog, log/error taxonomy, diagnostic example, redaction and outage test evidence."
+    },
+    {
+      "id": "AT-019",
+      "epic": "External interfaces",
+      "title": "Implement REST, RabbitMQ, and webhook adapters over the shared command/event contracts",
+      "priority": "P2",
+      "deps": "AT-017, AT-018",
+      "rationale": "External interfaces are useful only after durable semantics exist and must not create alternate lifecycle authority.",
+      "evidence": "REQ-024, REQ-025, REQ-030; current RabbitMQ publisher-only behavior.",
+      "files": "Create `atlas/api/`; complete event transport/dispatcher; optional webhook adapter; CLI/Python remain canonical clients.",
+      "requirements": [
+        "Expose versioned request/response schemas that invoke the same CommandService and StatusService as CLI/Python.",
+        "Complete RabbitMQ as outbox-backed event transport with publisher confirms, bounded retry/DLQ, schema/version headers, and no consumer-driven state mutation.",
+        "Webhooks are signed optional notifications with idempotent delivery.",
+        "Define authentication/authorization as deployment adapters; local single-operator mode need not require network IAM.",
+        "Generate and verify OpenAPI/contract artifacts."
+      ],
+      "interfaces": "REST v1, event envelope v1, webhook delivery record; no alternate phase/workflow semantics.",
+      "invariants": [
+        "No external interface bypasses canonical phase order, state guards, review, or source policy.",
+        "Events are notifications, not commands, unless a separately authenticated command endpoint validates through CommandService."
+      ],
+      "edges": [
+        "Duplicate request; stale ETag/version; broker/webhook outage; malformed schema; replayed command; slow consumer; API process restart."
+      ],
+      "failure": "Return stable errors without partial state; outbox retains delivery; replayed idempotent command returns prior result.",
+      "security": "Optional authn/authz/TLS/rate limits, request size/schema, replay protection, secret handling, event injection separation.",
+      "observability": "Request IDs/latency/errors, outbox/delivery metrics, contract version, auth decisions, replay detections.",
+      "tests": "Contract/OpenAPI validation, lifecycle-bypass negative tests, duplicate/replay, broker outage/redelivery, webhook signature, auth adapter.",
+      "accept": [
+        "REST and CLI produce identical authoritative state for equivalent commands.",
+        "RabbitMQ outage does not block committed lifecycle transitions beyond explicit outbox capacity policy.",
+        "No event payload can mutate state by being replayed as a command.",
+        "OpenAPI/event schemas are versioned and CI-checked."
+      ],
+      "migration": "Preserve legacy routing keys through v1 adapter; introduce REST additively.",
+      "rollback": "Remove/disable adapters without changing core state or job executability.",
+      "completion": "Versioned contracts, integration/fault reports, OpenAPI artifact, and adapter runbooks."
+    },
+    {
+      "id": "AT-020",
+      "epic": "Plugin isolation and resource governance",
+      "title": "Add subprocess execution with mediated artifacts and enforceable limits",
+      "priority": "P2",
+      "deps": "AT-014",
+      "rationale": "Third-party analyzers should not share process authority, unrestricted filesystem, or StateStore credentials.",
+      "evidence": "GAP-014, REQ-022; ADR-010.",
+      "files": "Create `atlas/execution/subprocess.py`; extend plugin descriptors/policy and workspace/artifact access.",
+      "requirements": [
+        "Launch plugins in a separate process with a minimal JSON/binary contract, dedicated workspace, mediated content handles/copies, and no StateStore credentials.",
+        "Enforce timeout/termination, output size, temp storage, process count, and platform-available CPU/memory constraints; report unsupported controls.",
+        "Network and external tool access are denied by default and explicitly declared/policy-granted.",
+        "Sanitize environment, working directory, inherited descriptors, PATH/tool resolution, and secrets.",
+        "Treat containers/sandboxes as later backend adapters, not mandatory core."
+      ],
+      "interfaces": "Subprocess backend implementing ExecutionBackend; `CapabilityGrant`; mediated artifact token/locator.",
+      "invariants": [
+        "Plugin process cannot mutate lifecycle authority.",
+        "Plugin receives only declared inputs/capabilities.",
+        "Timeout/kill leaves contained workspace and deterministic attempt outcome."
+      ],
+      "edges": [
+        "Fork bomb; stdout flood; child tree; ignored termination; output protocol corruption; temp exhaustion; network attempt; Windows job object/POSIX limits."
+      ],
+      "failure": "Kill process tree, mark attempt failed/timed out, retain bounded diagnostics, clean/quarantine workspace; no host-wide retry storm.",
+      "security": "Core control for untrusted plugins where technically enforceable; document platform gaps; no secrets unless explicitly referenced.",
+      "observability": "CPU/memory/temp/time, denied capability attempts where observable, exit/signal, output truncation, cleanup.",
+      "tests": "Hostile plugin corpus: file escape, network, process spawn, output flood, timeout, memory/temp exhaustion; backend conformance by OS.",
+      "accept": [
+        "Test plugin cannot access StateStore credentials or source paths outside mediated input under supported controls.",
+        "Timeout kills the entire child tree and preserves deterministic evidence.",
+        "Unsupported resource controls are visible and cannot be claimed as enforced.",
+        "In-process backend remains limited to explicitly trusted plugins."
+      ],
+      "migration": "Legacy plugins default to trusted in-process compatibility; require descriptor/trust classification before subprocess eligibility.",
+      "rollback": "Disable subprocess backend; untrusted plugins become unavailable rather than silently in-process.",
+      "completion": "Backend, capability policy, hostile-plugin test report, platform enforcement matrix, and cleanup diagnostics."
+    },
+    {
+      "id": "AT-021",
+      "epic": "Optional scale adapters",
+      "title": "Add PostgreSQL and object-storage adapters only after measured trigger conditions",
+      "priority": "P3",
+      "deps": "AT-003, AT-011, AT-016, benchmark evidence from AT-024",
+      "rationale": "Additional stores are justified only when SQLite/local CAS fail defined workloads while semantics are already stable.",
+      "evidence": "REQ-026, REQ-030; ADR-003; OQ-007.",
+      "files": "Later `atlas/persistence/postgres.py`, `atlas/artifacts/object_store.py`; migration/conformance tooling.",
+      "requirements": [
+        "Define quantitative trigger report from local benchmarks: contention, dataset size, recovery objective, multi-host need, or storage durability gap.",
+        "Implement adapters behind existing StateStore/ContentStore contracts; do not change lifecycle/data semantics.",
+        "Provide migration/copy verification, dual-read or maintenance-window strategy, consistency model, backup/restore, and rollback.",
+        "Keep one authoritative store per deployment; no split-brain dual writers."
+      ],
+      "interfaces": "Existing persistence/content conformance suites; provider configuration/version.",
+      "invariants": [
+        "Scale adapters preserve identical state transitions, identities, events, and lineage.",
+        "Only one authoritative backend is writable at a time.",
+        "Migration is verified before cutover."
+      ],
+      "edges": [
+        "Partial copy; network partition; object eventual consistency; credential outage; schema mismatch; rollback after writes."
+      ],
+      "failure": "Abort cutover on verification mismatch; retain old authority; reconcile unknown copied objects without promoting them.",
+      "security": "TLS/IAM/secrets are deployment controls; least privilege, bucket/database isolation, encryption options, audit.",
+      "observability": "Migration progress/checksums, backend latency/contention, object verify failures, cutover authority status.",
+      "tests": "Backend conformance, migration fault/rollback, partition/outage, large-data benchmarks, restore drill.",
+      "accept": [
+        "A written benchmark proves the selected adapter solves a measured limitation.",
+        "All core conformance/recovery tests pass unchanged.",
+        "Cutover/rollback drill preserves row/blob counts and hashes.",
+        "No dual-writer authority exists."
+      ],
+      "migration": "Introduce → shadow copy/verify → cut over authority → observe → deprecate old backend; exact approach based on workload.",
+      "rollback": "Stop new writes, restore old authority from verified point, reconcile post-cutover records via manifest.",
+      "completion": "Trigger analysis, adapter conformance report, migration/rollback drill, cost/resource model, and operator guide."
+    },
+    {
+      "id": "AT-022",
+      "epic": "Optional distributed execution",
+      "title": "Add remote workers with leases, fencing, and the existing WorkSpec contract",
+      "priority": "P3",
+      "deps": "AT-014, AT-016, AT-019, AT-021 if multi-node store required",
+      "rationale": "Remote execution is an infrastructure adapter, not a reason to redefine lifecycle semantics.",
+      "evidence": "REQ-026, REQ-030; Option C deferred; R-11.",
+      "files": "Later `atlas/execution/remote.py`, worker service/protocol, deployment docs.",
+      "requirements": [
+        "Dispatch immutable WorkSpec to authenticated workers; lease/heartbeat/fencing tokens and idempotency keys are authoritative in StateStore.",
+        "Workers receive scoped artifact access and cannot write lifecycle state.",
+        "Define result authentication/integrity, stale worker rejection, cancellation, worker drain, retry/reconciliation, and compatibility negotiation.",
+        "Preserve phase barriers and coordinator ownership.",
+        "Adopt only after workload/operational need is demonstrated."
+      ],
+      "interfaces": "Remote ExecutionBackend, worker protocol v1, lease/heartbeat, scoped artifact tokens.",
+      "invariants": [
+        "Worker loss or duplication cannot create duplicate authoritative effects.",
+        "Stale worker result is fenced.",
+        "Remote versus local execution yields equivalent persisted semantics."
+      ],
+      "edges": [
+        "Partition; duplicate delivery; stale worker; clock skew; worker upgrade mismatch; lost cancel; artifact transfer interruption; malicious worker."
+      ],
+      "failure": "Lease expires; attempt becomes lost/recoverable under operation semantics; stale results rejected; unknown side effect reconciled.",
+      "security": "Mutual service identity, scoped single-use access, transport security, no StateStore credentials, tenant isolation only if deployment requires.",
+      "observability": "Worker/lease health, queue/run/transfer latency, stale results, retries, capability/version distribution.",
+      "tests": "Network partition, worker kill, duplicate work, stale result, protocol mismatch, local/remote conformance, load/soak.",
+      "accept": [
+        "Remote backend passes the same conformance/recovery suite as local backends.",
+        "Killing/partitioning a worker cannot double-commit a side effect.",
+        "Stale result fencing is demonstrated.",
+        "Documented workload evidence justifies deployment complexity."
+      ],
+      "migration": "Enable per operation/phase with local fallback only where idempotency contract permits; no flag-day move.",
+      "rollback": "Drain remote dispatch, run new work locally, reconcile in-flight leases/results.",
+      "completion": "Need justification, protocol spec, security model, fault/soak results, and rollback drill."
+    },
+    {
+      "id": "AT-023",
+      "epic": "Optional agent/operator interfaces",
+      "title": "Expose MCP and operator UI only as bounded clients of canonical services",
+      "priority": "P3",
+      "deps": "AT-015, AT-017, AT-018, AT-019",
+      "rationale": "Agent/UI convenience must not become an alternate provenance, policy, or promotion authority.",
+      "evidence": "REQ-025, REQ-027, REQ-030; R-18.",
+      "files": "Later `atlas/integrations/mcp.py`, optional UI project/adapter.",
+      "requirements": [
+        "Expose read/status/analysis proposal tools first; any consequential command uses CommandService, policy, idempotency, and decision attribution.",
+        "Treat all model/tool text as untrusted data; prevent prompt/content instructions from becoming lifecycle commands.",
+        "Require explicit capability declarations and optional deployment authorization for controls/publication.",
+        "UI renders authoritative status and evidence, clearly distinguishing observed, inferred, proposed, approved, and published.",
+        "Do not embed model authority in core."
+      ],
+      "interfaces": "Versioned MCP tools/resources/prompts; UI API over REST/Status; bounded proposal records.",
+      "invariants": [
+        "AI may analyze/classify/correlate/recommend but cannot establish provenance, filesystem safety, lifecycle truth, or final promotion.",
+        "All consequential actions have deterministic backend validation and attribution."
+      ],
+      "edges": [
+        "Prompt injection in artifact; tool enumeration; replayed control; stale UI state; XSS in findings; model timeout/hallucination; confused deputy."
+      ],
+      "failure": "Unsafe/invalid request rejected; AI failure produces no lifecycle mutation; stale UI command requires version check/idempotency.",
+      "security": "Untrusted-content separation, output encoding, CSRF/auth optional deployment, least privilege, no raw secrets/content by default.",
+      "observability": "Tool calls, denied actions, proposal/decision separation, model/plugin versions, stale/replay events.",
+      "tests": "Prompt-injection fixtures, lifecycle-bypass negative tests, XSS/output encoding, stale/replay controls, AI authority assertions.",
+      "accept": [
+        "No MCP/UI path can bypass CommandService/state guards/review.",
+        "Artifact text cannot cause an unrequested tool action.",
+        "UI labels authority categories accurately.",
+        "Removing the adapters leaves core semantics unchanged."
+      ],
+      "migration": "Additive optional packages; no existing interface replacement.",
+      "rollback": "Disable/uninstall adapters; all authoritative records remain accessible through Python/CLI.",
+      "completion": "Threat model, bounded contract, negative tests, operator UX evidence, and adapter removal test."
+    },
+    {
+      "id": "AT-024",
+      "epic": "Testing, packaging, and release engineering",
+      "title": "Establish continuous release-quality gates and benchmark evidence",
+      "priority": "P1",
+      "deps": "Begins with AT-001 and expands as each task lands",
+      "rationale": "Current CI is test-only on Ubuntu/Python 3.13 and does not prove migration, packaging, security, compatibility, recovery, or performance.",
+      "evidence": "R-16; [ATLAS:efa547cafc64b58d60d19dcc1e5ba32c6b046bc5:.github/workflows/tests.yml:L1-L34]; Sections 21, 24, and 26.",
+      "files": "`.github/workflows/*`, `pyproject.toml`, packaging/release scripts, `SECURITY.md`, `CONTRIBUTING.md`, benchmark and fixture directories.",
+      "requirements": [
+        "Build/install wheel from clean environment; pin/lock dependency strategy; generate SBOM and package provenance; publish checksums/signatures as chosen policy.",
+        "Run formatting/lint, type checking, unit/integration/E2E, state-machine/property, migration, crash/restart, security/adversarial, compatibility, and OS-specific path tests.",
+        "Define mandatory gates with no unapproved skips; report coverage boundaries rather than calling the system production-ready.",
+        "Create reproducible benchmark suite for small files, million entries, multi-GB files, archives/nesting, duplicates, concurrent jobs, analyzers, subprocess, and later remote.",
+        "Retain raw benchmark/test/release evidence and rollback procedure."
+      ],
+      "interfaces": "CI/release manifest, benchmark schema, compatibility matrix, SBOM/provenance artifacts.",
+      "invariants": [
+        "A release claim is backed by named evidence and artifact hashes.",
+        "No capability is complete without its failure/restart tests where applicable.",
+        "Benchmarks define workload and environment; no unsupported scalability claims."
+      ],
+      "edges": [
+        "Flaky race tests; unavailable OS capability; dependency advisory without fix; reproducibility drift; migration failure; benchmark regression/noisy host."
+      ],
+      "failure": "Mandatory gate failure blocks release; approved skip requires owner/reason/expiry; rollback package/database backup remains available.",
+      "security": "Dependency/secret scanning, minimal publish credentials, protected release environment, artifact integrity, license inventory.",
+      "observability": "CI timing/flakes, test category status, coverage boundaries, benchmark trends/raw data, artifact hashes/SBOM.",
+      "tests": "This task owns gate execution; include wheel smoke, clean install, migration matrix, adversarial corpus, restore/rollback drill.",
+      "accept": [
+        "Every release candidate passes all declared mandatory gates with no unapproved skips.",
+        "Wheel installs and runs smoke/E2E from a clean environment.",
+        "Release bundle includes SBOM, hashes, test/migration/security reports, benchmark raw data, and rollback instructions.",
+        "Claims explicitly state untested platforms/workloads and no blanket production-ready language."
+      ],
+      "migration": "Introduce gates incrementally; baseline current failures, then make corrected gates mandatory by task dependency.",
+      "rollback": "Retain previous release artifacts/schema backup; documented application/database rollback drill.",
+      "completion": "Green release evidence bundle, reproducible build comparison, benchmark baseline, security/license reports, and signed-off rollback drill."
+    }
+  ]
+}
